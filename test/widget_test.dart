@@ -10,21 +10,31 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:delivery_app/main.dart';
 
+/**
+ * 🧪 TESTS WIDGET DE LA APLICACIÓN
+ * 
+ * Tests básicos para verificar el funcionamiento de la aplicación
+ */
+
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+  testWidgets('Delivery app loads correctly', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(const DeliveryApp());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // Verify that the app loads and shows login screen
+    expect(find.text('Delivery App'), findsOneWidget);
+    expect(find.text('Inicia sesión para continuar'), findsOneWidget);
+  });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
+  testWidgets('Login form validation works', (WidgetTester tester) async {
+    // Build our app and trigger a frame.
+    await tester.pumpWidget(const DeliveryApp());
+
+    // Tap the login button without entering credentials
+    await tester.tap(find.text('Iniciar Sesión'));
     await tester.pump();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Verify that validation messages appear
+    expect(find.text('Por favor ingresa tu email'), findsOneWidget);
   });
 }

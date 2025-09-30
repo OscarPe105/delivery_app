@@ -1,67 +1,67 @@
 class Business {
   final String id;
   final String name;
-  final String description;
-  final String imageUrl;
   final String category;
-  final String address;
-  final String phone;
-  final double rating;
-  final List<String> specialties;
-  final bool isLocal;
-  final String ownerName;
-  final String story;
-  final String deliveryTime;
-  final double deliveryFee;
-  
+  final String? description;
+  final String? address;
+  final String? phone;
+  final double? latitude;  // Nueva propiedad
+  final double? longitude; // Nueva propiedad
+  final double? rating;
+  final String? imageUrl;
+  final bool isActive;
+  final bool isOpen;
+  final List<String>? tags;
+
   Business({
     required this.id,
     required this.name,
-    required this.description,
-    required this.imageUrl,
     required this.category,
-    required this.address,
-    required this.phone,
-    this.rating = 0.0,
-    this.specialties = const [],
-    this.isLocal = true,
-    required this.ownerName,
-    required this.story,
-    this.deliveryTime = '30-45 min',
-    this.deliveryFee = 3000.0,
+    this.description,
+    this.address,
+    this.phone,
+    this.latitude,
+    this.longitude,
+    this.rating,
+    this.imageUrl,
+    this.isActive = true,
+    this.isOpen = true,
+    this.tags,
   });
-  
-  Business copyWith({
-    String? id,
-    String? name,
-    String? description,
-    String? imageUrl,
-    String? category,
-    String? address,
-    String? phone,
-    double? rating,
-    List<String>? specialties,
-    bool? isLocal,
-    String? ownerName,
-    String? story,
-    String? deliveryTime,
-    double? deliveryFee,
-  }) {
+
+  factory Business.fromJson(Map<String, dynamic> json) {
     return Business(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      description: description ?? this.description,
-      imageUrl: imageUrl ?? this.imageUrl,
-      category: category ?? this.category,
-      address: address ?? this.address,
-      phone: phone ?? this.phone,
-      rating: rating ?? this.rating,
-      specialties: specialties ?? this.specialties,
-      isLocal: isLocal ?? this.isLocal,
-      ownerName: ownerName ?? this.ownerName,
-      story: story ?? this.story,
-      deliveryTime: deliveryTime ?? this.deliveryTime,
-      deliveryFee: deliveryFee ?? this.deliveryFee,
+      id: json['id'] ?? '',
+      name: json['name'] ?? '',
+      category: json['category'] ?? '',
+      description: json['description'],
+      address: json['address'],
+      phone: json['phone'],
+      latitude: json['latitude']?.toDouble(),
+      longitude: json['longitude']?.toDouble(),
+      rating: json['rating']?.toDouble(),
+      imageUrl: json['imageUrl'],
+      isActive: json['isActive'] ?? true,
+      isOpen: json['isOpen'] ?? true,
+      tags: json['tags'] != null ? List<String>.from(json['tags']) : null,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'category': category,
+      'description': description,
+      'address': address,
+      'phone': phone,
+      'latitude': latitude,
+      'longitude': longitude,
+      'rating': rating,
+      'imageUrl': imageUrl,
+      'isActive': isActive,
+      'isOpen': isOpen,
+      'tags': tags,
+    };
   }
 }

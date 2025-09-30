@@ -1,13 +1,55 @@
 import 'package:flutter/material.dart';
 import '../models/product.dart';
 import '../models/order.dart';
+import '../models/business.dart'; // ✅ Agregar esta importación
 
 class BusinessProvider with ChangeNotifier {
   final List<Product> _products = [];
   final List<Order> _orders = [];
+  final List<Business> _businesses = []; // ✅ Agregar esta lista
   
   List<Product> get products => _products;
   List<Order> get orders => _orders;
+  List<Business> get businesses => _businesses; // ✅ Agregar este getter
+  
+  // ✅ Agregar este método
+  void loadBusinesses() {
+    // Simulación de carga de negocios para el MVP
+    _businesses.clear();
+    _businesses.addAll([
+      Business(
+        id: 'business1',
+        name: 'Restaurante El Buen Sabor',
+        category: 'Restaurante',
+        description: 'Comida tradicional hondureña',
+        address: 'Barrio El Centro, Tegucigalpa',
+        phone: '+50422345678',
+        rating: 4.5,
+        imageUrl: 'assets/images/restaurant1.jpg',
+      ),
+      Business(
+        id: 'business2',
+        name: 'Pizzería Don Mario',
+        category: 'Pizzería',
+        description: 'Las mejores pizzas de la ciudad',
+        address: 'Colonia Palmira, Tegucigalpa',
+        phone: '+50422987654',
+        rating: 4.2,
+        imageUrl: 'assets/images/pizza1.jpg',
+      ),
+      Business(
+        id: 'business3',
+        name: 'Farmacia San José',
+        category: 'Farmacia',
+        description: 'Medicamentos y productos de salud',
+        address: 'Barrio La Granja, Tegucigalpa',
+        phone: '+50422111222',
+        rating: 4.8,
+        imageUrl: 'assets/images/pharmacy1.jpg',
+      ),
+    ]);
+    notifyListeners();
+  }
   
   // Método para agregar un producto al catálogo
   void addProduct(Product product) {

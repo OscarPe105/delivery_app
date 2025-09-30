@@ -6,7 +6,6 @@ plugins {
 }
 
 android {
-    ndkVersion = "27.0.12077973"
     namespace = "com.example.delivery_app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
@@ -29,6 +28,7 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        manifestPlaceholders["MAPBOX_DOWNLOADS_TOKEN"] = project.findProperty("MAPBOX_DOWNLOADS_TOKEN") ?: ""
     }
 
     buildTypes {

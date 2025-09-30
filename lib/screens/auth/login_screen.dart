@@ -1,6 +1,14 @@
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../providers/auth_provider.dart';
+import '../../providers/auth_provider.dart';      // 🔑 Gestión de autenticación
+import '../../providers/theme_provider.dart';    // 🎨 Gestión de temas
+import '../../widgets/animated_components.dart'; // 🎨 Componentes animados
+import '../../widgets/improved_buttons.dart'; // 🎨 Botones mejorados
+import '../../utils/navigation_transitions.dart'; // 🚀 Transiciones de navegación
+import 'register_screen.dart';                  // 📝 Pantalla de registro
+import '../main_navigation.dart';               // 🧭 Navegación principal
+
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -9,175 +17,365 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen>
+    with TickerProviderStateMixin {
+  // 📝 CONTROLADORES DE FORMULARIO
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  UserType _selectedUserType = UserType.customer;
+  
+  // 👁️ CONTROL DE VISIBILIDAD DE CONTRASEÑA
+  bool _obscurePassword = true;
+  
+  // ⏳ ESTADO DE CARGA
   bool _isLoading = false;
+  
+  // 🎨 CONTROLADORES DE ANIMACIÓN
+  late AnimationController _logoAnimationController;
+  late AnimationController _formAnimationController;
+  late Animation<double> _logoScaleAnimation;
+  late Animation<double> _logoRotationAnimation;
+  late Animation<Offset> _formSlideAnimation;
+  late Animation<double> _formFadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeAnimations();
+    _startAnimations();
+  }
+
+  void _initializeAnimations() {
+    // 🎨 Controlador de animación del logo
+    _logoAnimationController = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    );
+
+    // 🎨 Controlador de animación del formulario
+    _formAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+
+    // 🎨 Animaciones del logo
+    _logoScaleAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _logoAnimationController,
+      curve: Curves.elasticOut,
+    ));
+
+    _logoRotationAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _logoAnimationController,
+      curve: Curves.easeInOut,
+    ));
+
+    // 🎨 Animaciones del formulario
+    _formSlideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.3),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _formAnimationController,
+      curve: Curves.easeOutBack,
+    ));
+
+    _formFadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _formAnimationController,
+      curve: Curves.easeOut,
+    ));
+  }
+
+  void _startAnimations() {
+    // 🎬 Iniciar animación del logo
+    _logoAnimationController.forward();
+    
+    // 🎬 Iniciar animación del formulario con delay
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        _formAnimationController.forward();
+      }
+    });
+  }
 
   @override
   void dispose() {
+    // 🧹 LIMPIEZA DE CONTROLADORES
     _emailController.dispose();
     _passwordController.dispose();
+    _logoAnimationController.dispose();
+    _formAnimationController.dispose();
     super.dispose();
   }
 
+  // 🔐 MÉTODO DE INICIO DE SESIÓN
   Future<void> _login() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });
-
-      try {
-        final authProvider = Provider.of<AuthProvider>(context, listen: false);
-        final success = await authProvider.login(
-          _emailController.text,
-          _passwordController.text,
-          _selectedUserType,
+    if (!_formKey.currentState!.validate()) return;
+    
+    setState(() {
+      _isLoading = true;
+    });
+    
+    try {
+      // 🔄 Simular proceso de autenticación
+      await Future.delayed(const Duration(seconds: 2));
+      
+      if (mounted) {
+        // 🎉 ÉXITO - Navegar a pantalla principal con transición suave
+        Navigator.of(context).pushReplacement(
+          ScaleFadeRoute(page: const MainNavigation()),
         );
-
-        if (success) {
-          if (!mounted) return;
-          
-          if (_selectedUserType == UserType.business) {
-            Navigator.pushReplacementNamed(context, '/business_home');
-          } else {
-            Navigator.pushReplacementNamed(context, '/customer_home');
-          }
-        } else {
-          if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Error al iniciar sesión. Verifica tus credenciales.')),
-          );
-        }
-      } catch (e) {
+      }
+    } catch (e) {
+      // ❌ ERROR - Mostrar mensaje
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}')),
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: ThemeProvider.errorColor,
+          ),
         );
-      } finally {
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-          });
-        }
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Text(
-                    'Delivery Comunitario',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF4CAF50),
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 40),
-                  TextFormField(
-                    controller: _emailController,
-                    decoration: const InputDecoration(
-                      labelText: 'Correo electrónico',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.email),
-                    ),
-                    keyboardType: TextInputType.emailAddress,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Por favor ingresa tu correo electrónico';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _passwordController,
-                    decoration: const InputDecoration(
-                      labelText: 'Contraseña',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.lock),
-                    ),
-                    obscureText: true,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Por favor ingresa tu contraseña';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 24),
-                  const Text(
-                    'Tipo de usuario:',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: RadioListTile<UserType>(
-                          title: const Text('Negocio'),
-                          value: UserType.business,
-                          groupValue: _selectedUserType,
-                          onChanged: (UserType? value) {
-                            setState(() {
-                              _selectedUserType = value!;
-                            });
-                          },
+    return Consumer2<AuthProvider, ThemeProvider>(
+      builder: (context, authProvider, themeProvider, child) {
+        return Scaffold(
+          // 🎨 FONDO CON GRADIENTE
+          body: Container(
+            decoration: BoxDecoration(
+              gradient: ThemeProvider.primaryGradient,
+            ),
+            child: SafeArea(
+              child: Center(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(24.0),
+                  child: AnimatedCard(
+                    animationDuration: const Duration(milliseconds: 800),
+                    delayMilliseconds: 500,
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // 🎯 LOGO Y TÍTULO ANIMADOS
+                          AnimatedBuilder(
+                            animation: _logoAnimationController,
+                            builder: (context, child) {
+                              return Transform.scale(
+                                scale: _logoScaleAnimation.value,
+                                child: Transform.rotate(
+                                  angle: _logoRotationAnimation.value * 0.1,
+                                  child: ParticleEffect(
+                                    particleCount: 15,
+                                    particleColor: ThemeProvider.primaryColor.withOpacity(0.3),
+                                    child: Icon(
+                                      Icons.delivery_dining,
+                                      size: 64,
+                                      color: ThemeProvider.primaryColor,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          AnimatedBuilder(
+                            animation: _logoAnimationController,
+                            builder: (context, child) {
+                              return FadeTransition(
+                                opacity: _logoAnimationController,
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      'Delivery App',
+                                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                        color: ThemeProvider.primaryTextColor,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Inicia sesión para continuar',
+                                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                        color: ThemeProvider.secondaryTextColor,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 32),
+                            
+                            // 📧 CAMPO DE EMAIL
+                            TextFormField(
+                              controller: _emailController,
+                              keyboardType: TextInputType.emailAddress,
+                              decoration: InputDecoration(
+                                labelText: 'Email',
+                                prefixIcon: const Icon(Icons.email_outlined),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(ThemeProvider.radiusMedium),
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Por favor ingresa tu email';
+                                }
+                                if (!value.contains('@')) {
+                                  return 'Por favor ingresa un email válido';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 16),
+                            
+                            // 🔒 CAMPO DE CONTRASEÑA
+                            TextFormField(
+                              controller: _passwordController,
+                              obscureText: _obscurePassword,
+                              decoration: InputDecoration(
+                                labelText: 'Contraseña',
+                                prefixIcon: const Icon(Icons.lock_outlined),
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _obscurePassword = !_obscurePassword;
+                                    });
+                                  },
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(ThemeProvider.radiusMedium),
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Por favor ingresa tu contraseña';
+                                }
+                                if (value.length < 6) {
+                                  return 'La contraseña debe tener al menos 6 caracteres';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 24),
+                            
+                            // 🔘 BOTÓN DE INICIO DE SESIÓN ANIMADO
+                            AnimatedBuilder(
+                              animation: _formAnimationController,
+                              builder: (context, child) {
+                                return FadeTransition(
+                                  opacity: _formFadeAnimation,
+                                  child: SlideTransition(
+                                    position: _formSlideAnimation,
+                                    child: AnimatedButton(
+                                      text: 'Iniciar Sesión',
+                                      onPressed: _isLoading ? null : _login,
+                                      isLoading: _isLoading,
+                                      icon: Icons.login,
+                                      width: double.infinity,
+                                      height: 50,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                            const SizedBox(height: 16),
+                            
+                            // 🔗 ENLACE A REGISTRO ANIMADO
+                            AnimatedBuilder(
+                              animation: _formAnimationController,
+                              builder: (context, child) {
+                                return FadeTransition(
+                                  opacity: _formFadeAnimation,
+                                  child: SlideTransition(
+                                    position: _formSlideAnimation,
+                                    child: AnimatedButton(
+                                      text: '¿No tienes cuenta? Regístrate',
+                                      onPressed: () {
+                                        NavigationUtils.slideRight(
+                                          context,
+                                          const RegisterScreen(),
+                                        );
+                                      },
+                                      backgroundColor: Colors.transparent,
+                                      textColor: ThemeProvider.primaryColor,
+                                      height: 40,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                            const SizedBox(height: 24),
+                            
+                            // 🧪 BOTÓN DE PRUEBA (TEMPORAL)
+                            PrimaryGradientButton(
+                              text: 'Ver Cambios Visuales',
+                              icon: Icons.visibility,
+                              onPressed: () {
+                                Navigator.pushNamed(context, '/test');
+                              },
+                              width: double.infinity,
+                            ),
+                            const SizedBox(height: 16),
+                            
+                            // 🌙 INTERRUPTOR DE TEMA (ACTUALMENTE DESHABILITADO)
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.light_mode,
+                                  color: ThemeProvider.mutedTextColor,
+                                ),
+                                const SizedBox(width: 12),
+                                Switch(
+                                  value: themeProvider.isDarkMode, // ❌ Siempre false (modo claro forzado)
+                                  onChanged: (value) {
+                                    setState(() {
+                                      // 🔄 Llama al método toggleTheme (actualmente no hace nada)
+                                      themeProvider.toggleTheme();
+                                    });
+                                  },
+                                  activeColor: ThemeProvider.primaryColor,
+                                  activeTrackColor: ThemeProvider.primaryColor.withOpacity(0.3),
+                                ),
+                                const SizedBox(width: 12),
+                                Icon(
+                                  Icons.dark_mode,
+                                  color: ThemeProvider.mutedTextColor,
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
-                      Expanded(
-                        child: RadioListTile<UserType>(
-                          title: const Text('Cliente'),
-                          value: UserType.customer,
-                          groupValue: _selectedUserType,
-                          onChanged: (UserType? value) {
-                            setState(() {
-                              _selectedUserType = value!;
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: _isLoading ? null : _login,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      backgroundColor: const Color(0xFF4CAF50),
-                      foregroundColor: Colors.white,
                     ),
-                    child: _isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text('Iniciar Sesión', style: TextStyle(fontSize: 16)),
                   ),
-                  const SizedBox(height: 16),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/register');
-                    },
-                    child: const Text('¿No tienes cuenta? Regístrate'),
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
-        ),
-      ),
-    );
+          );
+        },
+      );
   }
 }

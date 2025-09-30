@@ -7,7 +7,7 @@ import '../models/product.dart';
 class BusinessDetailScreen extends StatelessWidget {
   final Business business;
   
-  const BusinessDetailScreen({Key? key, required this.business}) : super(key: key);
+  const BusinessDetailScreen({super.key, required this.business});
   
   @override
   Widget build(BuildContext context) {
@@ -27,7 +27,7 @@ class BusinessDetailScreen extends StatelessWidget {
               width: double.infinity,
               decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: NetworkImage(business.imageUrl),
+                  image: NetworkImage(business.imageUrl ?? 'https://via.placeholder.com/400x250?text=Sin+Imagen'),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -48,7 +48,7 @@ class BusinessDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    business.description,
+                    business.description ?? 'Sin descripción disponible',
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.grey[600],
@@ -70,7 +70,7 @@ class BusinessDetailScreen extends StatelessWidget {
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          business.address,
+                          business.address ?? 'Dirección no disponible',
                           style: TextStyle(color: Colors.grey[600]),
                         ),
                       ),
@@ -188,7 +188,7 @@ class BusinessDetailScreen extends StatelessWidget {
             // Botón agregar al carrito
             ElevatedButton(
               onPressed: () {
-                provider.addToCart(product, 1);
+                provider.addToCart(product, quantity: 1); // Cambiar de (product, 1) a (product, quantity: 1)
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text('${product.name} agregado al carrito'),

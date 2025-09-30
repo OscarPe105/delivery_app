@@ -280,16 +280,15 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
               return AnimatedCard(
                 delayMilliseconds: 300 + (index * 100),
                 child: Container(
-                  width: 140,
-                  height: 180,
-                  margin: const EdgeInsets.only(right: 12),
+                  width: 160,
+                  margin: const EdgeInsets.only(right: 16),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.1),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
+                        blurRadius: 15,
+                        offset: const Offset(0, 8),
                       ),
                     ],
                   ),
@@ -298,7 +297,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
                     children: [
                       // Imagen del negocio animada
                       Container(
-                        height: 80,
+                        height: 100,
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
                             colors: [Color(0xFFBF360C), Color(0xFFD84315)],
@@ -306,59 +305,63 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
                             end: Alignment.bottomRight,
                           ),
                           borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(12),
-                            topRight: Radius.circular(12),
+                            topLeft: Radius.circular(16),
+                            topRight: Radius.circular(16),
                           ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFFBF360C).withOpacity(0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
                         ),
                         child: const Center(
                           child: Icon(
                             Icons.store,
-                            size: 30,
+                            size: 40,
                             color: Colors.white,
                           ),
                         ),
                       ),
                       // Información del negocio
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                business.name,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                      Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              business.name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
                               ),
-                              Text(
-                                business.category,
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 10,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              business.category,
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 12,
                               ),
-                              Row(
-                                children: [
-                                  const Icon(Icons.star, color: Colors.amber, size: 12),
-                                  const SizedBox(width: 2),
-                                  Text(
-                                    '4.5',
-                                    style: TextStyle(
-                                      color: Colors.grey[600],
-                                      fontSize: 10,
-                                    ),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                const Icon(Icons.star, color: Colors.amber, size: 16),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '4.5',
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize: 12,
                                   ),
-                                ],
-                              ),
-                            ],
-                          ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
                     ],

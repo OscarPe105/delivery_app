@@ -1,4 +1,4 @@
-// 🏠 PANTALLA PRINCIPAL DEL CLIENTE - VERSIÓN SIMPLIFICADA
+// 🏠 PANTALLA PRINCIPAL DEL CLIENTE
 // Esta pantalla muestra la interfaz principal para los clientes
 
 import 'package:flutter/material.dart';
@@ -7,6 +7,8 @@ import '../../providers/auth_provider.dart';      // 🔑 Datos del usuario aute
 import '../../providers/business_provider.dart'; // 🏪 Gestión de negocios
 import '../../widgets/delivery_map.dart';        // 🗺️ Widget de mapa interactivo
 import '../../widgets/animated_components.dart'; // 🎨 Componentes animados
+import '../../widgets/improved_buttons.dart';    // 🎨 Botones mejorados
+import '../../widgets/advanced_visual_effects.dart'; // ✨ Efectos visuales
 import '../../utils/navigation_transitions.dart'; // 🚀 Transiciones de navegación
 import '../search_screen.dart';                 // 🔍 Pantalla de búsqueda
 
@@ -110,7 +112,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
               // 🔍 BARRA DE BÚSQUEDA
               _buildSearchBar(),
               
-              // 🗺️ MAPA INTERACTIVO
+              // 🗺️ MAPA INTERACTIVO - NUEVA SECCIÓN
               _buildMapSection(businessProvider),
               
               // 🏪 NEGOCIOS DESTACADOS
@@ -157,48 +159,54 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
                   ),
                 ],
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Saludo personalizado animado
-                    Text(
-                      '¡Hola, ${authProvider.user?.name ?? 'Usuario'}! 👋',
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        fontFamily: 'Roboto',
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Descubre los mejores negocios de tu barrio',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w300,
-                        fontFamily: 'Roboto',
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    // Ubicación actual animada
-                    Row(
-                      children: [
-                        const Icon(Icons.location_on, color: Colors.white, size: 16),
-                        const SizedBox(width: 8),
-                        const Text(
-                          'Tu ubicación actual',
-                          style: TextStyle(
-                            color: Colors.white, 
-                            fontSize: 14,
+              child: FloatingParticles(
+                particleCount: 15,
+                particleColor: Colors.white.withOpacity(0.2),
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Saludo personalizado animado
+                      ShimmerEffect(
+                        child: Text(
+                          '¡Hola, ${authProvider.user?.name ?? 'Usuario'}! 👋',
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
                             fontFamily: 'Roboto',
                           ),
                         ),
-                      ],
-                    ),
-                  ],
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Descubre los mejores negocios de tu barrio',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w300,
+                          fontFamily: 'Roboto',
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      // Ubicación actual animada
+                      Row(
+                        children: [
+                          const Icon(Icons.location_on, color: Colors.white, size: 16),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'Tu ubicación actual',
+                            style: TextStyle(
+                              color: Colors.white, 
+                              fontSize: 14,
+                              fontFamily: 'Roboto',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -234,16 +242,18 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
                   ),
                 ],
               ),
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: 'Buscar productos, negocios...',
-                  prefixIcon: const Icon(Icons.search, color: Color(0xFFBF360C)),
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: ShimmerEffect(
+                child: TextField(
+                  decoration: InputDecoration(
+                    hintText: 'Buscar productos, negocios...',
+                    prefixIcon: const Icon(Icons.search, color: Color(0xFF667eea)),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  ),
+                  onTap: () {
+                    NavigationUtils.slideUp(context, const SearchScreen());
+                  },
                 ),
-                onTap: () {
-                  NavigationUtils.slideUp(context, const SearchScreen());
-                },
               ),
             ),
           ),
@@ -257,14 +267,20 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20.0),
-          child: Text(
-            'Negocios Destacados',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: ShimmerEffect(
+            child: Text(
+              'Negocios Destacados',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+                background: Paint()
+                  ..shader = const LinearGradient(
+                    colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                  ).createShader(const Rect.fromLTWH(0, 0, 200, 70)),
+              ),
             ),
           ),
         ),
@@ -280,16 +296,15 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
               return AnimatedCard(
                 delayMilliseconds: 300 + (index * 100),
                 child: Container(
-                  width: 140,
-                  height: 180,
-                  margin: const EdgeInsets.only(right: 12),
+                  width: 160,
+                  margin: const EdgeInsets.only(right: 16),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.1),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
+                        blurRadius: 15,
+                        offset: const Offset(0, 8),
                       ),
                     ],
                   ),
@@ -297,68 +312,74 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Imagen del negocio animada
-                      Container(
-                        height: 80,
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFFBF360C), Color(0xFFD84315)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
+                      WaveEffect(
+                        child: Container(
+                          height: 100,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Color(0xFF667eea + (index * 0x1000000)),
+                                Color(0xFF764ba2 + (index * 0x1000000)),
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(16),
+                              topRight: Radius.circular(16),
+                            ),
                           ),
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(12),
-                            topRight: Radius.circular(12),
-                          ),
-                        ),
-                        child: const Center(
-                          child: Icon(
-                            Icons.store,
-                            size: 30,
-                            color: Colors.white,
+                          child: FloatingParticles(
+                            particleCount: 5,
+                            particleColor: Colors.white.withOpacity(0.3),
+                            child: const Center(
+                              child: Icon(
+                                Icons.store,
+                                size: 40,
+                                color: Colors.white,
+                              ),
+                            ),
                           ),
                         ),
                       ),
                       // Información del negocio
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                business.name,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                      Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              business.name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
                               ),
-                              Text(
-                                business.category,
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 10,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              business.category,
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 12,
                               ),
-                              Row(
-                                children: [
-                                  const Icon(Icons.star, color: Colors.amber, size: 12),
-                                  const SizedBox(width: 2),
-                                  Text(
-                                    '4.5',
-                                    style: TextStyle(
-                                      color: Colors.grey[600],
-                                      fontSize: 10,
-                                    ),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                const Icon(Icons.star, color: Colors.amber, size: 16),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '4.5',
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize: 12,
                                   ),
-                                ],
-                              ),
-                            ],
-                          ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -379,105 +400,51 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Accesos Rápidos',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
+          ShimmerEffect(
+            child: Text(
+              'Accesos Rápidos',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+                background: Paint()
+                  ..shader = const LinearGradient(
+                    colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                  ).createShader(const Rect.fromLTWH(0, 0, 200, 70)),
+              ),
             ),
           ),
           const SizedBox(height: 16),
           Row(
             children: [
               Expanded(
-                child: _buildQuickActionCard(
+                child: PrimaryGradientButton(
+                  text: 'Tienda',
                   icon: Icons.store,
-                  title: 'Tienda',
-                  subtitle: 'Explorar productos',
-                  delay: 0,
-                  onTap: () {
+                  onPressed: () {
                     // Cambiar a pestaña de tienda
                   },
+                  width: double.infinity,
+                  height: 80,
+                  gradientColors: const [Color(0xFF667eea), Color(0xFF764ba2)],
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: _buildQuickActionCard(
+                child: PrimaryGradientButton(
+                  text: 'Mis Pedidos',
                   icon: Icons.receipt_long,
-                  title: 'Mis Pedidos',
-                  subtitle: 'Ver historial',
-                  delay: 100,
-                  onTap: () {
+                  onPressed: () {
                     // Cambiar a pestaña de pedidos
                   },
+                  width: double.infinity,
+                  height: 80,
+                  gradientColors: const [Color(0xFFf093fb), Color(0xFFf5576c)],
                 ),
               ),
             ],
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildQuickActionCard({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-    int delay = 0,
-  }) {
-    return AnimatedCard(
-      delayMilliseconds: 500 + delay,
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFBF360C), Color(0xFFD84315)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFFBF360C).withOpacity(0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  icon,
-                  size: 32,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                  fontFamily: 'Roboto',
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -511,14 +478,14 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFFBF360C), Color(0xFFD84315)],
+          colors: [Color(0xFF667eea), Color(0xFF764ba2)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFBF360C).withOpacity(0.3),
+            color: const Color(0xFF667eea).withOpacity(0.3),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -548,3 +515,4 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
     );
   }
 }
+
