@@ -19,19 +19,19 @@ class ThemeProvider extends ChangeNotifier {
   }
   
   // 🎨 COLORES PRINCIPALES
-  static Color get primaryColor => const Color(0xFFFF6B35);
-  static Color get secondaryColor => const Color(0xFF2E86AB);
-  static Color get accentColor => const Color(0xFFF7931E);
+  static Color get primaryColor => const Color(0xFF34656D);      // Verde azulado oscuro
+  static Color get secondaryColor => const Color(0xFF334443);    // Verde muy oscuro
+  static Color get accentColor => const Color(0xFFFAEAB1);       // Beige dorado
   
   // 🎨 COLORES DE TEXTO
-  static Color get primaryTextColor => const Color(0xFF2C3E50);
-  static Color get secondaryTextColor => const Color(0xFF7F8C8D);
-  static Color get lightTextColor => Colors.white;
+  static Color get primaryTextColor => const Color(0xFF334443);    // Verde muy oscuro
+  static Color get secondaryTextColor => const Color(0xFF34656D);  // Verde azulado oscuro
+  static Color get lightTextColor => const Color(0xFFFAF8F1);      // Beige muy claro
   
   // 🎨 COLORES DE FONDO
-  static Color get backgroundColor => const Color(0xFFF8F9FA);
-  static Color get cardColor => Colors.white;
-  static Color get surfaceColor => const Color(0xFFECF0F1);
+  static Color get backgroundColor => const Color(0xFFFAF8F1);      // Beige muy claro
+  static Color get cardColor => const Color(0xFFFAEAB1);           // Beige dorado
+  static Color get surfaceColor => const Color(0xFFFAF8F1);        // Beige muy claro
   
   // 🎨 COLORES DE ESTADO
   static Color get successColor => const Color(0xFF27AE60);
@@ -43,13 +43,13 @@ class ThemeProvider extends ChangeNotifier {
   static LinearGradient get primaryGradient => const LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFFFF6B35), Color(0xFFF7931E)],
+    colors: [Color(0xFF34656D), Color(0xFF334443)],
   );
   
   static LinearGradient get secondaryGradient => const LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: [Color(0xFF2E86AB), Color(0xFF3498DB)],
+    colors: [Color(0xFFFAEAB1), Color(0xFFFAF8F1)],
   );
   
   // 🎨 RADIOS DE BORDE
@@ -125,7 +125,7 @@ class ThemeProvider extends ChangeNotifier {
   }
   
   // 🎨 COLORES ADICIONALES
-  static Color get primaryColorDark => const Color(0xFFE65100); // Naranja oscuro
-  static Color get primaryColorLight => const Color(0xFFFFB74D); // Naranja claro
-  static Color get mutedTextColor => Colors.grey[600]!; // Color de texto apagado
+  static Color get primaryColorDark => const Color(0xFF334443);   // Verde muy oscuro
+  static Color get primaryColorLight => const Color(0xFFFAEAB1);  // Beige dorado
+  static Color get mutedTextColor => const Color(0xFF34656D);     // Verde azulado oscuro
 }

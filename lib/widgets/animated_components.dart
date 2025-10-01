@@ -24,6 +24,7 @@ class AnimatedButton extends StatefulWidget {
   final double? width;
   final double height;
   final EdgeInsetsGeometry? padding;
+  final bool hasShadow;
 
   const AnimatedButton({
     Key? key,
@@ -36,6 +37,7 @@ class AnimatedButton extends StatefulWidget {
     this.width,
     this.height = 50,
     this.padding,
+    this.hasShadow = true,
   }) : super(key: key);
 
   @override
@@ -119,13 +121,15 @@ class _AnimatedButtonState extends State<AnimatedButton>
                 decoration: BoxDecoration(
                   color: backgroundColor,
                   borderRadius: BorderRadius.circular(25),
-                  boxShadow: [
-                    BoxShadow(
-                      color: backgroundColor.withOpacity(0.3),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+                  boxShadow: widget.hasShadow
+                      ? [
+                          BoxShadow(
+                            color: backgroundColor.withOpacity(0.3),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ]
+                      : [],
                 ),
                 child: Center(
                   child: widget.isLoading

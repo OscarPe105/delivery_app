@@ -84,9 +84,9 @@ class _PrimaryGradientButtonState extends State<PrimaryGradientButton>
   @override
   Widget build(BuildContext context) {
     final colors = widget.gradientColors ?? [
-      const Color(0xFFFF6B35),
-      const Color(0xFFD84315),
-      const Color(0xFFE65100),
+      const Color(0xFF34656D),
+      const Color(0xFF334443),
+      const Color(0xFFFAEAB1),
     ];
 
     return GestureDetector(
@@ -225,8 +225,8 @@ class _SecondaryButtonState extends State<SecondaryButton>
 
   @override
   Widget build(BuildContext context) {
-    final borderColor = widget.borderColor ?? const Color(0xFFFF6B35);
-    final textColor = widget.textColor ?? const Color(0xFFFF6B35);
+    final borderColor = widget.borderColor ?? const Color(0xFF34656D);
+    final textColor = widget.textColor ?? const Color(0xFF34656D);
 
     return GestureDetector(
       onTapDown: (_) => _animationController.forward(),
@@ -346,7 +346,7 @@ class _FloatingActionButtonState extends State<FloatingActionButton>
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor = widget.backgroundColor ?? const Color(0xFFFF6B35);
+    final backgroundColor = widget.backgroundColor ?? const Color(0xFF34656D);
     final iconColor = widget.iconColor ?? Colors.white;
 
     return GestureDetector(
@@ -460,7 +460,7 @@ class _CustomIconButtonState extends State<CustomIconButton>
   @override
   Widget build(BuildContext context) {
     final backgroundColor = widget.backgroundColor ?? Colors.white;
-    final iconColor = widget.iconColor ?? const Color(0xFFFF6B35);
+    final iconColor = widget.iconColor ?? const Color(0xFF34656D);
 
     return GestureDetector(
       onTapDown: (_) => _animationController.forward(),

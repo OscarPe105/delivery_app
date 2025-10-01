@@ -186,7 +186,7 @@ class _MainNavigationState extends State<MainNavigation> {
       // 📍 BARRA DE NAVEGACIÓN INFERIOR
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: ThemeProvider.cardColor,    // 🏠 Fondo blanco
+          color: Colors.white,    // 🏠 Cambiado a blanco puro
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.1), // 🌫️ Sombra ligera
@@ -212,7 +212,7 @@ class _MainNavigationState extends State<MainNavigation> {
               });
             },
             type: BottomNavigationBarType.fixed,
-            backgroundColor: ThemeProvider.cardColor,        // 🏠 Fondo
+            backgroundColor: Colors.white,        // 🏠 Cambiado a blanco puro
             selectedItemColor: ThemeProvider.primaryColor,   // 🧡 Color de pestaña seleccionada
             unselectedItemColor: ThemeProvider.secondaryTextColor, // 📝 Color de pestaña no seleccionada
             selectedFontSize: 12,           // 📏 Tamaño de fuente seleccionada

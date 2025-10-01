@@ -1,10 +1,11 @@
 // 🏠 PANTALLA PRINCIPAL DEL CLIENTE - VERSIÓN SIMPLIFICADA
 // Esta pantalla muestra la interfaz principal para los clientes
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:async';
 import '../../providers/auth_provider.dart';      // 🔑 Datos del usuario autenticado
 import '../../providers/business_provider.dart'; // 🏪 Gestión de negocios
+import '../../providers/theme_provider.dart';    // 🎨 Paleta de colores
 import '../../widgets/delivery_map.dart';        // 🗺️ Widget de mapa interactivo
 import '../../widgets/animated_components.dart'; // 🎨 Componentes animados
 import '../../utils/navigation_transitions.dart'; // 🚀 Transiciones de navegación
@@ -24,6 +25,8 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
   late Animation<double> _headerSlideAnimation;
   late Animation<double> _headerFadeAnimation;
   late Animation<double> _contentSlideAnimation;
+  
+  bool _showHeader = true;
 
   @override
   void initState() {
@@ -32,6 +35,21 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
     // 🎨 Inicializar animaciones
     _initializeAnimations();
     _startAnimations();
+    
+    // Programar ocultar el header después de unos segundos
+    Future.delayed(const Duration(seconds: 5), () {
+      if (!mounted) return;
+      _headerAnimationController.reverse();
+    });
+
+    // Cuando la animación del header termine al retroceder, ocultarlo del árbol
+    _headerAnimationController.addStatusListener((status) {
+      if (status == AnimationStatus.dismissed && mounted) {
+        setState(() {
+          _showHeader = false;
+        });
+      }
+    });
     
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<BusinessProvider>(context, listen: false).loadBusinesses();
@@ -92,20 +110,67 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
     super.dispose();
   }
 
+  // 🏪 NAVEGACIÓN A DETALLE DE NEGOCIO
+  void _navigateToBusinessDetail(dynamic business) {
+    Navigator.pushNamed(
+      context, 
+      '/business-detail',
+      arguments: business,
+    ).catchError((error) {
+      // Fallback si la ruta no existe
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Detalle de ${business.name} - Próximamente'),
+          backgroundColor: ThemeProvider.primaryColor,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      return null;
+    });
+  }
+
+  // 🏪 NAVEGACIÓN A LISTA DE NEGOCIOS
+  void _navigateToBusinesses() {
+    Navigator.pushNamed(context, '/businesses').catchError((error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Lista de negocios - Próximamente'),
+          backgroundColor: ThemeProvider.primaryColor,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      return null;
+    });
+  }
+
+  // 📋 NAVEGACIÓN A PEDIDOS
+  void _navigateToOrders() {
+    Navigator.pushNamed(context, '/orders').catchError((error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Mis pedidos - Próximamente'),
+          backgroundColor: ThemeProvider.primaryColor,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      return null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
     final businessProvider = Provider.of<BusinessProvider>(context);
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: ThemeProvider.backgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 🎨 HEADER DE BIENVENIDA
-              _buildWelcomeHeader(authProvider),
+              // 🎨 HEADER DE BIENVENIDA (solo visible si _showHeader es true)
+              if (_showHeader) _buildWelcomeHeader(authProvider),
               
               // 🔍 BARRA DE BÚSQUEDA
               _buildSearchBar(),
@@ -140,18 +205,14 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
             child: Container(
               width: double.infinity,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFFBF360C), Color(0xFFD84315)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+                gradient: ThemeProvider.primaryGradient,
                 borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(30),
                   bottomRight: Radius.circular(30),
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFFBF360C).withOpacity(0.3),
+                    color: ThemeProvider.primaryColor.withOpacity(0.3),
                     blurRadius: 15,
                     offset: const Offset(0, 8),
                   ),
@@ -162,25 +223,54 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Saludo personalizado animado
-                    Text(
-                      '¡Hola, ${authProvider.user?.name ?? 'Usuario'}! 👋',
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        fontFamily: 'Roboto',
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Descubre los mejores negocios de tu barrio',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w300,
-                        fontFamily: 'Roboto',
-                      ),
+                    // Header con avatar y saludo
+                    Row(
+                      children: [
+                        // Avatar del usuario
+                        CircleAvatar(
+                          radius: 25,
+                          backgroundColor: Colors.white.withOpacity(0.2),
+                          backgroundImage: authProvider.user?.profileImage != null 
+                            ? NetworkImage(authProvider.user!.profileImage!) 
+                            : null,
+                          child: authProvider.user?.profileImage == null 
+                            ? const Icon(
+                                Icons.person, 
+                                color: Colors.white, 
+                                size: 30,
+                              ) 
+                            : null,
+                        ),
+                        const SizedBox(width: 16),
+                        // Texto de bienvenida
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '¡Hola, ${authProvider.user?.name ?? 'Usuario'}! ',
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  fontFamily: 'Roboto',
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              const Text(
+                                'Descubre los mejores negocios de tu barrio',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w300,
+                                  fontFamily: 'Roboto',
+                                  
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 20),
                     // Ubicación actual animada
@@ -237,7 +327,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
               child: TextField(
                 decoration: InputDecoration(
                   hintText: 'Buscar productos, negocios...',
-                  prefixIcon: const Icon(Icons.search, color: Color(0xFFBF360C)),
+                  prefixIcon: Icon(Icons.search, color: ThemeProvider.primaryColor),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 ),
@@ -279,32 +369,32 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
               final business = businessProvider.businesses[index];
               return AnimatedCard(
                 delayMilliseconds: 300 + (index * 100),
-                child: Container(
-                  width: 140,
-                  height: 180,
-                  margin: const EdgeInsets.only(right: 12),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Column(
+                child: GestureDetector(
+                  onTap: () {
+                    _navigateToBusinessDetail(business);
+                  },
+                  child: Container(
+                    width: 140,
+                    height: 180,
+                    margin: const EdgeInsets.only(right: 12),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Imagen del negocio animada
                       Container(
                         height: 80,
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFFBF360C), Color(0xFFD84315)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
+                          gradient: ThemeProvider.primaryGradient,
                           borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(12),
                             topRight: Radius.circular(12),
@@ -363,6 +453,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
                       ),
                     ],
                   ),
+                  ),
                 ),
               );
             },
@@ -397,7 +488,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
                   subtitle: 'Explorar productos',
                   delay: 0,
                   onTap: () {
-                    // Cambiar a pestaña de tienda
+                    _navigateToBusinesses();
                   },
                 ),
               ),
@@ -409,7 +500,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
                   subtitle: 'Ver historial',
                   delay: 100,
                   onTap: () {
-                    // Cambiar a pestaña de pedidos
+                    _navigateToOrders();
                   },
                 ),
               ),
@@ -438,15 +529,11 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFBF360C), Color(0xFFD84315)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  gradient: ThemeProvider.primaryGradient,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFFBF360C).withOpacity(0.3),
+                      color: ThemeProvider.primaryColor.withOpacity(0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 4),
                     ),
@@ -504,21 +591,17 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
     );
   }
 
-  // 🎯 PROMOCIONES
+  //  PROMOCIONES
   Widget _buildPromotions() {
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFFBF360C), Color(0xFFD84315)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        gradient: ThemeProvider.primaryGradient,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFBF360C).withOpacity(0.3),
+            color: ThemeProvider.primaryColor.withOpacity(0.3),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -528,7 +611,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            '🎉 ¡Ofertas Especiales!',
+            ' ¡Ofertas Especiales!',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,

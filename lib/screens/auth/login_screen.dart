@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';      // 🔑 Gestión de autenticación
 import '../../providers/theme_provider.dart';    // 🎨 Gestión de temas
 import '../../widgets/animated_components.dart'; // 🎨 Componentes animados
-import '../../widgets/improved_buttons.dart'; // 🎨 Botones mejorados
 import '../../utils/navigation_transitions.dart'; // 🚀 Transiciones de navegación
 import 'register_screen.dart';                  // 📝 Pantalla de registro
 import '../main_navigation.dart';               // 🧭 Navegación principal
@@ -252,7 +251,7 @@ class _LoginScreenState extends State<LoginScreen>
                               controller: _passwordController,
                               obscureText: _obscurePassword,
                               decoration: InputDecoration(
-                                labelText: 'Contraseña',
+                                labelText: 'Password',
                                 prefixIcon: const Icon(Icons.lock_outlined),
                                 suffixIcon: IconButton(
                                   icon: Icon(
@@ -311,7 +310,7 @@ class _LoginScreenState extends State<LoginScreen>
                                   child: SlideTransition(
                                     position: _formSlideAnimation,
                                     child: AnimatedButton(
-                                      text: '¿No tienes cuenta? Regístrate',
+                                      text: 'Crear Cuenta',
                                       onPressed: () {
                                         NavigationUtils.slideRight(
                                           context,
@@ -320,7 +319,8 @@ class _LoginScreenState extends State<LoginScreen>
                                       },
                                       backgroundColor: Colors.transparent,
                                       textColor: ThemeProvider.primaryColor,
-                                      height: 40,
+                                      hasShadow: false,
+                                      height: 50,
                                     ),
                                   ),
                                 );
@@ -328,44 +328,10 @@ class _LoginScreenState extends State<LoginScreen>
                             ),
                             const SizedBox(height: 24),
                             
-                            // 🧪 BOTÓN DE PRUEBA (TEMPORAL)
-                            PrimaryGradientButton(
-                              text: 'Ver Cambios Visuales',
-                              icon: Icons.visibility,
-                              onPressed: () {
-                                Navigator.pushNamed(context, '/test');
-                              },
-                              width: double.infinity,
-                            ),
-                            const SizedBox(height: 16),
+                            // 🧪 BOTÓN PRINCIPAL (ESTILO NARANJA)
+                      
                             
                             // 🌙 INTERRUPTOR DE TEMA (ACTUALMENTE DESHABILITADO)
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.light_mode,
-                                  color: ThemeProvider.mutedTextColor,
-                                ),
-                                const SizedBox(width: 12),
-                                Switch(
-                                  value: themeProvider.isDarkMode, // ❌ Siempre false (modo claro forzado)
-                                  onChanged: (value) {
-                                    setState(() {
-                                      // 🔄 Llama al método toggleTheme (actualmente no hace nada)
-                                      themeProvider.toggleTheme();
-                                    });
-                                  },
-                                  activeColor: ThemeProvider.primaryColor,
-                                  activeTrackColor: ThemeProvider.primaryColor.withOpacity(0.3),
-                                ),
-                                const SizedBox(width: 12),
-                                Icon(
-                                  Icons.dark_mode,
-                                  color: ThemeProvider.mutedTextColor,
-                                ),
-                              ],
-                            ),
                           ],
                         ),
                       ),
