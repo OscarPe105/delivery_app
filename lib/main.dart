@@ -15,14 +15,17 @@ import 'screens/main_navigation.dart';          // 🧭 Navegación principal
 import 'screens/auth/login_screen.dart';        // 🔑 Pantalla de inicio de sesión
 import 'screens/search_screen.dart';            // 🔍 Pantalla de búsqueda
 import 'screens/test_screen.dart';              // 🧪 Pantalla de prueba
+import 'screens/business/business_registration_screen.dart'; // 📝 Pantalla de registro de negocio
+import 'screens/business/business_onboarding_screen.dart';
+import 'screens/business/business_dashboard_screen.dart';
 
-// 🚀 FUNCIÓN PRINCIPAL
+// FUNCIÓN PRINCIPAL
 // Punto de entrada de la aplicación
 void main() {
-  // ✅ INICIALIZAR FLUTTER BINDING PRIMERO
+  // INICIALIZAR FLUTTER BINDING PRIMERO
   WidgetsFlutterBinding.ensureInitialized();
   
-  // ✅ CONFIGURAR MAPBOX OPTIONS DESPUÉS DE INICIALIZAR BINDING (comentado temporalmente)
+  // CONFIGURAR MAPBOX OPTIONS DESPUÉS DE INICIALIZAR BINDING (comentado temporalmente)
   // MapboxOptions.setAccessToken(MapboxConfig.accessToken);
   
   runApp(const DeliveryApp());
@@ -56,12 +59,15 @@ class DeliveryApp extends StatelessWidget {
             // 🔀 RUTAS NOMBRADAS
             routes: {
               '/': (context) => authProvider.isAuthenticated 
-                  ? MainNavigation()  // ✅ Removido 'const'
+                  ? MainNavigation()  //  Removido 'const'
                   : LoginScreen(),
-              '/main': (context) => MainNavigation(),  // ✅ Removido 'const'
+              '/main': (context) => MainNavigation(),  //  Removido 'const'
               '/login': (context) => LoginScreen(),
               '/search': (context) => const SearchScreen(),
               '/test': (context) => const TestScreen(),
+              '/business/register': (context) => const BusinessRegistrationScreen(), // 📝 Ruta para registro de negocio
+              '/business/onboarding': (context) => const BusinessOnboardingScreen(),
+              '/business/dashboard': (context) => const BusinessDashboardScreen(),
             },
             initialRoute: '/',
             debugShowCheckedModeBanner: false,

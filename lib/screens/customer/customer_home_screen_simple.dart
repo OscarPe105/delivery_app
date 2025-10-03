@@ -1,4 +1,4 @@
-// 🏠 PANTALLA PRINCIPAL DEL CLIENTE - VERSIÓN SIMPLIFICADA
+// PANTALLA PRINCIPAL DEL CLIENTE - VERSIÓN SIMPLIFICADA
 // Esta pantalla muestra la interfaz principal para los clientes
 
 import 'package:flutter/material.dart';
@@ -28,8 +28,8 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
   @override
   void initState() {
     super.initState();
-    
-    // 🎨 Inicializar animaciones
+  
+    //  Inicializar animaciones
     _initializeAnimations();
     _startAnimations();
     
@@ -39,19 +39,19 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
   }
 
   void _initializeAnimations() {
-    // 🎨 Controlador de animación del header
+    //  Controlador de animación del header
     _headerAnimationController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
 
-    // 🎨 Controlador de animación del contenido
+    // Controlador de animación del contenido
     _contentAnimationController = AnimationController(
       duration: const Duration(milliseconds: 1000),
       vsync: this,
     );
 
-    // 🎨 Animaciones del header
+    //  Animaciones del header
     _headerSlideAnimation = Tween<double>(
       begin: -100,
       end: 0,
@@ -68,7 +68,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
       curve: Curves.easeOut,
     ));
 
-    // 🎨 Animación del contenido
+    //  Animación del contenido
     _contentSlideAnimation = Tween<double>(
       begin: 50,
       end: 0,

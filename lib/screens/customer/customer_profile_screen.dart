@@ -200,6 +200,14 @@ class _CustomerProfileScreenState extends State<CustomerProfileScreen> {
                     onTap: () {},
                   ),
                   _buildMenuTile(
+                    icon: Icons.store,
+                    title: 'Registrar mi Negocio',
+                    subtitle: '¿Tienes un negocio? Únete a nuestra plataforma',
+                    onTap: () {
+                      Navigator.pushNamed(context, '/business/onboarding');
+                    },
+                  ),
+                  _buildMenuTile(
                     icon: Icons.settings,
                     title: 'Configuración',
                     subtitle: 'Ajustes de la aplicación',

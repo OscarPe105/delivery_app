@@ -1,4 +1,4 @@
-// 🏠 PANTALLA PRINCIPAL DEL CLIENTE - VERSIÓN SIMPLIFICADA
+// PANTALLA PRINCIPAL DEL CLIENTE - VERSIÓN SIMPLIFICADA
 // Esta pantalla muestra la interfaz principal para los clientes
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -32,7 +32,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
   void initState() {
     super.initState();
     
-    // 🎨 Inicializar animaciones
+    //  Inicializar animaciones
     _initializeAnimations();
     _startAnimations();
     

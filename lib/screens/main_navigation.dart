@@ -40,7 +40,7 @@ class _MainNavigationState extends State<MainNavigation> {
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          // 🎨 ENCABEZADO DEL DRAWER
+          //  ENCABEZADO DEL DRAWER
           DrawerHeader(
             decoration: BoxDecoration(
               color: ThemeProvider.primaryColor,
@@ -76,7 +76,7 @@ class _MainNavigationState extends State<MainNavigation> {
               ],
             ),
           ),
-          // 🏠 OPCIÓN INICIO
+          // OPCIÓN INICIO
           ListTile(
             leading: const Icon(Icons.home),
             title: const Text('Inicio'),
@@ -121,7 +121,16 @@ class _MainNavigationState extends State<MainNavigation> {
             },
           ),
           const Divider(),
-          // ❤️ OPCIÓN FAVORITOS
+          //  OPCIÓN REGISTRAR NEGOCIO
+          ListTile(
+            leading: const Icon(Icons.store_mall_directory, color: Colors.green),
+            title: const Text('Registrar mi Negocio'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(context, '/business/onboarding');
+            },
+          ),
+          // OPCIÓN FAVORITOS
           ListTile(
             leading: const Icon(Icons.favorite, color: Colors.red),
             title: const Text('Favoritos'),
@@ -146,7 +155,16 @@ class _MainNavigationState extends State<MainNavigation> {
             },
           ),
           const Divider(),
-          // ⚙️ OPCIÓN CONFIGURACIÓN
+          // 🏪 OPCIÓN REGISTRAR NEGOCIO
+          ListTile(
+            leading: const Icon(Icons.store_mall_directory, color: Colors.green),
+            title: const Text('Registrar mi Negocio'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(context, '/business/onboarding');
+            },
+          ),
+          // OPCIÓN CONFIGURACIÓN
           ListTile(
             leading: const Icon(Icons.settings),
             title: const Text('Configuración'),
@@ -175,18 +193,18 @@ class _MainNavigationState extends State<MainNavigation> {
     final themeProvider = Provider.of<ThemeProvider>(context);
     
     return Scaffold(
-      backgroundColor: ThemeProvider.backgroundColor, // 🏠 Color de fondo
+      backgroundColor: ThemeProvider.backgroundColor, //  Color de fondo
       
       // 📱 CUERPO PRINCIPAL - Muestra la pantalla actual
       body: IndexedStack(
-        index: _currentIndex,    // 📍 Pantalla actual
-        children: _screens,      // 📱 Lista de pantallas
+        index: _currentIndex,    // Pantalla actual
+        children: _screens,      // Lista de pantallas
       ),
       
       // 📍 BARRA DE NAVEGACIÓN INFERIOR
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: Colors.white,    // 🏠 Cambiado a blanco puro
+          color: Colors.white,    //  Cambiado a blanco puro
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.1), // 🌫️ Sombra ligera
@@ -205,35 +223,35 @@ class _MainNavigationState extends State<MainNavigation> {
             topRight: Radius.circular(24),
           ),
           child: BottomNavigationBar(
-            currentIndex: _currentIndex,     // 📍 Pestaña actual
-            onTap: (index) {                // 👆 Al tocar una pestaña
+            currentIndex: _currentIndex,     // Pestaña actual
+            onTap: (index) {                //  Al tocar una pestaña
               setState(() {
-                _currentIndex = index;       // 🔄 Cambiar pestaña actual
+                _currentIndex = index;       //  Cambiar pestaña actual
               });
             },
             type: BottomNavigationBarType.fixed,
-            backgroundColor: Colors.white,        // 🏠 Cambiado a blanco puro
-            selectedItemColor: ThemeProvider.primaryColor,   // 🧡 Color de pestaña seleccionada
-            unselectedItemColor: ThemeProvider.secondaryTextColor, // 📝 Color de pestaña no seleccionada
-            selectedFontSize: 12,           // 📏 Tamaño de fuente seleccionada
-            unselectedFontSize: 10,         // 📏 Tamaño de fuente no seleccionada
-            elevation: 0,                   // 🚫 Sin sombra
+            backgroundColor: Colors.white,        //  Cambiado a blanco puro
+            selectedItemColor: ThemeProvider.primaryColor,   // Color de pestaña seleccionada
+            unselectedItemColor: ThemeProvider.secondaryTextColor, //  Color de pestaña no seleccionada
+            selectedFontSize: 12,           // Tamaño de fuente seleccionada
+            unselectedFontSize: 10,         //  Tamaño de fuente no seleccionada
+            elevation: 0,                   //  Sin sombra
             
-            // 📍 PESTAÑAS DE NAVEGACIÓN
+            // PESTAÑAS DE NAVEGACIÓN
             items: const [
-              // 🏠 PESTAÑA INICIO
+              //  PESTAÑA INICIO
               BottomNavigationBarItem(
                 icon: Icon(Icons.home_outlined),     // 🏠 Ícono no seleccionado
                 activeIcon: Icon(Icons.home_rounded), // 🏠 Ícono seleccionado
                 label: 'Inicio',                     // 📝 Etiqueta
               ),
-              // 🏪 PESTAÑA TIENDA
+              //  PESTAÑA TIENDA
               BottomNavigationBarItem(
                 icon: Icon(Icons.store_outlined),     // 🏪 Ícono no seleccionado
                 activeIcon: Icon(Icons.store_rounded), // 🏪 Ícono seleccionado
                 label: 'Tienda',                      // 📝 Etiqueta
               ),
-              // 📋 PESTAÑA MIS PEDIDOS
+              // PESTAÑA MIS PEDIDOS
               BottomNavigationBarItem(
                 icon: Icon(Icons.receipt_long_outlined),     // 📋 Ícono no seleccionado
                 activeIcon: Icon(Icons.receipt_long_rounded), // 📋 Ícono seleccionado
@@ -250,7 +268,7 @@ class _MainNavigationState extends State<MainNavigation> {
         ),
       ),
       
-      // 🍔 DRAWER LATERAL (Menú hamburguesa) - Disponible en todas las pestañas
+      //  DRAWER LATERAL (Menú hamburguesa) - Disponible en todas las pestañas
       drawer: _buildDrawer(context, themeProvider),
     );
   }
