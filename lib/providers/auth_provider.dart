@@ -13,7 +13,7 @@ class AuthProvider with ChangeNotifier {
   UserType get userType => _userType;
   String get userId => _userId;
   User? get currentUser => _currentUser;
-  User? get user => _currentUser; // ✅ Agregar este getter
+  User? get user => _currentUser; // Agregar este getter
   
   Future<bool> login(String email, String password, UserType type) async {
     // Simulación de autenticación para el MVP

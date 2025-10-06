@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import '../models/product.dart';
 import '../models/order.dart';
-import '../models/business.dart'; // ✅ Agregar esta importación
+import '../models/business.dart'; //Agregar esta importación
 
 class BusinessProvider with ChangeNotifier {
   final List<Product> _products = [];
   final List<Order> _orders = [];
-  final List<Business> _businesses = []; // ✅ Agregar esta lista
+  final List<Business> _businesses = []; // Agregar esta lista
   
   List<Product> get products => _products;
   List<Order> get orders => _orders;
-  List<Business> get businesses => _businesses; // ✅ Agregar este getter
+  List<Business> get businesses => _businesses; // Agregar este getter
   
   // ✅ Agregar este método
   void loadBusinesses() {

@@ -63,7 +63,7 @@ class CommunityStoreProvider with ChangeNotifier {
     if (_searchQuery.isNotEmpty) {
       filtered = filtered.where((product) {
         return product.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-               product.description.toLowerCase().contains(_searchQuery.toLowerCase());
+              product.description.toLowerCase().contains(_searchQuery.toLowerCase());
       }).toList();
     }
     
@@ -231,8 +231,8 @@ class CommunityStoreProvider with ChangeNotifier {
         id: '1',
         name: 'Restaurante Doña María',
         description: 'Comida casera con el sabor de la abuela',
-        imageUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400',
-        category: 'restaurant',
+        imageUrl: 'assets/images/businesses/business_restaurante_dona_maria.jpg',
+        category: 'food',
         address: 'Calle 10 #45-67, Barrio Centro',
         phone: '+57 300 123 4567',
         rating: 4.8,
@@ -244,7 +244,7 @@ class CommunityStoreProvider with ChangeNotifier {
         id: '2',
         name: 'Panadería El Amanecer',
         description: 'Pan fresco todos los días desde las 5 AM',
-        imageUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400',
+        imageUrl: 'assets/images/businesses/business_panaderia_el_amanecer.jpg',
         category: 'bakery',
         address: 'Carrera 15 #23-45, Barrio Norte',
         phone: '+57 301 234 5678',
@@ -257,7 +257,7 @@ class CommunityStoreProvider with ChangeNotifier {
         id: '3',
         name: 'Frutería La Cosecha',
         description: 'Frutas y verduras frescas directo del campo',
-        imageUrl: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400',
+        imageUrl: 'assets/images/businesses/business_fruteria_la_cosecha.jpg',
         category: 'fruits',
         address: 'Avenida 20 #12-34, Barrio Sur',
         phone: '+57 302 345 6789',
@@ -265,6 +265,71 @@ class CommunityStoreProvider with ChangeNotifier {
         latitude: 14.0623,
         longitude: -87.2168,
         tags: ['Frutas Tropicales', 'Verduras Orgánicas', 'Jugos Naturales'],
+      ),
+      Business(
+        id: '4',
+        name: 'Boutique Alma',
+        description: 'Ropa femenina y accesorios',
+        imageUrl: 'assets/images/businesses/business_boutique_alma.jpg',
+        category: 'fashion',
+        address: 'C.C. Central, Local 12',
+        phone: '+57 303 111 2222',
+        rating: 4.6,
+        latitude: 14.0751,
+        longitude: -87.2051,
+        tags: ['Vestidos', 'Blusas', 'Accesorios'],
+      ),
+      Business(
+        id: '5',
+        name: 'Joyas Brillantes',
+        description: 'Joyería artesanal y plata',
+        imageUrl: 'assets/images/businesses/business_joyas_brillantes.jpg',
+        category: 'jewelry',
+        address: 'Av. Principal #45',
+        phone: '+57 304 222 3333',
+        rating: 4.7,
+        latitude: 14.0788,
+        longitude: -87.2090,
+        tags: ['Anillos', 'Collares', 'Pulseras'],
+      ),
+      Business(
+        id: '6',
+        name: 'TecnoMundo',
+        description: 'Electrónica y gadgets',
+        imageUrl: 'assets/images/businesses/business_tecnomundo.jpg',
+        category: 'electronics',
+        address: 'C.C. Tech Plaza, Local 5',
+        phone: '+57 305 333 4444',
+        rating: 4.5,
+        latitude: 14.0814,
+        longitude: -87.2034,
+        tags: ['Auriculares', 'Smartphones', 'Accesorios'],
+      ),
+      Business(
+        id: '7',
+        name: 'Hogar & Deco',
+        description: 'Decoración y artículos para el hogar',
+        imageUrl: 'assets/images/businesses/business_hogar_deco.jpg',
+        category: 'home',
+        address: 'Calle 8 #12-90',
+        phone: '+57 306 444 5555',
+        rating: 4.4,
+        latitude: 14.0799,
+        longitude: -87.2005,
+        tags: ['Decoración', 'Textiles', 'Organización'],
+      ),
+      Business(
+        id: '8',
+        name: 'Belleza Natural',
+        description: 'Cosmética y cuidado personal',
+        imageUrl: 'assets/images/businesses/business_belleza_natural.jpg',
+        category: 'beauty',
+        address: 'Pasaje Norte, Local 3',
+        phone: '+57 307 666 7777',
+        rating: 4.6,
+        latitude: 14.0777,
+        longitude: -87.2077,
+        tags: ['Skincare', 'Maquillaje', 'Belleza'],
       ),
     ];
   }
@@ -319,40 +384,119 @@ class CommunityStoreProvider with ChangeNotifier {
         businessId: '3',
         isPopular: true,
       ),
+
+      // Nuevos productos: marketplace
+      Product(
+        id: 'p6',
+        name: 'Vestido Floral',
+        description: 'Vestido midi floral, tela ligera',
+        price: 85000,
+        imageUrl: 'https://images.unsplash.com/photo-1521335629791-ce4aec67dd53?w=400',
+        businessId: '4',
+        isPopular: true,
+      ),
+      Product(
+        id: 'p7',
+        name: 'Collar Plata 925',
+        description: 'Collar minimalista de plata 925',
+        price: 120000,
+        imageUrl: 'https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?w=400',
+        businessId: '5',
+        isPopular: true,
+      ),
+      Product(
+        id: 'p8',
+        name: 'Auriculares Bluetooth',
+        description: 'Auriculares inalámbricos con cancelación de ruido',
+        price: 150000,
+        imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400',
+        businessId: '6',
+        isPopular: true,
+      ),
+      Product(
+        id: 'p9',
+        name: 'Set de Cojines Decorativos',
+        description: 'Set de 2 cojines tejidos',
+        price: 45000,
+        imageUrl: 'https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=400',
+        businessId: '7',
+        isPopular: false,
+      ),
+      Product(
+        id: 'p10',
+        name: 'Serum Vitamina C',
+        description: 'Serum iluminador y antioxidante',
+        price: 60000,
+        imageUrl: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc0?w=400',
+        businessId: '8',
+        isPopular: true,
+      ),
     ];
   }
-
+//Slider de categorias
   void _loadCategories() {
     _categories = [
       Category(
         id: 'all',
         name: 'Todos',
         description: 'Todos los productos',
-        icon: '🛒', // Cambiado de 'assets/icons/all.png'
+        icon: 'assets/images/icons/all.png',
       ),
       Category(
         id: 'food',
         name: 'Comida',
         description: 'Platos preparados y alimentos',
-        icon: '🍽️', // Cambiado de 'assets/icons/food.png'
+        icon: 'assets/images/icons/food.png',
       ),
       Category(
         id: 'groceries',
         name: 'Abarrotes',
         description: 'Productos básicos y despensa',
-        icon: '🛒', // Cambiado de 'assets/icons/groceries.png'
+        icon: 'assets/images/icons/despensa.png',
       ),
       Category(
         id: 'bakery',
         name: 'Panadería',
         description: 'Panes y pasteles frescos',
-        icon: '🍞', // Cambiado de 'assets/icons/bakery.png'
+        icon: 'assets/images/icons/panadero.png',
       ),
       Category(
         id: 'fruits',
         name: 'Frutas y Verduras',
         description: 'Productos frescos',
-        icon: '🍎', // Cambiado de 'assets/icons/fruits.png'
+        icon: 'assets/images/icons/verduras.png',
+      ),
+
+      // Nuevas categorías: marketplace
+      Category(
+        id: 'fashion',
+        name: 'Moda',
+        description: 'Ropa y accesorios',
+        icon: 'assets/images/icons/ropa.png',
+      ),
+      Category(
+        id: 'jewelry',
+        name: 'Joyería',
+        description: 'Accesorios y joyas',
+        icon: 'assets/images/icons/joyas.png',
+      ),
+      Category(
+        id: 'electronics',
+        name: 'Electrónica',
+        description: 'Gadgets y tecnología',
+        icon: 'assets/images/icons/electronica.png',
+      ),
+      Category(
+        id: 'home',
+        name: 'Hogar',
+        description: 'Decoración y utensilios',
+        icon: 'assets/images/icons/hogar.png',
+      ),
+      Category(
+        id: 'beauty',
+        name: 'Belleza',
+        description: 'Cosmética y cuidado personal',
+        icon: 'assets/images/icons/belleza.png',
       ),
     ];
   }

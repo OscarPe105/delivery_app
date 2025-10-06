@@ -26,8 +26,19 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/images/businesses/
-    - assets/images/products/
-    - assets/images/categories/
-    - assets/images/ui/
-    - assets/images/backgrounds/
+    - assets/images/icons/all.png
+    - assets/images/icons/despensa.png
+    - assets/images/icons/food.png
+    - assets/images/icons/panadero.png
+    - assets/images/icons/verduras.png
+    - assets/images/businesses/business_belleza_natural.jpg
+    - assets/images/businesses/business_boutique_alma.jpg
+    - assets/images/businesses/business_fruteria_la_cosecha.jpg
+    - assets/images/businesses/business_hogar_deco.jpg
+    - assets/images/businesses/business_joyas_brillantes.jpg
+    - assets/images/businesses/business_panaderia_el_amanecer.jpg
+    - assets/images/businesses/business_restaurante_dona_maria.jpg
+    - assets/images/businesses/business_tecnomundo.jpeg
+    - assets/images/businesses/panaderia.jpg
+    - assets/images/businesses/panaderia02.jpg
+    - assets/images/ui/eletronicos.jpg

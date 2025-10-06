@@ -1,20 +1,20 @@
 // 🚀 ARCHIVO PRINCIPAL DE LA APLICACIÓN
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-// import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart'; // ✅ Comentado temporalmente
+// import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart'; // Comentado temporalmente
 // Este archivo es el punto de entrada de la aplicación y configura los proveedores y temas
 // 🔐 Importar proveedores para gestión de estado
-import 'providers/auth_provider.dart';         // 🔑 Autenticación
-import 'providers/business_provider.dart';     // 🏪 Negocios
-import 'providers/community_store_provider.dart'; // 🛒 Tienda comunitaria
-import 'providers/customer_provider.dart';     // 👤 Cliente
-import 'providers/theme_provider.dart';        // 🎨 Tema
+import 'providers/auth_provider.dart';         // Autenticación
+import 'providers/business_provider.dart';     // Negocios
+import 'providers/community_store_provider.dart'; // Tienda comunitaria
+import 'providers/customer_provider.dart';     // Cliente
+import 'providers/theme_provider.dart';        // Tema
 import 'config/mapbox_config.dart'; // ✅ Agregar esta importación
 // 📱 Importar pantallas
-import 'screens/main_navigation.dart';          // 🧭 Navegación principal
-import 'screens/auth/login_screen.dart';        // 🔑 Pantalla de inicio de sesión
-import 'screens/search_screen.dart';            // 🔍 Pantalla de búsqueda
-import 'screens/test_screen.dart';              // 🧪 Pantalla de prueba
+import 'screens/main_navigation.dart';          // Navegación principal
+import 'screens/auth/login_screen.dart';        // Pantalla de inicio de sesión
+import 'screens/search_screen.dart';            // Pantalla de búsqueda
+import 'screens/test_screen.dart';              // Pantalla de prueba
 import 'screens/business/business_registration_screen.dart'; // 📝 Pantalla de registro de negocio
 import 'screens/business/business_onboarding_screen.dart';
 import 'screens/business/business_dashboard_screen.dart';
@@ -41,11 +41,11 @@ class DeliveryApp extends StatelessWidget {
       // 📊 PROVEEDORES DE ESTADO
       // Configuración de todos los proveedores para gestión de estado global
       providers: [
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),      // 🎨 Tema
-        ChangeNotifierProvider(create: (_) => AuthProvider()),        // 🔑 Autenticación
-        ChangeNotifierProvider(create: (_) => BusinessProvider()),    // 🏪 Negocios
-        ChangeNotifierProvider(create: (_) => CommunityStoreProvider()), // 🛒 Tienda
-        ChangeNotifierProvider(create: (_) => CustomerProvider()),    // 👤 Cliente
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),      // Tema
+        ChangeNotifierProvider(create: (_) => AuthProvider()),        // Autenticación
+        ChangeNotifierProvider(create: (_) => BusinessProvider()),    // Negocios
+        ChangeNotifierProvider(create: (_) => CommunityStoreProvider()), // Tienda
+        ChangeNotifierProvider(create: (_) => CustomerProvider()),    // Cliente
       ],
       // 📱 CONFIGURACIÓN DE LA APLICACIÓN
       // Escucha cambios en ThemeProvider y AuthProvider
@@ -65,7 +65,7 @@ class DeliveryApp extends StatelessWidget {
               '/login': (context) => LoginScreen(),
               '/search': (context) => const SearchScreen(),
               '/test': (context) => const TestScreen(),
-              '/business/register': (context) => const BusinessRegistrationScreen(), // 📝 Ruta para registro de negocio
+              '/business/register': (context) => const BusinessRegistrationScreen(), // Ruta para registro de negocio
               '/business/onboarding': (context) => const BusinessOnboardingScreen(),
               '/business/dashboard': (context) => const BusinessDashboardScreen(),
             },

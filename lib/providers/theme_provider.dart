@@ -18,28 +18,28 @@ class ThemeProvider extends ChangeNotifier {
     notifyListeners();
   }
   
-  // 🎨 COLORES PRINCIPALES
+  // COLORES PRINCIPALES
   static Color get primaryColor => const Color(0xFF34656D);      // Verde azulado oscuro
   static Color get secondaryColor => const Color(0xFF334443);    // Verde muy oscuro
   static Color get accentColor => const Color(0xFFFAEAB1);       // Beige dorado
   
-  // 🎨 COLORES DE TEXTO
+  // COLORES DE TEXTO
   static Color get primaryTextColor => const Color(0xFF334443);    // Verde muy oscuro
   static Color get secondaryTextColor => const Color(0xFF34656D);  // Verde azulado oscuro
   static Color get lightTextColor => const Color(0xFFFAF8F1);      // Beige muy claro
   
-  // 🎨 COLORES DE FONDO
+  // COLORES DE FONDO
   static Color get backgroundColor => const Color(0xFFFAF8F1);      // Beige muy claro
   static Color get cardColor => const Color(0xFFFAEAB1);           // Beige dorado
   static Color get surfaceColor => const Color(0xFFFAF8F1);        // Beige muy claro
   
-  // 🎨 COLORES DE ESTADO
+  // COLORES DE ESTADO
   static Color get successColor => const Color(0xFF27AE60);
   static Color get errorColor => const Color(0xFFE74C3C);
   static Color get warningColor => const Color(0xFFF39C12);
   static Color get infoColor => const Color(0xFF3498DB);
   
-  // 🎨 GRADIENTES
+  // GRADIENTES
   static LinearGradient get primaryGradient => const LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
@@ -52,13 +52,13 @@ class ThemeProvider extends ChangeNotifier {
     colors: [Color(0xFFFAEAB1), Color(0xFFFAF8F1)],
   );
   
-  // 🎨 RADIOS DE BORDE
+  // RADIOS DE BORDE
   static double get radiusSmall => 8.0;
   static double get radiusMedium => 12.0;
   static double get radiusLarge => 16.0;
   static double get radiusXLarge => 24.0;
   
-  // 🎨 TEMAS COMPLETOS
+  // TEMAS COMPLETOS
   ThemeData get lightTheme => ThemeData(
     useMaterial3: true,
     colorScheme: ColorScheme.fromSeed(
@@ -112,7 +112,7 @@ class ThemeProvider extends ChangeNotifier {
     ),
   );
   
-  // 💾 MÉTODOS DE PERSISTENCIA
+  //MÉTODOS DE PERSISTENCIA
   Future<void> _saveThemePreference() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isDarkMode', _isDarkMode);
@@ -124,7 +124,7 @@ class ThemeProvider extends ChangeNotifier {
     notifyListeners();
   }
   
-  // 🎨 COLORES ADICIONALES
+  // COLORES ADICIONALES
   static Color get primaryColorDark => const Color(0xFF334443);   // Verde muy oscuro
   static Color get primaryColorLight => const Color(0xFFFAEAB1);  // Beige dorado
   static Color get mutedTextColor => const Color(0xFF34656D);     // Verde azulado oscuro

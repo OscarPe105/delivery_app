@@ -56,7 +56,7 @@ class BusinessDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   
-                  // Rating y información
+                  // Rating
                   Row(
                     children: [
                       const Icon(Icons.star, color: Colors.amber, size: 20),
@@ -65,17 +65,46 @@ class BusinessDetailScreen extends StatelessWidget {
                         business.rating.toString(),
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      const SizedBox(width: 16),
-                      const Icon(Icons.location_on, color: Colors.grey, size: 20),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          business.address ?? 'Dirección no disponible',
-                          style: TextStyle(color: Colors.grey[600]),
-                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Icon(Icons.access_time, color: Colors.grey, size: 18),
+                      const SizedBox(width: 6),
+                      Text(
+                        business.isOpen ? 'Abierto ahora' : 'Cerrado',
+                        style: const TextStyle(fontSize: 14, color: Colors.black54),
                       ),
                     ],
                   ),
+                  const SizedBox(height: 8),
+                  if (business.address != null)
+                    Row(
+                      children: [
+                        const Icon(Icons.location_on, color: Colors.grey, size: 18),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            business.address!,
+                            style: const TextStyle(fontSize: 14, color: Colors.black54),
+                          ),
+                        ),
+                      ],
+                    ),
+                  if (business.phone != null) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        const Icon(Icons.phone, color: Colors.grey, size: 18),
+                        const SizedBox(width: 6),
+                        Text(
+                          business.phone!,
+                          style: const TextStyle(fontSize: 14, color: Colors.black54),
+                        ),
+                      ],
+                    ),
+                  ],
                   
                   const SizedBox(height: 24),
                   

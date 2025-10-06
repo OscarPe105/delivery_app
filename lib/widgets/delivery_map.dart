@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 // import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart'; // Comentado temporalmente
-import '../config/mapbox_config.dart';
+//import '../config/mapbox_config.dart';
 import '../services/location_service.dart';
 
 

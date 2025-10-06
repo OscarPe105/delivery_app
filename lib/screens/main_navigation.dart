@@ -1,19 +1,19 @@
-// 🧭 NAVEGACIÓN PRINCIPAL DE LA APLICACIÓN
+// NAVEGACIÓN PRINCIPAL DE LA APLICACIÓN
 // Este archivo controla la barra de navegación inferior y el drawer lateral
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
 
-// 📱 Importar todas las pantallas
+// Importar todas las pantallas
 
-// 📱 Importar todas las pantallas
-import 'customer/customer_home_screen.dart';           // 🏠 Pantalla de inicio principal
-import 'customer/customer_profile_screen.dart';       // 👤 Pantalla de perfil
-import 'community_store_screen.dart';        // 🏪 Pantalla de tienda
-import 'orders_screen.dart';                 // 📋 Pantalla de pedidos
-import 'profile_screen.dart';                 // 👤 Pantalla de perfil mejorada
-import 'favorites_screen.dart';               // ❤️ Pantalla de favoritos
-import 'notifications_screen.dart';           // 🔔 Pantalla de notificaciones
+//  Importar todas las pantallas
+import 'customer/customer_home_screen.dart';           // Pantalla de inicio principal
+import 'customer/customer_profile_screen.dart';       // Pantalla de perfil
+import 'community_store_screen.dart';        // Pantalla de tienda
+import 'orders_screen.dart';                 // Pantalla de pedidos
+import 'profile_screen.dart';                 // Pantalla de perfil mejorada
+import 'favorites_screen.dart';               // Pantalla de favoritos
+import 'notifications_screen.dart';           // Pantalla de notificaciones
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -23,18 +23,18 @@ class MainNavigation extends StatefulWidget {
 }
 
 class _MainNavigationState extends State<MainNavigation> {
-  // 📍 Índice de la pestaña actual (0 = Inicio, 1 = Tienda, 2 = Pedidos, 3 = Perfil)
+  // Índice de la pestaña actual (0 = Inicio, 1 = Tienda, 2 = Pedidos, 3 = Perfil)
   int _currentIndex = 0;
 
-  // 📱 Lista de pantallas correspondientes a cada pestaña
+  // Lista de pantallas correspondientes a cada pestaña
     final List<Widget> _screens = [
-    const CustomerHomeScreen(),           // 🏠 Pestaña 0: Inicio principal
-    const CommunityStoreScreen(), // 🏪 Pestaña 1: Tienda
-    const OrdersScreen(),         // 📋 Pestaña 2: Mis Pedidos
+    const CustomerHomeScreen(),           // Pestaña 0: Inicio principal
+    const CommunityStoreScreen(), //  Pestaña 1: Tienda
+    const OrdersScreen(),         //  Pestaña 2: Mis Pedidos
     const CustomerProfileScreen(),        // 👤 Pestaña 3: Perfil
   ];
 
-  // 🍔 MÉTODO PARA CONSTRUIR EL DRAWER (Menú lateral)
+  // MÉTODO PARA CONSTRUIR EL DRAWER (Menú lateral)
   Widget _buildDrawer(BuildContext context, ThemeProvider themeProvider) {
     return Drawer(
       child: ListView(
@@ -98,7 +98,7 @@ class _MainNavigationState extends State<MainNavigation> {
               Navigator.pop(context);
             },
           ),
-          // 📋 OPCIÓN MIS PEDIDOS
+          // OPCIÓN MIS PEDIDOS
           ListTile(
             leading: const Icon(Icons.receipt_long),
             title: const Text('Mis Pedidos'),
@@ -109,7 +109,7 @@ class _MainNavigationState extends State<MainNavigation> {
               Navigator.pop(context);
             },
           ),
-          // 👤 OPCIÓN PERFIL
+          // OPCIÓN PERFIL
           ListTile(
             leading: const Icon(Icons.person),
             title: const Text('Perfil'),
@@ -142,7 +142,7 @@ class _MainNavigationState extends State<MainNavigation> {
               );
             },
           ),
-          // 🔔 OPCIÓN NOTIFICACIONES
+          // OPCIÓN NOTIFICACIONES
           ListTile(
             leading: const Icon(Icons.notifications, color: Colors.orange),
             title: const Text('Notificaciones'),
@@ -155,7 +155,7 @@ class _MainNavigationState extends State<MainNavigation> {
             },
           ),
           const Divider(),
-          // 🏪 OPCIÓN REGISTRAR NEGOCIO
+          //OPCIÓN REGISTRAR NEGOCIO
           ListTile(
             leading: const Icon(Icons.store_mall_directory, color: Colors.green),
             title: const Text('Registrar mi Negocio'),
@@ -173,7 +173,7 @@ class _MainNavigationState extends State<MainNavigation> {
               Navigator.pop(context);
             },
           ),
-          // 🚪 OPCIÓN CERRAR SESIÓN
+          // OPCIÓN CERRAR SESIÓN
           ListTile(
             leading: const Icon(Icons.exit_to_app),
             title: const Text('Cerrar Sesión'),
@@ -195,26 +195,26 @@ class _MainNavigationState extends State<MainNavigation> {
     return Scaffold(
       backgroundColor: ThemeProvider.backgroundColor, //  Color de fondo
       
-      // 📱 CUERPO PRINCIPAL - Muestra la pantalla actual
+      // CUERPO PRINCIPAL - Muestra la pantalla actual
       body: IndexedStack(
         index: _currentIndex,    // Pantalla actual
         children: _screens,      // Lista de pantallas
       ),
       
-      // 📍 BARRA DE NAVEGACIÓN INFERIOR
+      // BARRA DE NAVEGACIÓN INFERIOR
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: Colors.white,    //  Cambiado a blanco puro
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1), // 🌫️ Sombra ligera
+              color: Colors.black.withOpacity(0.1), // Sombra ligera
               blurRadius: 20,
               offset: const Offset(0, -5),
             ),
           ],
           borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(24),    // 🔘 Esquina superior izquierda redondeada
-            topRight: Radius.circular(24),   // 🔘 Esquina superior derecha redondeada
+            topLeft: Radius.circular(24),    //  Esquina superior izquierda redondeada
+            topRight: Radius.circular(24),   // Esquina superior derecha redondeada
           ),
         ),
         child: ClipRRect(
@@ -224,9 +224,9 @@ class _MainNavigationState extends State<MainNavigation> {
           ),
           child: BottomNavigationBar(
             currentIndex: _currentIndex,     // Pestaña actual
-            onTap: (index) {                //  Al tocar una pestaña
+            onTap: (index) {                //Al tocar una pestaña
               setState(() {
-                _currentIndex = index;       //  Cambiar pestaña actual
+                _currentIndex = index;       //Cambiar pestaña actual
               });
             },
             type: BottomNavigationBarType.fixed,
@@ -241,27 +241,27 @@ class _MainNavigationState extends State<MainNavigation> {
             items: const [
               //  PESTAÑA INICIO
               BottomNavigationBarItem(
-                icon: Icon(Icons.home_outlined),     // 🏠 Ícono no seleccionado
-                activeIcon: Icon(Icons.home_rounded), // 🏠 Ícono seleccionado
-                label: 'Inicio',                     // 📝 Etiqueta
+                icon: Icon(Icons.home_outlined),     // Ícono no seleccionado
+                activeIcon: Icon(Icons.home_rounded), //Ícono seleccionado
+                label: 'Inicio',                     //Etiqueta
               ),
               //  PESTAÑA TIENDA
               BottomNavigationBarItem(
-                icon: Icon(Icons.store_outlined),     // 🏪 Ícono no seleccionado
-                activeIcon: Icon(Icons.store_rounded), // 🏪 Ícono seleccionado
-                label: 'Tienda',                      // 📝 Etiqueta
+                icon: Icon(Icons.store_outlined),     // Ícono no seleccionado
+                activeIcon: Icon(Icons.store_rounded), // Ícono seleccionado
+                label: 'Negocios',                      //  Etiqueta
               ),
               // PESTAÑA MIS PEDIDOS
               BottomNavigationBarItem(
-                icon: Icon(Icons.receipt_long_outlined),     // 📋 Ícono no seleccionado
-                activeIcon: Icon(Icons.receipt_long_rounded), // 📋 Ícono seleccionado
-                label: 'Mis Pedidos',                        // 📝 Etiqueta
+                icon: Icon(Icons.receipt_long_outlined),     // Ícono no seleccionado
+                activeIcon: Icon(Icons.receipt_long_rounded), // Ícono seleccionado
+                label: 'Mis Pedidos',                        // Etiqueta
               ),
               // 👤 PESTAÑA PERFIL
               BottomNavigationBarItem(
-                icon: Icon(Icons.person_outline_rounded),  // 👤 Ícono no seleccionado
-                activeIcon: Icon(Icons.person_rounded),     // 👤 Ícono seleccionado
-                label: 'Perfil',                           // 📝 Etiqueta
+                icon: Icon(Icons.person_outline_rounded),  // Ícono no seleccionado
+                activeIcon: Icon(Icons.person_rounded),     //  Ícono seleccionado
+                label: 'Perfil',                           //  Etiqueta
               ),
             ],
           ),
