@@ -67,9 +67,14 @@ class BusinessProvider with ChangeNotifier {
   }
   
   // Método para eliminar un producto
-  void deleteProduct(String productId) {
+  void removeProduct(String productId) {
     _products.removeWhere((p) => p.id == productId);
     notifyListeners();
+  }
+  
+  // Método para eliminar un producto (alias)
+  void deleteProduct(String productId) {
+    removeProduct(productId);
   }
   
   // Método para actualizar el estado de un pedido

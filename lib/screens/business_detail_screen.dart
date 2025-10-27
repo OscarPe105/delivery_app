@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/community_store_provider.dart';
 import '../models/business.dart';
 import '../models/product.dart';
+import '../widgets/optimized_image.dart';
 
 class BusinessDetailScreen extends StatelessWidget {
   final Business business;
@@ -25,28 +26,14 @@ class BusinessDetailScreen extends StatelessWidget {
             Container(
               height: 250,
               width: double.infinity,
-              color: Colors.grey[300],
-              child: business.imageUrl != null && business.imageUrl!.isNotEmpty
-                  ? Image.network(
-                      business.imageUrl!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Center(
-                          child: Icon(
-                            Icons.store,
-                            size: 64,
-                            color: Colors.grey,
-                          ),
-                        );
-                      },
-                    )
-                  : const Center(
-                      child: Icon(
-                        Icons.store,
-                        size: 64,
-                        color: Colors.grey,
-                      ),
-                    ),
+              child: BusinessImage(
+                imageUrl: business.imageUrl,
+                width: double.infinity,
+                height: 250,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(12),
+                ),
+              ),
             ),
             
             // Información del negocio
@@ -175,29 +162,9 @@ class BusinessDetailScreen extends StatelessWidget {
         child: Row(
           children: [
             // Imagen del producto
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: product.imageUrl != null && product.imageUrl!.isNotEmpty
-                  ? Image.network(
-                      product.imageUrl!,
-                      width: 80,
-                      height: 80,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          width: 80,
-                          height: 80,
-                          color: Colors.grey[300],
-                          child: const Icon(Icons.image_not_supported),
-                        );
-                      },
-                    )
-                  : Container(
-                      width: 80,
-                      height: 80,
-                      color: Colors.grey[300],
-                      child: const Icon(Icons.image_not_supported),
-                    ),
+            ProductImage(
+              imageUrl: product.imageUrl,
+              size: 80,
             ),
             
             const SizedBox(width: 12),
