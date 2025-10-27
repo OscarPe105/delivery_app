@@ -1,15 +1,19 @@
-// 🏠 PANTALLA PRINCIPAL DEL CLIENTE - VERSIÓN SIMPLIFICADA
+// PANTALLA PRINCIPAL DEL CLIENTE - VERSIÓN SIMPLIFICADA
 // Esta pantalla muestra la interfaz principal para los clientes
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
-import '../../providers/auth_provider.dart';      // 🔑 Datos del usuario autenticado
-import '../../providers/business_provider.dart'; // 🏪 Gestión de negocios
-import '../../providers/theme_provider.dart';    // 🎨 Paleta de colores
-import '../../widgets/delivery_map.dart';        // 🗺️ Widget de mapa interactivo
-import '../../widgets/animated_components.dart'; // 🎨 Componentes animados
-import '../../utils/navigation_transitions.dart'; // 🚀 Transiciones de navegación
-import '../search_screen.dart';                 // 🔍 Pantalla de búsqueda
+import '../../providers/auth_provider.dart';      //  Datos del usuario autenticado
+import '../../providers/business_provider.dart'; //  Gestión de negocios
+import '../../providers/community_store_provider.dart'; //  Provider principal de la tienda
+import '../../models/business.dart';
+import '../../providers/theme_provider.dart';    //  Paleta de colores
+import '../../widgets/delivery_map.dart';        //  Widget de mapa interactivo
+import '../../widgets/animated_components.dart'; //  Componentes animados
+import '../../utils/navigation_transitions.dart'; //  Transiciones de navegación
+import '../search_screen.dart';                 //  Pantalla de búsqueda
+import '../community_store_screen.dart';
+import '../orders_screen.dart';
 
 class CustomerHomeScreen extends StatefulWidget {
   const CustomerHomeScreen({super.key});
@@ -28,11 +32,19 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
   
   bool _showHeader = true;
 
+  // Controladores de página para secciones destacadas y locales
+  late PageController _featuredPageController;
+  late PageController _localPageController;
+  int _featuredPageIndex = 0;
+  int _localPageIndex = 0;
+
   @override
   void initState() {
     super.initState();
+    _featuredPageController = PageController(viewportFraction: 0.85);
+    _localPageController = PageController(viewportFraction: 0.85);
     
-    // 🎨 Inicializar animaciones
+    //  Inicializar animaciones
     _initializeAnimations();
     _startAnimations();
     
@@ -51,25 +63,26 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
       }
     });
     
+    // Cargar negocios desde CommunityStoreProvider
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<BusinessProvider>(context, listen: false).loadBusinesses();
+      Provider.of<CommunityStoreProvider>(context, listen: false).loadBusinesses();
     });
   }
 
   void _initializeAnimations() {
-    // 🎨 Controlador de animación del header
+    //  Controlador de animación del header
     _headerAnimationController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
 
-    // 🎨 Controlador de animación del contenido
+    //  Controlador de animación del contenido
     _contentAnimationController = AnimationController(
       duration: const Duration(milliseconds: 1000),
       vsync: this,
     );
 
-    // 🎨 Animaciones del header
+    //  Animaciones del header
     _headerSlideAnimation = Tween<double>(
       begin: -100,
       end: 0,
@@ -86,7 +99,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
       curve: Curves.easeOut,
     ));
 
-    // 🎨 Animación del contenido
+    //  Animación del contenido
     _contentSlideAnimation = Tween<double>(
       begin: 50,
       end: 0,
@@ -107,10 +120,12 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
   void dispose() {
     _headerAnimationController.dispose();
     _contentAnimationController.dispose();
+    _featuredPageController.dispose();
+    _localPageController.dispose();
     super.dispose();
   }
 
-  // 🏪 NAVEGACIÓN A DETALLE DE NEGOCIO
+  //  NAVEGACIÓN A DETALLE DE NEGOCIO
   void _navigateToBusinessDetail(dynamic business) {
     Navigator.pushNamed(
       context, 
@@ -129,38 +144,26 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
     });
   }
 
-  // 🏪 NAVEGACIÓN A LISTA DE NEGOCIOS
+  //  NAVEGACIÓN A LISTA DE NEGOCIOS
   void _navigateToBusinesses() {
-    Navigator.pushNamed(context, '/businesses').catchError((error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Lista de negocios - Próximamente'),
-          backgroundColor: ThemeProvider.primaryColor,
-          duration: const Duration(seconds: 2),
-        ),
-      );
-      return null;
-    });
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => CommunityStoreScreen()),
+    );
   }
 
-  // 📋 NAVEGACIÓN A PEDIDOS
+  //  NAVEGACIÓN A PEDIDOS
   void _navigateToOrders() {
-    Navigator.pushNamed(context, '/orders').catchError((error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Mis pedidos - Próximamente'),
-          backgroundColor: ThemeProvider.primaryColor,
-          duration: const Duration(seconds: 2),
-        ),
-      );
-      return null;
-    });
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => OrdersScreen()),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
-    final businessProvider = Provider.of<BusinessProvider>(context);
+    final storeProvider = Provider.of<CommunityStoreProvider>(context);
 
     return Scaffold(
       backgroundColor: ThemeProvider.backgroundColor,
@@ -169,22 +172,25 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 🎨 HEADER DE BIENVENIDA (solo visible si _showHeader es true)
+              // HEADER DE BIENVENIDA (solo visible si _showHeader es true)
               if (_showHeader) _buildWelcomeHeader(authProvider),
               
               // 🔍 BARRA DE BÚSQUEDA
               _buildSearchBar(),
               
-              // 🗺️ MAPA INTERACTIVO
-              _buildMapSection(businessProvider),
+              //  MAPA INTERACTIVO
+              _buildMapSection(storeProvider),
               
-              // 🏪 NEGOCIOS DESTACADOS
-              _buildFeaturedBusinesses(businessProvider),
+              //  NEGOCIOS DESTACADOS
+              _buildFeaturedBusinesses(storeProvider),
               
-              // 📋 ACCESOS RÁPIDOS
+              //  EMPRENDIMIENTOS LOCALES (SEGUNDO CARRUSEL)
+              _buildLocalBusinessesCarousel(storeProvider),
+              
+              // ACCESOS RÁPIDOS
               _buildQuickActions(),
               
-              // 🎯 PROMOCIONES
+              //  PROMOCIONES
               _buildPromotions(),
             ],
           ),
@@ -193,7 +199,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
     );
   }
 
-  // 🎨 HEADER DE BIENVENIDA ANIMADO
+  //  HEADER DE BIENVENIDA ANIMADO
   Widget _buildWelcomeHeader(AuthProvider authProvider) {
     return AnimatedBuilder(
       animation: _headerAnimationController,
@@ -298,7 +304,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
     );
   }
   
-  // 🔍 BARRA DE BÚSQUEDA ANIMADA
+  //  BARRA DE BÚSQUEDA ANIMADA
   Widget _buildSearchBar() {
     return AnimatedBuilder(
       animation: _contentAnimationController,
@@ -342,8 +348,10 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
     );
   }
   
-  // 🏪 NEGOCIOS DESTACADOS
-  Widget _buildFeaturedBusinesses(BusinessProvider businessProvider) {
+  // 🏪 NEGOCIOS DESTACADOS (PRIMER CARRUSEL)
+  // Método: _buildFeaturedBusinesses
+  Widget _buildFeaturedBusinesses(CommunityStoreProvider storeProvider) {
+    final businesses = List<Business>.from(storeProvider.businesses);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -351,34 +359,27 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
           padding: EdgeInsets.symmetric(horizontal: 20.0),
           child: Text(
             'Negocios Destacados',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
           ),
         ),
         const SizedBox(height: 16),
         SizedBox(
-          height: 200,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            itemCount: businessProvider.businesses.length,
+          height: 220,
+          child: PageView.builder(
+            controller: _featuredPageController,
+            onPageChanged: (i) => setState(() => _featuredPageIndex = i),
+            itemCount: businesses.length,
             itemBuilder: (context, index) {
-              final business = businessProvider.businesses[index];
+              final business = businesses[index];
               return AnimatedCard(
-                delayMilliseconds: 300 + (index * 100),
+                padding: EdgeInsets.zero, // quita padding por defecto (16)
+                delayMilliseconds: 200,
                 child: GestureDetector(
-                  onTap: () {
-                    _navigateToBusinessDetail(business);
-                  },
+                  onTap: () => _navigateToBusinessDetail(business),
                   child: Container(
-                    width: 140,
-                    height: 180,
                     margin: const EdgeInsets.only(right: 12),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withOpacity(0.1),
@@ -388,71 +389,182 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
                       ],
                     ),
                     child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Imagen del negocio animada
-                      Container(
-                        height: 80,
-                        decoration: BoxDecoration(
-                          gradient: ThemeProvider.primaryGradient,
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(12),
-                            topRight: Radius.circular(12),
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          height: 100,
+                          decoration: BoxDecoration(
+                            image: business.imageUrl != null
+                                ? DecorationImage(
+                                    image: NetworkImage(business.imageUrl!),
+                                    fit: BoxFit.cover,
+                                  )
+                                : null,
+                            gradient: business.imageUrl == null
+                                ? ThemeProvider.primaryGradient
+                                : null,
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(16),
+                              topRight: Radius.circular(16),
+                            ),
                           ),
+                          child: business.imageUrl == null
+                              ? const Center(
+                                  child: Icon(Icons.star, size: 36, color: Colors.white),
+                                )
+                              : null,
                         ),
-                        child: const Center(
-                          child: Icon(
-                            Icons.store,
-                            size: 30,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                      // Información del negocio
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                business.name,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
+                        Flexible(
+                          fit: FlexFit.loose,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  business.name,
+                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              Text(
-                                business.category,
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 10,
+                                Text(
+                                  business.description ?? 'Negocio destacado',
+                                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              Row(
-                                children: [
-                                  const Icon(Icons.star, color: Colors.amber, size: 12),
-                                  const SizedBox(width: 2),
-                                  Text(
-                                    '4.5',
-                                    style: TextStyle(
-                                      color: Colors.grey[600],
-                                      fontSize: 10,
+                                Row(
+                                  children: [
+                                    const Icon(Icons.access_time, color: Colors.green, size: 14),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      business.isOpen ? 'Abierto ahora' : 'Cerrado',
+                                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                                    const Spacer(),
+                                    TextButton(
+                                      onPressed: () => _navigateToBusinessDetail(business),
+                                      child: const Text('Ver ficha'),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+  
+  // 🏪 NEGOCIOS DESTACADOS
+  // Dentro de la clase _CustomerHomeScreenState
+  // Método: _buildLocalBusinessesCarousel
+  Widget _buildLocalBusinessesCarousel(CommunityStoreProvider storeProvider) {
+    final businesses = List<Business>.from(storeProvider.businesses);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20.0),
+          child: Text(
+            'Emprendimientos Locales',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
+          ),
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          height: 220,
+          child: PageView.builder(
+            controller: _localPageController,
+            onPageChanged: (i) => setState(() => _localPageIndex = i),
+            itemCount: businesses.length,
+            itemBuilder: (context, index) {
+              final business = businesses[index];
+              return AnimatedCard(
+                padding: EdgeInsets.zero, // elimina padding por defecto (16)
+                delayMilliseconds: 250,
+                child: GestureDetector(
+                  onTap: () => _navigateToBusinessDetail(business),
+                  child: Container(
+                    margin: const EdgeInsets.only(right: 12),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          height: 100, // antes 120
+                          decoration: BoxDecoration(
+                            gradient: ThemeProvider.primaryGradient,
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(16),
+                              topRight: Radius.circular(16),
+                            ),
+                          ),
+                          child: const Center(
+                            child: Icon(Icons.business, size: 36, color: Colors.white),
+                          ),
+                        ),
+                        Flexible(
+                          fit: FlexFit.loose,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  business.name,
+                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  business.description ?? 'Negocio local',
+                                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Row(
+                                  children: [
+                                    const Icon(Icons.access_time, color: Colors.green, size: 14),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      business.isOpen ? 'Abierto ahora' : 'Cerrado',
+                                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                                    ),
+                                    const Spacer(),
+                                    TextButton(
+                                      onPressed: () => _navigateToBusinessDetail(business),
+                                      child: const Text('Ver ficha'),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );
@@ -484,8 +596,8 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
               Expanded(
                 child: _buildQuickActionCard(
                   icon: Icons.store,
-                  title: 'Tienda',
-                  subtitle: 'Explorar productos',
+                  title: 'Negocios',
+                  subtitle: 'Explorar negocios',
                   delay: 0,
                   onTap: () {
                     _navigateToBusinesses();
@@ -569,8 +681,8 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
     );
   }
 
-  // 🗺️ SECCIÓN DEL MAPA
-  Widget _buildMapSection(BusinessProvider businessProvider) {
+  // SECCIÓN DEL MAPA
+  Widget _buildMapSection(CommunityStoreProvider storeProvider) {
     return Container(
       margin: const EdgeInsets.all(16),
       height: 200,

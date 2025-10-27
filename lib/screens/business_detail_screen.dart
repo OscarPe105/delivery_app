@@ -25,12 +25,28 @@ class BusinessDetailScreen extends StatelessWidget {
             Container(
               height: 250,
               width: double.infinity,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: NetworkImage(business.imageUrl ?? 'https://via.placeholder.com/400x250?text=Sin+Imagen'),
-                  fit: BoxFit.cover,
-                ),
-              ),
+              color: Colors.grey[300],
+              child: business.imageUrl != null && business.imageUrl!.isNotEmpty
+                  ? Image.network(
+                      business.imageUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Center(
+                          child: Icon(
+                            Icons.store,
+                            size: 64,
+                            color: Colors.grey,
+                          ),
+                        );
+                      },
+                    )
+                  : const Center(
+                      child: Icon(
+                        Icons.store,
+                        size: 64,
+                        color: Colors.grey,
+                      ),
+                    ),
             ),
             
             // Información del negocio
@@ -56,7 +72,7 @@ class BusinessDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   
-                  // Rating y información
+                  // Rating
                   Row(
                     children: [
                       const Icon(Icons.star, color: Colors.amber, size: 20),
@@ -65,17 +81,46 @@ class BusinessDetailScreen extends StatelessWidget {
                         business.rating.toString(),
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      const SizedBox(width: 16),
-                      const Icon(Icons.location_on, color: Colors.grey, size: 20),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          business.address ?? 'Dirección no disponible',
-                          style: TextStyle(color: Colors.grey[600]),
-                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Icon(Icons.access_time, color: Colors.grey, size: 18),
+                      const SizedBox(width: 6),
+                      Text(
+                        business.isOpen ? 'Abierto ahora' : 'Cerrado',
+                        style: const TextStyle(fontSize: 14, color: Colors.black54),
                       ),
                     ],
                   ),
+                  const SizedBox(height: 8),
+                  if (business.address != null)
+                    Row(
+                      children: [
+                        const Icon(Icons.location_on, color: Colors.grey, size: 18),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            business.address!,
+                            style: const TextStyle(fontSize: 14, color: Colors.black54),
+                          ),
+                        ),
+                      ],
+                    ),
+                  if (business.phone != null) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        const Icon(Icons.phone, color: Colors.grey, size: 18),
+                        const SizedBox(width: 6),
+                        Text(
+                          business.phone!,
+                          style: const TextStyle(fontSize: 14, color: Colors.black54),
+                        ),
+                      ],
+                    ),
+                  ],
                   
                   const SizedBox(height: 24),
                   
@@ -132,20 +177,27 @@ class BusinessDetailScreen extends StatelessWidget {
             // Imagen del producto
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.network(
-                product.imageUrl,
-                width: 80,
-                height: 80,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    width: 80,
-                    height: 80,
-                    color: Colors.grey[300],
-                    child: const Icon(Icons.image_not_supported),
-                  );
-                },
-              ),
+              child: product.imageUrl != null && product.imageUrl!.isNotEmpty
+                  ? Image.network(
+                      product.imageUrl!,
+                      width: 80,
+                      height: 80,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          width: 80,
+                          height: 80,
+                          color: Colors.grey[300],
+                          child: const Icon(Icons.image_not_supported),
+                        );
+                      },
+                    )
+                  : Container(
+                      width: 80,
+                      height: 80,
+                      color: Colors.grey[300],
+                      child: const Icon(Icons.image_not_supported),
+                    ),
             ),
             
             const SizedBox(width: 12),

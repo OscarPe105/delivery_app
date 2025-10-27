@@ -1,0 +1,50 @@
+# Django y dependencias principales
+Django==4.2.7
+djangorestframework==3.14.0
+django-cors-headers==4.3.1
+django-filter==23.3
+
+# Base de datos
+# psycopg2-binary==2.9.7  # Para PostgreSQL (comentado para usar SQLite)
+# mysqlclient==2.2.0    # Alternativa para MySQL
+# django-environ==0.11.2  # Para variables de entorno
+
+# Autenticación y seguridad
+djangorestframework-simplejwt==5.3.0
+django-allauth==0.57.0
+cryptography==41.0.7
+
+# APIs y comunicación
+requests==2.31.0
+celery==5.3.4  # Para tareas asíncronas
+redis==5.0.1   # Para Celery
+
+# Manejo de archivos e imágenes
+Pillow==10.1.0
+django-storages==1.14.2
+boto3==1.34.0  # Para AWS S3 (opcional)
+
+# Validación y serialización
+marshmallow==3.20.1
+
+# Testing
+pytest==7.4.3
+pytest-django==4.7.0
+factory-boy==3.3.0
+
+# Desarrollo
+django-debug-toolbar==4.2.0
+django-extensions==3.2.3
+
+# Logging y monitoreo
+django-logging==1.0.0
+
+# Geocoding y mapas (integración con Flutter)
+geopy==2.4.0
+python-decouple==3.8  # Para variables de entorno
+
+# Firebase Integration
+firebase-admin==6.2.0
+google-cloud-firestore==2.11.1
+google-cloud-storage==2.10.0
+pyrebase4==4.7.1

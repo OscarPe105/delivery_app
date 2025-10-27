@@ -1,0 +1,82 @@
+Objetivos (General y Específicos)
+Objetivo General
+Desarrollar una aplicación móvil multiplataforma en Flutter que permita gestionar de manera
+eficiente el proceso de entrega de productos a domicilio, integrando funcionalidades para
+usuarios, repartidores y administradores de negocios.
+Objetivos Específicos
+• Diseñar una interfaz fácil de comprender que permita al usuario navegar fácilmente
+por la app y realizar pedidos sin ninguna complicación.
+• Ofrecer al usuario un historial de pedidos y notificaciones, para que pueda revisar
+compras anteriores y recibir actualizaciones importantes.
+• Permitir a los usuarios registrarse e iniciar sesión de manera segura, garantizando que
+cada cliente tenga acceso personalizado a sus pedidos y datos.
+• Conectar la app con una base de datos que almacene productos, pedidos y usuarios,
+permitiendo que la información esté siempre actualizada.
+3
+Alcance del proyecto
+El alcance de este proyecto es desarrollar una aplicación móvil de delivery en Flutter que
+permita a los clientes realizar pedidos y seguimiento en tiempo real, y a los restaurantes
+gestionar sus menús, pedidos y clientes. La aplicación tendrá las siguientes características y
+funcionalidades:
+• Gestión de pedidos y seguimiento en tiempo real
+• Integración con opciones de pago seguras y convenientes
+• Administración de restaurantes y menús
+• Notificaciones y alertas para clientes y restaurantes
+• Autenticación y autorización de usuarios
+• Búsqueda y filtrado de restaurantes y menús
+• Valoraciones y reseñas de restaurantes y platos
+La aplicación estará diseñada para ser escalable y adaptable a las necesidades de los clientes
+y restaurantes, y se enfocará en proporcionar una experiencia de usuario intuitiva y fácil de
+usar.
+4
+Metodología o plan de trabajo
+Para desarrollar la aplicación de delivery en Flutter, se seguirá una metodología ágil y flexible
+que permita adaptarse a los cambios y necesidades del proyecto. A continuación, se presentan
+las 4 etapas que se seguirán:
+Etapa 1: Análisis y Diseño
+• Análisis de requisitos y necesidades de los clientes y restaurantes
+• Creación de bocetos y mockups de la aplicación
+• Definición de la arquitectura y tecnología a utilizar
+Etapa 2: Desarrollo
+• Desarrollo de la aplicación en Flutter
+• Implementación de las funcionalidades y características definidas
+• Integración con APIs y servicios externos
+Etapa 3: Pruebas y Depuración
+• Realización de pruebas unitarias y de integración
+• Identificación y corrección de errores y bugs
+• Garantía de la calidad y funcionalidad de la aplicación
+Etapa 4: Implementación y Lanzamiento
+• Implementación de la aplicación en los servidores
+• Lanzamiento de la aplicación al público
+• Monitoreo y mantenimiento de la aplicación para garantizar su funcionamiento
+correcto y seguridad.
+5
+Cronograma
+El desarrollo de la aplicación de delivery en Flutter se organizará en un periodo de 12
+semanas con actividades distribuidas de forma progresiva para lograr una planificación clara,
+ordenada y enfocada en cumplir los objetivos del proyecto. A continuación, se muestra cómo
+se dividirán las tareas por semana:
+• Semana 1-2: Análisis de requisitos y creación de bocetos y mockups de la aplicación.
+• Semana 3-4: Desarrollo de la estructura básica de la aplicación y diseño de la interfaz
+de usuario.
+• Semana 5-6: Implementación de funcionalidades de autenticación y autorización de
+usuarios.
+• Semana 7-8: Desarrollo de la funcionalidad de gestión de pedidos y restaurantes.
+• Semana 9-10: Pruebas unitarias y de integración, corrección de errores y bugs.
+• Semana 11: Implementación en servidores y configuración de la infraestructura.
+• Semana 12: Lanzamiento de la aplicación al público y pruebas finales.
+6
+Requisitos iniciales del sistema (Requisitos funcionales y no
+funcionales)
+Requisitos Funcionales
+• Autenticación y autorización: Permitir a los usuarios registrarse e iniciar sesión de
+manera segura.
+• Gestión de pedidos: Permitir a los usuarios crear, editar y eliminar pedidos.
+• Notificaciones y alertas: Enviar notificaciones y alertas a los usuarios y restaurantes
+sobre el estado de sus pedidos.
+Requisitos No Funcionales
+• Rendimiento: La aplicación debe responder rápidamente a las solicitudes de los
+usuarios.
+• Usabilidad: La aplicación debe ser fácil de usar y navegar para los usuarios.
+• Compatibilidad: La aplicación debe funcionar correctamente en diferentes
+dispositivos y sistemas operativos. 

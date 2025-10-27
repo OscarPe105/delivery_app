@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import '../models/business.dart';
 import '../models/product.dart';
 import '../models/cart_item.dart';
 import '../models/category.dart';
+import '../services/api_service.dart';
 
 class CommunityStoreProvider with ChangeNotifier {
   List<Business> _businesses = [];
@@ -17,6 +20,16 @@ class CommunityStoreProvider with ChangeNotifier {
   double _maxPrice = 1000;
   bool _showOnlyAvailable = false;
   bool _showOnlyPopular = false;
+  
+  // Constantes para SharedPreferences
+  static const String _cartKey = 'cart_items';
+  static const String _favoritesKey = 'favorites';
+  
+  // Constructor - cargar datos persistentes al inicializar
+  CommunityStoreProvider() {
+    _loadCart();
+    _loadFavorites();
+  }
   
   // Getters
   List<Business> get businesses => _businesses;
@@ -63,7 +76,7 @@ class CommunityStoreProvider with ChangeNotifier {
     if (_searchQuery.isNotEmpty) {
       filtered = filtered.where((product) {
         return product.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-               product.description.toLowerCase().contains(_searchQuery.toLowerCase());
+              product.description.toLowerCase().contains(_searchQuery.toLowerCase());
       }).toList();
     }
     
@@ -96,18 +109,43 @@ class CommunityStoreProvider with ChangeNotifier {
   
   // Métodos principales
   Future<void> loadBusinesses() async {
+    debugPrint('🚀 CommunityStoreProvider.loadBusinesses - INICIO');
     _isLoading = true;
     notifyListeners();
     
-    // Simular carga de datos
-    await Future.delayed(const Duration(seconds: 1));
-    
-    _loadMockBusinesses();
-    _loadProducts();
-    _loadCategories();
+    try {
+      // Cargar desde Django API SOLAMENTE
+      debugPrint('📞 Llamando a ApiService.getBusinesses()...');
+      final apiService = ApiService();
+      final businesses = await apiService.getBusinesses();
+      
+      debugPrint('📞 Llamando a ApiService.getProducts()...');
+      final products = await apiService.getProducts();
+      
+      // Asignar datos de la API (incluso si está vacío)
+      _businesses = businesses;
+      _products = products;
+      _loadCategories();
+      
+      debugPrint('✅ Negocios cargados desde Django: ${businesses.length}');
+      debugPrint('✅ Productos cargados desde Django: ${products.length}');
+      
+      if (businesses.isNotEmpty) {
+        debugPrint('📋 Primer negocio: ${businesses.first.name}');
+      }
+    } catch (e, stackTrace) {
+      // Error conectando con Django
+      debugPrint('❌ Error cargando desde API: $e');
+      debugPrint('📚 Stack trace: $stackTrace');
+      // Dejar listas vacías si hay error
+      _businesses = [];
+      _products = [];
+      _loadCategories();
+    }
     
     _isLoading = false;
     notifyListeners();
+    debugPrint('🏁 CommunityStoreProvider.loadBusinesses - FIN');
   }
   
   // Implementación de loadProductsByBusiness
@@ -115,10 +153,18 @@ class CommunityStoreProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     
-    // Simular carga de datos
-    await Future.delayed(const Duration(milliseconds: 500));
+    try {
+      final apiService = ApiService();
+      final products = await apiService.getProducts(businessId: businessId);
+      
+      if (products.isNotEmpty) {
+        // Filtrar productos del negocio
+        _products = products;
+      }
+    } catch (e) {
+      debugPrint('Error cargando productos: $e');
+    }
     
-    // Los productos ya están cargados en _products, solo notificamos cambios
     _isLoading = false;
     notifyListeners();
   }
@@ -147,11 +193,13 @@ class CommunityStoreProvider with ChangeNotifier {
         ),
       );
     }
+    _saveCart(); // Guardar cambios automáticamente
     notifyListeners();
   }
 
   void removeFromCart(String cartItemId) {
     _cartItems.removeWhere((item) => item.id == cartItemId);
+    _saveCart(); // Guardar cambios automáticamente
     notifyListeners();
   }
   
@@ -164,13 +212,73 @@ class CommunityStoreProvider with ChangeNotifier {
     final index = _cartItems.indexWhere((item) => item.id == cartItemId);
     if (index >= 0) {
       _cartItems[index] = _cartItems[index].copyWith(quantity: quantity);
+      _saveCart(); // Guardar cambios automáticamente
       notifyListeners();
     }
   }
 
   void clearCart() {
     _cartItems.clear();
+    _saveCart(); // Guardar cambios
     notifyListeners();
+  }
+  
+  // Métodos de persistencia del carrito
+  Future<void> _loadCart() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cartJson = prefs.getString(_cartKey);
+      
+      if (cartJson != null) {
+        final List<dynamic> cartList = json.decode(cartJson);
+        _cartItems.clear();
+        _cartItems.addAll(
+          cartList.map((item) => CartItem.fromJson(item as Map<String, dynamic>))
+        );
+        debugPrint('🛒 Carrito cargado desde SharedPreferences: ${_cartItems.length} items');
+      }
+    } catch (e) {
+      debugPrint('❌ Error cargando carrito: $e');
+    }
+  }
+
+  Future<void> _saveCart() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cartJson = json.encode(_cartItems.map((item) => item.toJson()).toList());
+      await prefs.setString(_cartKey, cartJson);
+      debugPrint('💾 Carrito guardado en SharedPreferences: ${_cartItems.length} items');
+    } catch (e) {
+      debugPrint('❌ Error guardando carrito: $e');
+    }
+  }
+
+  // Métodos de persistencia de favoritos
+  Future<void> _loadFavorites() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final favoritesJson = prefs.getString(_favoritesKey);
+      
+      if (favoritesJson != null) {
+        final List<dynamic> favoritesList = json.decode(favoritesJson);
+        _favorites.clear();
+        _favorites.addAll(favoritesList.cast<String>());
+        debugPrint('❤️ Favoritos cargados desde SharedPreferences: ${_favorites.length} items');
+      }
+    } catch (e) {
+      debugPrint('❌ Error cargando favoritos: $e');
+    }
+  }
+
+  Future<void> _saveFavorites() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final favoritesJson = json.encode(_favorites);
+      await prefs.setString(_favoritesKey, favoritesJson);
+      debugPrint('💾 Favoritos guardados en SharedPreferences: ${_favorites.length} items');
+    } catch (e) {
+      debugPrint('❌ Error guardando favoritos: $e');
+    }
   }
   
   // Métodos de favoritos
@@ -180,6 +288,7 @@ class CommunityStoreProvider with ChangeNotifier {
     } else {
       _favorites.add(businessId);
     }
+    _saveFavorites(); // Guardar cambios automáticamente
     notifyListeners();
   }
 
@@ -231,8 +340,8 @@ class CommunityStoreProvider with ChangeNotifier {
         id: '1',
         name: 'Restaurante Doña María',
         description: 'Comida casera con el sabor de la abuela',
-        imageUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400',
-        category: 'restaurant',
+        imageUrl: 'assets/images/businesses/business_restaurante_dona_maria.jpg',
+        category: 'food',
         address: 'Calle 10 #45-67, Barrio Centro',
         phone: '+57 300 123 4567',
         rating: 4.8,
@@ -244,7 +353,7 @@ class CommunityStoreProvider with ChangeNotifier {
         id: '2',
         name: 'Panadería El Amanecer',
         description: 'Pan fresco todos los días desde las 5 AM',
-        imageUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400',
+        imageUrl: 'assets/images/businesses/business_panaderia_el_amanecer.jpg',
         category: 'bakery',
         address: 'Carrera 15 #23-45, Barrio Norte',
         phone: '+57 301 234 5678',
@@ -257,7 +366,7 @@ class CommunityStoreProvider with ChangeNotifier {
         id: '3',
         name: 'Frutería La Cosecha',
         description: 'Frutas y verduras frescas directo del campo',
-        imageUrl: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400',
+        imageUrl: 'assets/images/businesses/business_fruteria_la_cosecha.jpg',
         category: 'fruits',
         address: 'Avenida 20 #12-34, Barrio Sur',
         phone: '+57 302 345 6789',
@@ -265,6 +374,71 @@ class CommunityStoreProvider with ChangeNotifier {
         latitude: 14.0623,
         longitude: -87.2168,
         tags: ['Frutas Tropicales', 'Verduras Orgánicas', 'Jugos Naturales'],
+      ),
+      Business(
+        id: '4',
+        name: 'Boutique Alma',
+        description: 'Ropa femenina y accesorios',
+        imageUrl: 'assets/images/businesses/business_boutique_alma.jpg',
+        category: 'fashion',
+        address: 'C.C. Central, Local 12',
+        phone: '+57 303 111 2222',
+        rating: 4.6,
+        latitude: 14.0751,
+        longitude: -87.2051,
+        tags: ['Vestidos', 'Blusas', 'Accesorios'],
+      ),
+      Business(
+        id: '5',
+        name: 'Joyas Brillantes',
+        description: 'Joyería artesanal y plata',
+        imageUrl: 'assets/images/businesses/business_joyas_brillantes.jpg',
+        category: 'jewelry',
+        address: 'Av. Principal #45',
+        phone: '+57 304 222 3333',
+        rating: 4.7,
+        latitude: 14.0788,
+        longitude: -87.2090,
+        tags: ['Anillos', 'Collares', 'Pulseras'],
+      ),
+      Business(
+        id: '6',
+        name: 'TecnoMundo',
+        description: 'Electrónica y gadgets',
+        imageUrl: 'assets/images/businesses/business_tecnomundo.jpg',
+        category: 'electronics',
+        address: 'C.C. Tech Plaza, Local 5',
+        phone: '+57 305 333 4444',
+        rating: 4.5,
+        latitude: 14.0814,
+        longitude: -87.2034,
+        tags: ['Auriculares', 'Smartphones', 'Accesorios'],
+      ),
+      Business(
+        id: '7',
+        name: 'Hogar & Deco',
+        description: 'Decoración y artículos para el hogar',
+        imageUrl: 'assets/images/businesses/business_hogar_deco.jpg',
+        category: 'home',
+        address: 'Calle 8 #12-90',
+        phone: '+57 306 444 5555',
+        rating: 4.4,
+        latitude: 14.0799,
+        longitude: -87.2005,
+        tags: ['Decoración', 'Textiles', 'Organización'],
+      ),
+      Business(
+        id: '8',
+        name: 'Belleza Natural',
+        description: 'Cosmética y cuidado personal',
+        imageUrl: 'assets/images/businesses/business_belleza_natural.jpg',
+        category: 'beauty',
+        address: 'Pasaje Norte, Local 3',
+        phone: '+57 307 666 7777',
+        rating: 4.6,
+        latitude: 14.0777,
+        longitude: -87.2077,
+        tags: ['Skincare', 'Maquillaje', 'Belleza'],
       ),
     ];
   }
@@ -319,41 +493,120 @@ class CommunityStoreProvider with ChangeNotifier {
         businessId: '3',
         isPopular: true,
       ),
+
+      // Nuevos productos: marketplace
+      Product(
+        id: 'p6',
+        name: 'Vestido Floral',
+        description: 'Vestido midi floral, tela ligera',
+        price: 85000,
+        imageUrl: 'https://images.unsplash.com/photo-1521335629791-ce4aec67dd53?w=400',
+        businessId: '4',
+        isPopular: true,
+      ),
+      Product(
+        id: 'p7',
+        name: 'Collar Plata 925',
+        description: 'Collar minimalista de plata 925',
+        price: 120000,
+        imageUrl: 'https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?w=400',
+        businessId: '5',
+        isPopular: true,
+      ),
+      Product(
+        id: 'p8',
+        name: 'Auriculares Bluetooth',
+        description: 'Auriculares inalámbricos con cancelación de ruido',
+        price: 150000,
+        imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400',
+        businessId: '6',
+        isPopular: true,
+      ),
+      Product(
+        id: 'p9',
+        name: 'Set de Cojines Decorativos',
+        description: 'Set de 2 cojines tejidos',
+        price: 45000,
+        imageUrl: 'https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=400',
+        businessId: '7',
+        isPopular: false,
+      ),
+      Product(
+        id: 'p10',
+        name: 'Serum Vitamina C',
+        description: 'Serum iluminador y antioxidante',
+        price: 60000,
+        imageUrl: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc0?w=400',
+        businessId: '8',
+        isPopular: true,
+      ),
     ];
   }
-
+//Slider de categorias
   void _loadCategories() {
     _categories = [
       Category(
         id: 'all',
         name: 'Todos',
         description: 'Todos los productos',
-        icon: '🛒', // Cambiado de 'assets/icons/all.png'
+        icon: 'assets/images/icons/all.png',
       ),
       Category(
         id: 'food',
         name: 'Comida',
         description: 'Platos preparados y alimentos',
-        icon: '🍽️', // Cambiado de 'assets/icons/food.png'
+        icon: 'assets/images/icons/food.png',
       ),
       Category(
         id: 'groceries',
         name: 'Abarrotes',
         description: 'Productos básicos y despensa',
-        icon: '🛒', // Cambiado de 'assets/icons/groceries.png'
+        icon: 'assets/images/icons/despensa.png',
       ),
       Category(
         id: 'bakery',
         name: 'Panadería',
         description: 'Panes y pasteles frescos',
-        icon: '🍞', // Cambiado de 'assets/icons/bakery.png'
+        icon: 'assets/images/icons/panadero.png',
       ),
       Category(
         id: 'fruits',
         name: 'Frutas y Verduras',
         description: 'Productos frescos',
-        icon: '🍎', // Cambiado de 'assets/icons/fruits.png'
+        icon: 'assets/images/icons/verduras.png',
       ),
+
+      // Nuevas categorías: marketplace
+              Category(
+          id: 'fashion',
+          name: 'Moda',
+          description: 'Ropa y accesorios',
+          icon: 'assets/images/icons/vestido-nuevo.png',
+        ),
+        Category(
+          id: 'jewelry',
+          name: 'Joyería',
+          description: 'Accesorios y joyas',
+          icon: 'assets/images/icons/joyeria.png',
+        ),
+        Category(
+          id: 'electronics',
+          name: 'Electrónica',
+          description: 'Gadgets y tecnología',
+          icon: 'assets/images/icons/tienda-online.png',
+        ),
+        Category(
+          id: 'home',
+          name: 'Hogar',
+          description: 'Decoración y utensilios',
+          icon: 'assets/images/icons/sala-de-estar.png',
+        ),
+        Category(
+          id: 'beauty',
+          name: 'Belleza',
+          description: 'Cosmética y cuidado personal',
+          icon: 'assets/images/icons/salon-de-belleza.png',
+        ),
     ];
   }
 }

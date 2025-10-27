@@ -1,33 +1,48 @@
 name: delivery_app
-description: A new Flutter project.
+description: "Aplicación de delivery con Flutter y Django"
+publish_to: 'none'
 
 version: 1.0.0+1
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
-  flutter: ">=3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
+  
+  # Dependencias básicas
   provider: ^6.0.5
-  shared_preferences: ^2.0.18
-  # mapbox_maps_flutter: ^1.0.0  # Comentado temporalmente
+  shared_preferences: ^2.3.2
+  http: ^1.2.0
+  
+  # Para geolocalización
   geolocator: ^9.0.2
-  geocoding: ^2.1.1
+  geocoding: ^2.2.2
   permission_handler: ^12.0.1
-  http: ^1.1.0
+  
+  # Firebase - Versiones compatibles entre sí
+  firebase_core: 2.14.0
+  firebase_auth: 4.6.0
+  cloud_firestore: 4.7.0
+  firebase_storage: 11.2.3
+  firebase_messaging: 14.6.4
+  firebase_analytics: 10.4.3
+  google_sign_in: 6.1.4
+  
+  # Para notificaciones y archivos
+  flutter_local_notifications: ^17.2.3
+  image_picker: ^1.0.4
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.0
+  flutter_lints: ^2.0.3
 
 flutter:
   uses-material-design: true
+  
   assets:
-    - assets/images/businesses/
-    - assets/images/products/
-    - assets/images/categories/
-    - assets/images/ui/
-    - assets/images/backgrounds/
+    - assets/images/
+    - assets/images/icons/
+    - assets/icons/

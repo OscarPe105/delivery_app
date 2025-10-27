@@ -4,7 +4,7 @@ class CartItem {
   final String productName;
   final double price;
   final int quantity;
-  final String imageUrl;
+  final String? imageUrl;
   final String businessId;
   final String businessName;
   
@@ -14,7 +14,7 @@ class CartItem {
     required this.productName,
     required this.price,
     required this.quantity,
-    required this.imageUrl,
+    this.imageUrl,
     required this.businessId,
     required this.businessName,
   });
@@ -40,6 +40,33 @@ class CartItem {
       imageUrl: imageUrl ?? this.imageUrl,
       businessId: businessId ?? this.businessId,
       businessName: businessName ?? this.businessName,
+    );
+  }
+
+  // Métodos para serialización/deserialización con SharedPreferences
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'productId': productId,
+      'productName': productName,
+      'price': price,
+      'quantity': quantity,
+      'imageUrl': imageUrl,
+      'businessId': businessId,
+      'businessName': businessName,
+    };
+  }
+
+  factory CartItem.fromJson(Map<String, dynamic> json) {
+    return CartItem(
+      id: json['id'] as String,
+      productId: json['productId'] as String,
+      productName: json['productName'] as String,
+      price: (json['price'] as num).toDouble(),
+      quantity: json['quantity'] as int,
+      imageUrl: json['imageUrl'] as String?,
+      businessId: json['businessId'] as String,
+      businessName: json['businessName'] as String,
     );
   }
 }

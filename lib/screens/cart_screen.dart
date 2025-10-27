@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/community_store_provider.dart';
 import '../models/cart_item.dart';
+import 'checkout_screen.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
@@ -95,20 +96,27 @@ class CartScreen extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.network(
-                cartItem.imageUrl,
-                width: 80,
-                height: 80,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    width: 80,
-                    height: 80,
-                    color: Colors.grey[300],
-                    child: const Icon(Icons.image_not_supported, color: Colors.white),
-                  );
-                },
-              ),
+              child: cartItem.imageUrl != null && cartItem.imageUrl!.isNotEmpty
+                  ? Image.network(
+                      cartItem.imageUrl!,
+                      width: 80,
+                      height: 80,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          width: 80,
+                          height: 80,
+                          color: Colors.grey[300],
+                          child: const Icon(Icons.image_not_supported, color: Colors.white),
+                        );
+                      },
+                    )
+                  : Container(
+                      width: 80,
+                      height: 80,
+                      color: Colors.grey[300],
+                      child: const Icon(Icons.image_not_supported, color: Colors.white),
+                    ),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -249,7 +257,12 @@ class CartScreen extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () {
-                // Implementar checkout
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CheckoutScreen(),
+                  ),
+                );
               },
               child: const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),

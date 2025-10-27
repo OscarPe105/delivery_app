@@ -19,22 +19,39 @@ class _CommunityStoreScreenState extends State<CommunityStoreScreen> with Single
   bool _showHeader = true; // Variable para controlar la visibilidad del header
   late AnimationController _headerAnimationController;
   late Animation<double> _headerFadeAnimation;
+  late final ScrollController _categoryScrollController;
+  bool _canScrollLeft = false;
+  bool _canScrollRight = false;
+  bool _showSwipeHint = true;
+
+  void _updateCategoryScrollHints() {
+    if (!_categoryScrollController.hasClients) return;
+    final pos = _categoryScrollController.position;
+    final canLeft = pos.pixels > 0;
+    final canRight = pos.pixels < pos.maxScrollExtent;
+    if (canLeft != _canScrollLeft || canRight != _canScrollRight) {
+      setState(() {
+        _canScrollLeft = canLeft;
+        _canScrollRight = canRight;
+      });
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-    
+
     // Inicializar controlador de animación
     _headerAnimationController = AnimationController(
       duration: const Duration(milliseconds: 500),
       vsync: this,
     );
-    
+
     _headerFadeAnimation = Tween<double>(
       begin: 1.0,
       end: 0.0,
     ).animate(_headerAnimationController);
-    
+
     // Agregar listener para manejar el estado de la animación
     _headerAnimationController.addStatusListener((status) {
       if (status == AnimationStatus.completed && mounted) {
@@ -43,21 +60,45 @@ class _CommunityStoreScreenState extends State<CommunityStoreScreen> with Single
         });
       }
     });
-    
+
     // Programar la ocultación del header después de 5 segundos
     Timer(const Duration(seconds: 5), () {
       if (mounted) {
         _headerAnimationController.forward();
       }
     });
-    
+
+    // Inicializar controlador de scroll para categorías
+    _categoryScrollController = ScrollController();
+    _categoryScrollController.addListener(_updateCategoryScrollHints);
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<CommunityStoreProvider>(context, listen: false).loadData();
+
+      // Actualizar indicadores de scroll y realizar un pequeño "nudge"
+      _updateCategoryScrollHints();
+      if (_categoryScrollController.hasClients &&
+          _categoryScrollController.position.maxScrollExtent > 0) {
+        _categoryScrollController
+            .animateTo(24, duration: const Duration(milliseconds: 450), curve: Curves.easeOut)
+            .then((_) {
+          if (mounted && _categoryScrollController.hasClients) {
+            _categoryScrollController.animateTo(0,
+                duration: const Duration(milliseconds: 300), curve: Curves.easeIn);
+          }
+        });
+      }
+
+      // Ocultar el hint de swipe automáticamente
+      Future.delayed(const Duration(seconds: 3), () {
+        if (mounted) setState(() => _showSwipeHint = false);
+      });
     });
   }
 
   @override
   void dispose() {
+    _categoryScrollController.dispose();
     _headerAnimationController.dispose();
     super.dispose();
   }
@@ -198,6 +239,12 @@ class _CommunityStoreScreenState extends State<CommunityStoreScreen> with Single
             ),
           ),
           const SizedBox(height: 12),
+          Icon(
+            Icons.store,
+            size: 48,
+            color: ThemeProvider.lightTextColor.withOpacity(0.9),
+          ),
+          const SizedBox(height: 12),
           Text(
             'Descubre los mejores productos de microempresarios locales',
             style: TextStyle(
@@ -275,63 +322,176 @@ class _CommunityStoreScreenState extends State<CommunityStoreScreen> with Single
   Widget _buildCategoryFilter() {
     return Consumer<CommunityStoreProvider>(builder: (context, provider, child) {
       return Container(
-        height: 90,
+        height: 95,
         padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          itemCount: provider.categories.length,
-          itemBuilder: (context, index) {
-            final category = provider.categories[index];
-            final isSelected = provider.selectedCategory == category.id;
+        child: Stack(
+          children: [
+            Scrollbar(
+              controller: _categoryScrollController,
+              thumbVisibility: true,
+              radius: const Radius.circular(12),
+              thickness: 4,
+              child: ListView.builder(
+                controller: _categoryScrollController,
+                scrollDirection: Axis.horizontal,
+                itemCount: provider.categories.length,
+                itemBuilder: (context, index) {
+                  final category = provider.categories[index];
+                  final isSelected = provider.selectedCategory == category.id;
 
-            return Padding(
-              padding: const EdgeInsets.only(right: 16),
-              child: GestureDetector(
-                onTap: () => provider.setCategory(category.id),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  decoration: BoxDecoration(
-                    gradient: isSelected ? ThemeProvider.primaryGradient : null,
-                    color: isSelected ? null : ThemeProvider.lightTextColor,
-                    borderRadius: BorderRadius.circular(25),
-                    border: Border.all(
-                      color: ThemeProvider.primaryColor,
-                      width: 2,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: isSelected
-                            ? ThemeProvider.primaryColor.withOpacity(0.3)
-                            : Colors.black.withOpacity(0.1),
-                        blurRadius: isSelected ? 8 : 4,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(category.icon, style: const TextStyle(fontSize: 24)),
-                      const SizedBox(height: 6),
-                      Text(
-                        category.name,
-                        style: TextStyle(
-                          color: isSelected
-                              ? ThemeProvider.lightTextColor
-                              : ThemeProvider.primaryColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                          fontFamily: 'Roboto',
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 16),
+                    child: GestureDetector(
+                      onTap: () => provider.setCategory(category.id),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        decoration: BoxDecoration(
+                          gradient: isSelected ? ThemeProvider.primaryGradient : null,
+                          color: isSelected ? null : ThemeProvider.lightTextColor,
+                          borderRadius: BorderRadius.circular(25),
+                          border: Border.all(
+                            color: ThemeProvider.primaryColor,
+                            width: 2,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: isSelected
+                                  ? ThemeProvider.primaryColor.withOpacity(0.3)
+                                  : Colors.black.withOpacity(0.1),
+                              blurRadius: isSelected ? 8 : 4,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            (() {
+                              final iconPath = category.icon;
+                              if (iconPath.startsWith('assets/')) {
+                                return Image.asset(
+                                  iconPath,
+                                  width: 28,
+                                  height: 28,
+                                  fit: BoxFit.contain,
+                                  errorBuilder: (context, error, stackTrace) => const Icon(
+                                    Icons.category,
+                                    size: 24,
+                                  ),
+                                );
+                              }
+                              return const Icon(
+                                Icons.category,
+                                size: 24,
+                              );
+                            })(),
+                            const SizedBox(height: 6),
+                            Text(
+                              category.name,
+                              style: TextStyle(
+                                color: isSelected
+                                    ? ThemeProvider.lightTextColor
+                                    : ThemeProvider.primaryColor,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                                fontFamily: 'Roboto',
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
+                    ),
+                  );
+                },
+              ),
+            ),
+            if (_canScrollLeft)
+              Positioned(
+                left: 0,
+                top: 0,
+                bottom: 0,
+                child: Container(
+                  width: 28,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        ThemeProvider.backgroundColor,
+                        ThemeProvider.backgroundColor.withOpacity(0.0)
+                      ],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.chevron_left,
+                    color: ThemeProvider.primaryColor.withOpacity(0.8),
                   ),
                 ),
               ),
-            );
-          },
+            if (_canScrollRight)
+              Positioned(
+                right: 0,
+                top: 0,
+                bottom: 0,
+                child: Container(
+                  width: 28,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        ThemeProvider.backgroundColor,
+                        ThemeProvider.backgroundColor.withOpacity(0.0)
+                      ],
+                      begin: Alignment.centerRight,
+                      end: Alignment.centerLeft,
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.chevron_right,
+                    color: ThemeProvider.primaryColor.withOpacity(0.8),
+                  ),
+                ),
+              ),
+            if (_showSwipeHint)
+              Positioned.fill(
+                child: IgnorePointer(
+                  ignoring: true,
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: Container(
+                      margin: const EdgeInsets.only(top: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: ThemeProvider.lightTextColor.withOpacity(0.9),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.08),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.touch_app, size: 16, color: Colors.black87),
+                          const SizedBox(width: 6),
+                          const Text(
+                            'Desliza las categorías',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
       );
     });
@@ -409,30 +569,23 @@ class _CommunityStoreScreenState extends State<CommunityStoreScreen> with Single
                       topLeft: Radius.circular(20),
                       topRight: Radius.circular(20),
                     ),
-                    child: Image.network(
-                      business.imageUrl ??
-                          'https://via.placeholder.com/400x200?text=Sin+Imagen',
-                      height: 200,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          height: 200,
-                          decoration: BoxDecoration(
-                            gradient: ThemeProvider.primaryGradient,
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(20),
-                              topRight: Radius.circular(20),
-                            ),
-                          ),
-                          child: Icon(
-                            Icons.store,
-                            size: 60,
-                            color: ThemeProvider.lightTextColor,
-                          ),
-                        );
-                      },
-                    ),
+                    child: (business.imageUrl != null && business.imageUrl!.isNotEmpty)
+                        ? (business.imageUrl!.startsWith('assets/')
+                            ? Image.asset(
+                                business.imageUrl!,
+                                height: 200,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) => _buildPlaceholderImage(),
+                              )
+                            : Image.network(
+                                business.imageUrl!,
+                                height: 200,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) => _buildPlaceholderImage(),
+                              ))
+                        : _buildPlaceholderImage(),
                   ),
                   Positioned(
                     top: 16,
@@ -522,25 +675,27 @@ class _CommunityStoreScreenState extends State<CommunityStoreScreen> with Single
                         fontFamily: 'Roboto',
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     Row(
                       children: [
-                        Icon(Icons.person,
-                            size: 18, color: ThemeProvider.primaryColor),
+                        const Icon(Icons.access_time, size: 18, color: Colors.grey),
                         const SizedBox(width: 6),
                         Text(
-                          'Negocio Local',
+                          business.isOpen ? 'Abierto ahora' : 'Cerrado',
                           style: TextStyle(
                             fontSize: 14,
-                            color: ThemeProvider.primaryColor,
-                            fontStyle: FontStyle.italic,
+                            color: ThemeProvider.secondaryTextColor,
                             fontFamily: 'Roboto',
-                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],
                     ),
+                    const SizedBox(height: 12),
                     const SizedBox(height: 16),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: const SizedBox.shrink(),
+                    ),
                     if (business.tags != null && business.tags!.isNotEmpty)
                       Wrap(
                         spacing: 8,
@@ -571,6 +726,19 @@ class _CommunityStoreScreenState extends State<CommunityStoreScreen> with Single
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildPlaceholderImage() {
+    return Container(
+      height: 200,
+      width: double.infinity,
+      color: Colors.grey[300],
+      child: const Icon(
+        Icons.store,
+        size: 64,
+        color: Colors.grey,
       ),
     );
   }
