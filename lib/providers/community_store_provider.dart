@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import '../models/business.dart';
 import '../models/product.dart';
 import '../models/cart_item.dart';
@@ -18,6 +20,16 @@ class CommunityStoreProvider with ChangeNotifier {
   double _maxPrice = 1000;
   bool _showOnlyAvailable = false;
   bool _showOnlyPopular = false;
+  
+  // Constantes para SharedPreferences
+  static const String _cartKey = 'cart_items';
+  static const String _favoritesKey = 'favorites';
+  
+  // Constructor - cargar datos persistentes al inicializar
+  CommunityStoreProvider() {
+    _loadCart();
+    _loadFavorites();
+  }
   
   // Getters
   List<Business> get businesses => _businesses;
@@ -181,11 +193,13 @@ class CommunityStoreProvider with ChangeNotifier {
         ),
       );
     }
+    _saveCart(); // Guardar cambios automáticamente
     notifyListeners();
   }
 
   void removeFromCart(String cartItemId) {
     _cartItems.removeWhere((item) => item.id == cartItemId);
+    _saveCart(); // Guardar cambios automáticamente
     notifyListeners();
   }
   
@@ -198,13 +212,73 @@ class CommunityStoreProvider with ChangeNotifier {
     final index = _cartItems.indexWhere((item) => item.id == cartItemId);
     if (index >= 0) {
       _cartItems[index] = _cartItems[index].copyWith(quantity: quantity);
+      _saveCart(); // Guardar cambios automáticamente
       notifyListeners();
     }
   }
 
   void clearCart() {
     _cartItems.clear();
+    _saveCart(); // Guardar cambios
     notifyListeners();
+  }
+  
+  // Métodos de persistencia del carrito
+  Future<void> _loadCart() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cartJson = prefs.getString(_cartKey);
+      
+      if (cartJson != null) {
+        final List<dynamic> cartList = json.decode(cartJson);
+        _cartItems.clear();
+        _cartItems.addAll(
+          cartList.map((item) => CartItem.fromJson(item as Map<String, dynamic>))
+        );
+        debugPrint('🛒 Carrito cargado desde SharedPreferences: ${_cartItems.length} items');
+      }
+    } catch (e) {
+      debugPrint('❌ Error cargando carrito: $e');
+    }
+  }
+
+  Future<void> _saveCart() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cartJson = json.encode(_cartItems.map((item) => item.toJson()).toList());
+      await prefs.setString(_cartKey, cartJson);
+      debugPrint('💾 Carrito guardado en SharedPreferences: ${_cartItems.length} items');
+    } catch (e) {
+      debugPrint('❌ Error guardando carrito: $e');
+    }
+  }
+
+  // Métodos de persistencia de favoritos
+  Future<void> _loadFavorites() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final favoritesJson = prefs.getString(_favoritesKey);
+      
+      if (favoritesJson != null) {
+        final List<dynamic> favoritesList = json.decode(favoritesJson);
+        _favorites.clear();
+        _favorites.addAll(favoritesList.cast<String>());
+        debugPrint('❤️ Favoritos cargados desde SharedPreferences: ${_favorites.length} items');
+      }
+    } catch (e) {
+      debugPrint('❌ Error cargando favoritos: $e');
+    }
+  }
+
+  Future<void> _saveFavorites() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final favoritesJson = json.encode(_favorites);
+      await prefs.setString(_favoritesKey, favoritesJson);
+      debugPrint('💾 Favoritos guardados en SharedPreferences: ${_favorites.length} items');
+    } catch (e) {
+      debugPrint('❌ Error guardando favoritos: $e');
+    }
   }
   
   // Métodos de favoritos
@@ -214,6 +288,7 @@ class CommunityStoreProvider with ChangeNotifier {
     } else {
       _favorites.add(businessId);
     }
+    _saveFavorites(); // Guardar cambios automáticamente
     notifyListeners();
   }
 

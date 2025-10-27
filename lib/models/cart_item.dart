@@ -42,4 +42,31 @@ class CartItem {
       businessName: businessName ?? this.businessName,
     );
   }
+
+  // Métodos para serialización/deserialización con SharedPreferences
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'productId': productId,
+      'productName': productName,
+      'price': price,
+      'quantity': quantity,
+      'imageUrl': imageUrl,
+      'businessId': businessId,
+      'businessName': businessName,
+    };
+  }
+
+  factory CartItem.fromJson(Map<String, dynamic> json) {
+    return CartItem(
+      id: json['id'] as String,
+      productId: json['productId'] as String,
+      productName: json['productName'] as String,
+      price: (json['price'] as num).toDouble(),
+      quantity: json['quantity'] as int,
+      imageUrl: json['imageUrl'] as String?,
+      businessId: json['businessId'] as String,
+      businessName: json['businessName'] as String,
+    );
+  }
 }
