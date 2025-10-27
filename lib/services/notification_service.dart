@@ -38,14 +38,18 @@ class NotificationService {
           borderRadius: BorderRadius.circular(10),
         ),
         action: SnackBarAction(
-          label: 'Ver',
+          label: 'Ver pedidos',
           textColor: Colors.white,
           onPressed: () {
-            // Navegar a pedidos
-            Navigator.of(context).pushNamedAndRemoveUntil(
-              '/main',
-              (route) => false,
-            );
+            // Navegar a pedidos de forma segura
+            try {
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                '/main',
+                (route) => false,
+              );
+            } catch (e) {
+              debugPrint('Error navegando a pedidos: $e');
+            }
           },
         ),
       ),
