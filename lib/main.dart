@@ -18,12 +18,17 @@ import 'screens/test_screen.dart';              // Pantalla de prueba
 import 'screens/business/business_registration_screen.dart'; // 📝 Pantalla de registro de negocio
 import 'screens/business/business_onboarding_screen.dart';
 import 'screens/business/business_dashboard_screen.dart';
+import 'screens/firebase_test_screen.dart';
+import 'services/firebase_service.dart';
 
 // FUNCIÓN PRINCIPAL
 // Punto de entrada de la aplicación
-void main() {
+void main() async {
   // INICIALIZAR FLUTTER BINDING PRIMERO
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // INICIALIZAR FIREBASE
+  await FirebaseService.initialize();
   
   // CONFIGURAR MAPBOX OPTIONS DESPUÉS DE INICIALIZAR BINDING (comentado temporalmente)
   // MapboxOptions.setAccessToken(MapboxConfig.accessToken);
@@ -65,6 +70,7 @@ class DeliveryApp extends StatelessWidget {
               '/login': (context) => LoginScreen(),
               '/search': (context) => const SearchScreen(),
               '/test': (context) => const TestScreen(),
+              '/firebase-test': (context) => const FirebaseTestScreen(),
               '/business/register': (context) => const BusinessRegistrationScreen(), // Ruta para registro de negocio
               '/business/onboarding': (context) => const BusinessOnboardingScreen(),
               '/business/dashboard': (context) => const BusinessDashboardScreen(),

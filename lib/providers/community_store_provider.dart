@@ -3,6 +3,7 @@ import '../models/business.dart';
 import '../models/product.dart';
 import '../models/cart_item.dart';
 import '../models/category.dart';
+import '../services/api_service.dart';
 
 class CommunityStoreProvider with ChangeNotifier {
   List<Business> _businesses = [];
@@ -96,18 +97,43 @@ class CommunityStoreProvider with ChangeNotifier {
   
   // Métodos principales
   Future<void> loadBusinesses() async {
+    debugPrint('🚀 CommunityStoreProvider.loadBusinesses - INICIO');
     _isLoading = true;
     notifyListeners();
     
-    // Simular carga de datos
-    await Future.delayed(const Duration(seconds: 1));
-    
-    _loadMockBusinesses();
-    _loadProducts();
-    _loadCategories();
+    try {
+      // Cargar desde Django API SOLAMENTE
+      debugPrint('📞 Llamando a ApiService.getBusinesses()...');
+      final apiService = ApiService();
+      final businesses = await apiService.getBusinesses();
+      
+      debugPrint('📞 Llamando a ApiService.getProducts()...');
+      final products = await apiService.getProducts();
+      
+      // Asignar datos de la API (incluso si está vacío)
+      _businesses = businesses;
+      _products = products;
+      _loadCategories();
+      
+      debugPrint('✅ Negocios cargados desde Django: ${businesses.length}');
+      debugPrint('✅ Productos cargados desde Django: ${products.length}');
+      
+      if (businesses.isNotEmpty) {
+        debugPrint('📋 Primer negocio: ${businesses.first.name}');
+      }
+    } catch (e, stackTrace) {
+      // Error conectando con Django
+      debugPrint('❌ Error cargando desde API: $e');
+      debugPrint('📚 Stack trace: $stackTrace');
+      // Dejar listas vacías si hay error
+      _businesses = [];
+      _products = [];
+      _loadCategories();
+    }
     
     _isLoading = false;
     notifyListeners();
+    debugPrint('🏁 CommunityStoreProvider.loadBusinesses - FIN');
   }
   
   // Implementación de loadProductsByBusiness
@@ -115,10 +141,18 @@ class CommunityStoreProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     
-    // Simular carga de datos
-    await Future.delayed(const Duration(milliseconds: 500));
+    try {
+      final apiService = ApiService();
+      final products = await apiService.getProducts(businessId: businessId);
+      
+      if (products.isNotEmpty) {
+        // Filtrar productos del negocio
+        _products = products;
+      }
+    } catch (e) {
+      debugPrint('Error cargando productos: $e');
+    }
     
-    // Los productos ya están cargados en _products, solo notificamos cambios
     _isLoading = false;
     notifyListeners();
   }
@@ -468,36 +502,36 @@ class CommunityStoreProvider with ChangeNotifier {
       ),
 
       // Nuevas categorías: marketplace
-      Category(
-        id: 'fashion',
-        name: 'Moda',
-        description: 'Ropa y accesorios',
-        icon: 'assets/images/icons/ropa.png',
-      ),
-      Category(
-        id: 'jewelry',
-        name: 'Joyería',
-        description: 'Accesorios y joyas',
-        icon: 'assets/images/icons/joyas.png',
-      ),
-      Category(
-        id: 'electronics',
-        name: 'Electrónica',
-        description: 'Gadgets y tecnología',
-        icon: 'assets/images/icons/electronica.png',
-      ),
-      Category(
-        id: 'home',
-        name: 'Hogar',
-        description: 'Decoración y utensilios',
-        icon: 'assets/images/icons/hogar.png',
-      ),
-      Category(
-        id: 'beauty',
-        name: 'Belleza',
-        description: 'Cosmética y cuidado personal',
-        icon: 'assets/images/icons/belleza.png',
-      ),
+              Category(
+          id: 'fashion',
+          name: 'Moda',
+          description: 'Ropa y accesorios',
+          icon: 'assets/images/icons/vestido-nuevo.png',
+        ),
+        Category(
+          id: 'jewelry',
+          name: 'Joyería',
+          description: 'Accesorios y joyas',
+          icon: 'assets/images/icons/joyeria.png',
+        ),
+        Category(
+          id: 'electronics',
+          name: 'Electrónica',
+          description: 'Gadgets y tecnología',
+          icon: 'assets/images/icons/tienda-online.png',
+        ),
+        Category(
+          id: 'home',
+          name: 'Hogar',
+          description: 'Decoración y utensilios',
+          icon: 'assets/images/icons/sala-de-estar.png',
+        ),
+        Category(
+          id: 'beauty',
+          name: 'Belleza',
+          description: 'Cosmética y cuidado personal',
+          icon: 'assets/images/icons/salon-de-belleza.png',
+        ),
     ];
   }
 }

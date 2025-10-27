@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/theme_provider.dart';
+import '../../services/firebase_auth_service.dart';
 
 /// 📋 Pantalla de registro de nuevos usuarios
 /// Permite crear cuenta con email, contraseña y datos personales
@@ -47,7 +48,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   // 📝 MÉTODO DE REGISTRO
-  Future<void> _register() async {
+  Future<void> _register(AuthProvider authProvider) async {
     if (!_formKey.currentState!.validate()) return;
     
     if (!_acceptTerms) {
@@ -65,18 +66,35 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
     
     try {
-      // 🔄 Simular proceso de registro
-      await Future.delayed(const Duration(seconds: 2));
+      // 🔄 Registrar usuario con Firebase usando FirebaseAuthService
+      final firebaseAuth = FirebaseAuthService();
+      final result = await firebaseAuth.signUpWithEmail(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+        name: _nameController.text.trim(),
+        phone: _phoneController.text.trim(),
+        userType: 'customer',
+      );
       
       if (mounted) {
-        // 🎉 ÉXITO - Mostrar mensaje y volver al login
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('¡Cuenta creada exitosamente!'),
-            backgroundColor: ThemeProvider.successColor,
-          ),
-        );
-        Navigator.of(context).pop();
+        if (result['success'] == true) {
+          // 🎉 ÉXITO - Mostrar mensaje y volver al login
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('¡Cuenta creada exitosamente!'),
+              backgroundColor: ThemeProvider.successColor,
+            ),
+          );
+          Navigator.of(context).pop();
+        } else {
+          // ❌ ERROR - Mostrar mensaje de error
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result['error'] ?? 'Error al crear cuenta'),
+              backgroundColor: ThemeProvider.errorColor,
+            ),
+          );
+        }
       }
     } catch (e) {
       // ❌ ERROR - Mostrar mensaje
@@ -315,7 +333,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             SizedBox(
                               width: double.infinity,
                               child: ElevatedButton(
-                                onPressed: _isLoading ? null : _register,
+                                onPressed: _isLoading ? null : () => _register(context.read<AuthProvider>()),
                                 child: _isLoading
                                     ? const SizedBox(
                                         height: 20,

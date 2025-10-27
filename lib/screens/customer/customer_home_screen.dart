@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'dart:async';
 import '../../providers/auth_provider.dart';      //  Datos del usuario autenticado
 import '../../providers/business_provider.dart'; //  Gestión de negocios
+import '../../providers/community_store_provider.dart'; //  Provider principal de la tienda
 import '../../models/business.dart';
 import '../../providers/theme_provider.dart';    //  Paleta de colores
 import '../../widgets/delivery_map.dart';        //  Widget de mapa interactivo
@@ -62,8 +63,9 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
       }
     });
     
+    // Cargar negocios desde CommunityStoreProvider
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<BusinessProvider>(context, listen: false).loadBusinesses();
+      Provider.of<CommunityStoreProvider>(context, listen: false).loadBusinesses();
     });
   }
 
@@ -161,7 +163,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
-    final businessProvider = Provider.of<BusinessProvider>(context);
+    final storeProvider = Provider.of<CommunityStoreProvider>(context);
 
     return Scaffold(
       backgroundColor: ThemeProvider.backgroundColor,
@@ -177,13 +179,13 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
               _buildSearchBar(),
               
               //  MAPA INTERACTIVO
-              _buildMapSection(businessProvider),
+              _buildMapSection(storeProvider),
               
               //  NEGOCIOS DESTACADOS
-              _buildFeaturedBusinesses(businessProvider),
+              _buildFeaturedBusinesses(storeProvider),
               
               //  EMPRENDIMIENTOS LOCALES (SEGUNDO CARRUSEL)
-              _buildLocalBusinessesCarousel(businessProvider),
+              _buildLocalBusinessesCarousel(storeProvider),
               
               // ACCESOS RÁPIDOS
               _buildQuickActions(),
@@ -348,8 +350,8 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
   
   // 🏪 NEGOCIOS DESTACADOS (PRIMER CARRUSEL)
   // Método: _buildFeaturedBusinesses
-  Widget _buildFeaturedBusinesses(BusinessProvider businessProvider) {
-    final businesses = List<Business>.from(businessProvider.businesses);
+  Widget _buildFeaturedBusinesses(CommunityStoreProvider storeProvider) {
+    final businesses = List<Business>.from(storeProvider.businesses);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -467,8 +469,8 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
   // 🏪 NEGOCIOS DESTACADOS
   // Dentro de la clase _CustomerHomeScreenState
   // Método: _buildLocalBusinessesCarousel
-  Widget _buildLocalBusinessesCarousel(BusinessProvider businessProvider) {
-    final businesses = List<Business>.from(businessProvider.businesses);
+  Widget _buildLocalBusinessesCarousel(CommunityStoreProvider storeProvider) {
+    final businesses = List<Business>.from(storeProvider.businesses);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -680,7 +682,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen>
   }
 
   // SECCIÓN DEL MAPA
-  Widget _buildMapSection(BusinessProvider businessProvider) {
+  Widget _buildMapSection(CommunityStoreProvider storeProvider) {
     return Container(
       margin: const EdgeInsets.all(16),
       height: 200,

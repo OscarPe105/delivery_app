@@ -23,7 +23,7 @@ class CustomerProvider with ChangeNotifier {
         name: 'Hamburguesa Clásica',
         description: 'Deliciosa hamburguesa con carne, lechuga, tomate y queso',
         price: 5.99,
-        imageUrl: 'https://via.placeholder.com/150',
+        imageUrl: null,
         businessId: 'business1',
       ),
       Product(
@@ -31,7 +31,7 @@ class CustomerProvider with ChangeNotifier {
         name: 'Papas Fritas',
         description: 'Crujientes papas fritas con sal',
         price: 2.50,
-        imageUrl: 'https://via.placeholder.com/150',
+        imageUrl: null,
         businessId: 'business1',
       ),
       Product(
@@ -39,7 +39,7 @@ class CustomerProvider with ChangeNotifier {
         name: 'Pizza Margarita',
         description: 'Pizza tradicional con salsa de tomate, queso mozzarella y albahaca',
         price: 8.99,
-        imageUrl: 'https://via.placeholder.com/150',
+        imageUrl: null,
         businessId: 'business2',
       ),
     ]);

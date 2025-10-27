@@ -16,8 +16,7 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen>
-    with TickerProviderStateMixin {
+class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin {
   // CONTROLADORES DE FORMULARIO
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
@@ -114,40 +113,77 @@ class _LoginScreenState extends State<LoginScreen>
     super.dispose();
   }
 
-  //MÉTODO DE INICIO DE SESIÓN
-  Future<void> _login() async {
-    if (!_formKey.currentState!.validate()) return;
-    
-    setState(() {
-      _isLoading = true;
-    });
-    
+  //MÉTODO DE INICIO DE SESIÓN CON GOOGLE
+  Future<void> _loginWithGoogle() async {
+    setState(() { _isLoading = true; });
+
     try {
-      // Simular proceso de autenticación
-      await Future.delayed(const Duration(seconds: 2));
-      
-      if (mounted) {
-        // ÉXITO - Navegar a pantalla principal con transición suave
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final ok = await authProvider.loginWithGoogle();
+      if (!mounted) return;
+
+      if (ok) {
         Navigator.of(context).pushReplacement(
           ScaleFadeRoute(page: const MainNavigation()),
         );
-      }
-    } catch (e) {
-      // ERROR - Mostrar mensaje
-      if (mounted) {
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: ${e.toString()}'),
+            content: const Text('Error al iniciar sesión con Google'),
             backgroundColor: ThemeProvider.errorColor,
           ),
         );
       }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: ThemeProvider.errorColor,
+        ),
+      );
     } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
+      if (!mounted) return;
+      setState(() { _isLoading = false; });
+    }
+  }
+
+  //MÉTODO DE INICIO DE SESIÓN
+  Future<void> _login() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() { _isLoading = true; });
+
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final ok = await authProvider.loginWithApi(
+        _emailController.text.trim(),
+        _passwordController.text,
+      );
+      if (!mounted) return;
+
+      if (ok) {
+        Navigator.of(context).pushReplacement(
+          ScaleFadeRoute(page: const MainNavigation()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Credenciales inválidas o error de servidor'),
+            backgroundColor: ThemeProvider.errorColor,
+          ),
+        );
       }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: ThemeProvider.errorColor,
+        ),
+      );
+    } finally {
+      if (!mounted) return;
+      setState(() { _isLoading = false; });
     }
   }
 
@@ -279,6 +315,65 @@ class _LoginScreenState extends State<LoginScreen>
                             ),
                             const SizedBox(height: 24),
                             
+                                // BOTÓN DE GOOGLE SIGN-IN (TEMPORALMENTE DESHABILITADO)
+                                AnimatedBuilder(
+                                  animation: _formAnimationController,
+                                  builder: (context, child) {
+                                    return FadeTransition(
+                                      opacity: _formFadeAnimation,
+                                      child: SlideTransition(
+                                        position: _formSlideAnimation,
+                                        child: Container(
+                                          width: double.infinity,
+                                          height: 50,
+                                          decoration: BoxDecoration(
+                                            border: Border.all(color: Colors.grey.shade300),
+                                            borderRadius: BorderRadius.circular(ThemeProvider.radiusMedium),
+                                          ),
+                                          child: ElevatedButton.icon(
+                                            onPressed: null, // Deshabilitado temporalmente
+                                            icon: const Icon(Icons.g_mobiledata, color: Colors.grey),
+                                            label: const Text(
+                                              'Google Sign-In (Próximamente)',
+                                              style: TextStyle(
+                                                color: Colors.grey,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.grey.shade100,
+                                              elevation: 0,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(ThemeProvider.radiusMedium),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                                const SizedBox(height: 16),
+                                
+                                // DIVISOR
+                                Row(
+                                  children: [
+                                    Expanded(child: Divider(color: Colors.grey.shade300)),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                                      child: Text(
+                                        'o',
+                                        style: TextStyle(
+                                          color: Colors.grey.shade600,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(child: Divider(color: Colors.grey.shade300)),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                          
                             // BOTÓN DE INICIO DE SESIÓN ANIMADO
                             AnimatedBuilder(
                               animation: _formAnimationController,

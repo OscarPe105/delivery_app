@@ -141,10 +141,14 @@ class _DeliveryMapState extends State<DeliveryMap> {
   }
 
   void _centerOnUserLocation() async {
+    if (!mounted) return;
+    
     if (userLocation == null) {
       await _getCurrentLocation();
     }
 
+    if (!mounted) return;
+    
     if (userLocation != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -175,6 +179,8 @@ class _DeliveryMapState extends State<DeliveryMap> {
   Future<void> _getCurrentLocation() async {
     try {
       final location = await LocationService.getCurrentLocation();
+      if (!mounted) return;
+      
       if (location != null) {
         setState(() {
           userLocation = Point(
@@ -183,7 +189,9 @@ class _DeliveryMapState extends State<DeliveryMap> {
         });
       }
     } catch (e) {
-      print('Error getting location: $e');
+      if (mounted) {
+        print('Error getting location: $e');
+      }
     }
   }
 }

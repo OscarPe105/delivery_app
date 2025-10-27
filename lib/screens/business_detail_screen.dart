@@ -25,12 +25,28 @@ class BusinessDetailScreen extends StatelessWidget {
             Container(
               height: 250,
               width: double.infinity,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: NetworkImage(business.imageUrl ?? 'https://via.placeholder.com/400x250?text=Sin+Imagen'),
-                  fit: BoxFit.cover,
-                ),
-              ),
+              color: Colors.grey[300],
+              child: business.imageUrl != null && business.imageUrl!.isNotEmpty
+                  ? Image.network(
+                      business.imageUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Center(
+                          child: Icon(
+                            Icons.store,
+                            size: 64,
+                            color: Colors.grey,
+                          ),
+                        );
+                      },
+                    )
+                  : const Center(
+                      child: Icon(
+                        Icons.store,
+                        size: 64,
+                        color: Colors.grey,
+                      ),
+                    ),
             ),
             
             // Información del negocio
@@ -161,20 +177,27 @@ class BusinessDetailScreen extends StatelessWidget {
             // Imagen del producto
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.network(
-                product.imageUrl,
-                width: 80,
-                height: 80,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    width: 80,
-                    height: 80,
-                    color: Colors.grey[300],
-                    child: const Icon(Icons.image_not_supported),
-                  );
-                },
-              ),
+              child: product.imageUrl != null && product.imageUrl!.isNotEmpty
+                  ? Image.network(
+                      product.imageUrl!,
+                      width: 80,
+                      height: 80,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          width: 80,
+                          height: 80,
+                          color: Colors.grey[300],
+                          child: const Icon(Icons.image_not_supported),
+                        );
+                      },
+                    )
+                  : Container(
+                      width: 80,
+                      height: 80,
+                      color: Colors.grey[300],
+                      child: const Icon(Icons.image_not_supported),
+                    ),
             ),
             
             const SizedBox(width: 12),

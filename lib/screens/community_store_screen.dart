@@ -239,11 +239,12 @@ class _CommunityStoreScreenState extends State<CommunityStoreScreen> with Single
             ),
           ),
           const SizedBox(height: 12),
-          Image.asset(
-            'assets/images/ui/store_header.jpg',
-            height: 100,
-            fit: BoxFit.contain,
+          Icon(
+            Icons.store,
+            size: 48,
+            color: ThemeProvider.lightTextColor.withOpacity(0.9),
           ),
+          const SizedBox(height: 12),
           Text(
             'Descubre los mejores productos de microempresarios locales',
             style: TextStyle(
@@ -575,31 +576,16 @@ class _CommunityStoreScreenState extends State<CommunityStoreScreen> with Single
                                 height: 200,
                                 width: double.infinity,
                                 fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) => Image.asset(
-                                  'assets/images/businesses/default_business.jpg',
-                                  height: 200,
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
-                                ),
+                                errorBuilder: (context, error, stackTrace) => _buildPlaceholderImage(),
                               )
                             : Image.network(
                                 business.imageUrl!,
                                 height: 200,
                                 width: double.infinity,
                                 fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) => Image.asset(
-                                  'assets/images/businesses/default_business.jpg',
-                                  height: 200,
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
-                                ),
+                                errorBuilder: (context, error, stackTrace) => _buildPlaceholderImage(),
                               ))
-                        : Image.asset(
-                            'assets/images/businesses/default_business.jpg',
-                            height: 200,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                          ),
+                        : _buildPlaceholderImage(),
                   ),
                   Positioned(
                     top: 16,
@@ -740,6 +726,19 @@ class _CommunityStoreScreenState extends State<CommunityStoreScreen> with Single
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildPlaceholderImage() {
+    return Container(
+      height: 200,
+      width: double.infinity,
+      color: Colors.grey[300],
+      child: const Icon(
+        Icons.store,
+        size: 64,
+        color: Colors.grey,
       ),
     );
   }

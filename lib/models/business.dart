@@ -31,18 +31,18 @@ class Business {
 
   factory Business.fromJson(Map<String, dynamic> json) {
     return Business(
-      id: json['id'] ?? '',
+      id: json['id']?.toString() ?? '',
       name: json['name'] ?? '',
-      category: json['category'] ?? '',
+      category: json['category_name']?.toString() ?? json['category']?.toString() ?? '',
       description: json['description'],
       address: json['address'],
       phone: json['phone'],
-      latitude: json['latitude']?.toDouble(),
-      longitude: json['longitude']?.toDouble(),
-      rating: json['rating']?.toDouble(),
-      imageUrl: json['imageUrl'],
-      isActive: json['isActive'] ?? true,
-      isOpen: json['isOpen'] ?? true,
+      latitude: json['latitude'] != null ? double.tryParse(json['latitude'].toString()) : null,
+      longitude: json['longitude'] != null ? double.tryParse(json['longitude'].toString()) : null,
+      rating: json['rating'] != null ? double.tryParse(json['rating'].toString()) : null,
+      imageUrl: json['image_url'],
+      isActive: json['is_active'] ?? true,
+      isOpen: json['is_open'] ?? true,
       tags: json['tags'] != null ? List<String>.from(json['tags']) : null,
     );
   }
