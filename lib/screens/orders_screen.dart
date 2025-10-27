@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../providers/community_store_provider.dart';
-import '../providers/auth_provider.dart';
 import '../models/order.dart';
 import '../services/api_service.dart';
 
@@ -33,15 +30,19 @@ class _OrdersScreenState extends State<OrdersScreen> {
       final apiService = ApiService();
       final orders = await apiService.getOrders();
       
-      setState(() {
-        _orders = orders;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _orders = orders;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _error = e.toString();
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _isLoading = false;
+        });
+      }
     }
   }
 

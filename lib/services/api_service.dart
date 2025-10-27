@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/business.dart';
@@ -10,6 +9,9 @@ class ApiService {
   // Token JWT de Django (se obtiene después de Firebase login)
   String? _djangoToken;
   
+  // Cliente HTTP con timeout
+  final http.Client _client = http.Client();
+  
   // Para Android Emulator usar 10.0.2.2, para Web usar localhost
   static String get baseUrl {
     if (kIsWeb) {
@@ -19,6 +21,20 @@ class ApiService {
     }
   }
   
+  // Método para hacer peticiones con timeout
+  Future<http.Response> _makeRequest(Future<http.Response> Function() request) async {
+    try {
+      return await request().timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw Exception('Timeout: La petición tardó más de 10 segundos');
+        },
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   // Headers comunes
   Future<Map<String, String>> get headers async {
     return {
@@ -66,10 +82,10 @@ class ApiService {
   
   Future<List<Business>> getBusinesses() async {
     try {
-      final response = await http.get(
+      final response = await _makeRequest(() async => _client.get(
         Uri.parse('$baseUrl/businesses/'),
         headers: await headers,
-      );
+      ));
       
       if (kDebugMode) {
         print('🔍 ApiService.getBusinesses - Status: ${response.statusCode}');
@@ -98,6 +114,8 @@ class ApiService {
     } catch (e) {
       if (kDebugMode) {
         print('❌ Error en getBusinesses: $e');
+        print('🔍 URL intentada: $baseUrl/businesses/');
+        print('🔍 Headers: ${await headers}');
       }
       return [];
     }
@@ -156,10 +174,10 @@ class ApiService {
         url += '?${params.join('&')}';
       }
       
-      final response = await http.get(
+      final response = await _makeRequest(() async => _client.get(
         Uri.parse(url),
         headers: await headers,
-      );
+      ));
       
       if (kDebugMode) {
         print('🔍 ApiService.getProducts - Status: ${response.statusCode}');
@@ -183,6 +201,8 @@ class ApiService {
     } catch (e) {
       if (kDebugMode) {
         print('❌ Error en getProducts: $e');
+        print('🔍 URL intentada: $baseUrl/products/');
+        print('🔍 Headers: ${await headers}');
       }
       return [];
     }
@@ -211,10 +231,10 @@ class ApiService {
   
   Future<List<Order>> getOrders() async {
     try {
-      final response = await http.get(
+      final response = await _makeRequest(() async => _client.get(
         Uri.parse('$baseUrl/orders/'),
         headers: await headers,
-      );
+      ));
       
       if (kDebugMode) {
         print('🔍 ApiService.getOrders - Status: ${response.statusCode}');
@@ -241,6 +261,8 @@ class ApiService {
     } catch (e) {
       if (kDebugMode) {
         print('❌ Error en getOrders: $e');
+        print('🔍 URL intentada: $baseUrl/orders/');
+        print('🔍 Headers: ${await headers}');
       }
       return [];
     }
