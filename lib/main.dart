@@ -9,10 +9,8 @@ import 'providers/business_provider.dart';     // Negocios
 import 'providers/community_store_provider.dart'; // Tienda comunitaria
 import 'providers/customer_provider.dart';     // Cliente
 import 'providers/theme_provider.dart';        // Tema
-import 'config/mapbox_config.dart'; // ✅ Agregar esta importación
 // 📱 Importar pantallas
-import 'screens/main_navigation.dart';          // Navegación principal
-import 'screens/auth/login_screen.dart';        // Pantalla de inicio de sesión
+import 'screens/auth/user_type_router.dart';        // Router de tipos de usuario
 import 'screens/search_screen.dart';            // Pantalla de búsqueda
 import 'screens/test_screen.dart';              // Pantalla de prueba
 import 'screens/business/business_registration_screen.dart'; // 📝 Pantalla de registro de negocio
@@ -63,15 +61,11 @@ class DeliveryApp extends StatelessWidget {
             themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
             // 🔀 RUTAS NOMBRADAS
             routes: {
-              '/': (context) => authProvider.isAuthenticated 
-                  ? MainNavigation()  //  Removido 'const'
-                  : LoginScreen(),
-              '/main': (context) => MainNavigation(),  //  Removido 'const'
-              '/login': (context) => LoginScreen(),
+              '/': (context) => const UserTypeRouter(), // Usar el router de tipos de usuario
               '/search': (context) => const SearchScreen(),
               '/test': (context) => const TestScreen(),
               '/firebase-test': (context) => const FirebaseTestScreen(),
-              '/business/register': (context) => const BusinessRegistrationScreen(), // Ruta para registro de negocio
+              '/business/register': (context) => const BusinessRegistrationScreen(),
               '/business/onboarding': (context) => const BusinessOnboardingScreen(),
               '/business/dashboard': (context) => const BusinessDashboardScreen(),
             },
