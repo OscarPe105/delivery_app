@@ -8,7 +8,8 @@ class GoogleMapsConfig {
   // 4. Crea credenciales (API key)
   // 5. Configura las restricciones de la API key para seguridad
   
-  static const String apiKey = 'YOUR_GOOGLE_MAPS_API_KEY_HERE';
+  // API Key real de Google Maps
+  static const String apiKey = 'AIzaSyB6KeKlf5FYnM_2YVYsQY2vkEOHzf3RFhA';
   
   // Configuraciones adicionales
   static const double defaultZoom = 15.0;
