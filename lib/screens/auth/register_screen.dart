@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/app_animations.dart';
+import '../../themes/app_colors.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -67,7 +68,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ? '¡Cuenta creada! Te llevamos al dashboard de tu negocio'
                 : '¡Cuenta creada exitosamente!'
             ),
-            backgroundColor: const Color(0xFFE8B86D),
+            backgroundColor: AppColors.primary,
             duration: const Duration(seconds: 3),
           ),
         );
@@ -112,7 +113,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         return Scaffold(
       appBar: AppBar(
         title: const Text('Crear Cuenta'),
-        backgroundColor: const Color(0xFFE8B86D),
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -121,7 +122,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFFE8B86D), Color(0xFFD4A574)],
+            colors: [AppColors.primary, AppColors.primaryDark],
           ),
             ),
             child: SafeArea(
@@ -150,7 +151,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           child: const Icon(
                             Icons.delivery_dining,
                               size: 64,
-                            color: Color(0xFFE8B86D),
+                            color: AppColors.primary,
                           ),
                             ),
                             const SizedBox(height: 16),
@@ -212,51 +213,52 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                           });
                                         },
                                         child: Container(
-                                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-                                        decoration: BoxDecoration(
-                                          color: _selectedUserType == UserType.customer 
-                                            ? const Color(0xFFE8B86D).withOpacity(0.1)
-                                            : Colors.white,
-                                          border: Border.all(
+                                          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                                          decoration: BoxDecoration(
                                             color: _selectedUserType == UserType.customer 
-                                              ? const Color(0xFFE8B86D)
-                                              : Colors.grey[300]!,
-                                            width: _selectedUserType == UserType.customer ? 2 : 1,
-                                          ),
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        child: Column(
-                                          children: [
-                                            Icon(
-                                              Icons.person,
+                                              ? AppColors.primary.withOpacity(0.1)
+                                              : Colors.white,
+                                            border: Border.all(
                                               color: _selectedUserType == UserType.customer 
-                                                ? const Color(0xFFE8B86D)
-                                                : Colors.grey[600],
-                                              size: 24,
+                                                ? AppColors.primary
+                                                : Colors.grey[300]!,
+                                              width: _selectedUserType == UserType.customer ? 2 : 1,
                                             ),
-                                            const SizedBox(height: 8),
-                                            Text(
-                                              'Cliente',
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          child: Column(
+                                            children: [
+                                              Icon(
+                                                Icons.person,
                                                 color: _selectedUserType == UserType.customer 
-                                                  ? const Color(0xFFE8B86D)
+                                                  ? AppColors.primary
                                                   : Colors.grey[600],
+                                                size: 24,
                                               ),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              'Para hacer pedidos',
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                color: _selectedUserType == UserType.customer 
-                                                  ? const Color(0xFFE8B86D).withOpacity(0.8)
-                                                  : Colors.grey[500],
+                                              const SizedBox(height: 8),
+                                              Text(
+                                                'Cliente',
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: _selectedUserType == UserType.customer 
+                                                    ? AppColors.primary
+                                                    : Colors.grey[600],
+                                                ),
                                               ),
-                                              textAlign: TextAlign.center,
-                                            ),
-                                          ],
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                'Para hacer pedidos',
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  color: _selectedUserType == UserType.customer 
+                                                    ? AppColors.primary.withOpacity(0.8)
+                                                    : Colors.grey[500],
+                                                ),
+                                                textAlign: TextAlign.center,
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -266,57 +268,58 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     child: AppAnimations.scaleIn(
                                       duration: const Duration(milliseconds: 600),
                                       child: GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          _selectedUserType = UserType.business;
-                                        });
-                                      },
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-                                        decoration: BoxDecoration(
-                                          color: _selectedUserType == UserType.business 
-                                            ? Colors.orange.withOpacity(0.1)
-                                            : Colors.white,
-                                          border: Border.all(
+                                        onTap: () {
+                                          setState(() {
+                                            _selectedUserType = UserType.business;
+                                          });
+                                        },
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                                          decoration: BoxDecoration(
                                             color: _selectedUserType == UserType.business 
-                                              ? Colors.orange
-                                              : Colors.grey[300]!,
-                                            width: _selectedUserType == UserType.business ? 2 : 1,
-                                          ),
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        child: Column(
-                                          children: [
-                                            Icon(
-                                              Icons.store,
+                                              ? Colors.orange.withOpacity(0.1)
+                                              : Colors.white,
+                                            border: Border.all(
                                               color: _selectedUserType == UserType.business 
                                                 ? Colors.orange
-                                                : Colors.grey[600],
-                                              size: 24,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                                              'Dueño de Negocio',
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
+                                                : Colors.grey[300]!,
+                                              width: _selectedUserType == UserType.business ? 2 : 1,
+                                            ),
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          child: Column(
+                                            children: [
+                                              Icon(
+                                                Icons.store,
                                                 color: _selectedUserType == UserType.business 
                                                   ? Colors.orange
                                                   : Colors.grey[600],
+                                                size: 24,
                                               ),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              'Para gestionar tu negocio',
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                color: _selectedUserType == UserType.business 
-                                                  ? Colors.orange.withOpacity(0.8)
-                                                  : Colors.grey[500],
+                                              const SizedBox(height: 8),
+                                              Text(
+                                                'Dueño de Negocio',
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: _selectedUserType == UserType.business 
+                                                    ? Colors.orange
+                                                    : Colors.grey[600],
+                                                ),
                                               ),
-                                              textAlign: TextAlign.center,
-                                            ),
-                                          ],
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                'Para gestionar tu negocio',
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  color: _selectedUserType == UserType.business 
+                                                    ? Colors.orange.withOpacity(0.8)
+                                                    : Colors.grey[500],
+                                                ),
+                                                textAlign: TextAlign.center,
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -345,7 +348,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Color(0xFFE8B86D), width: 2),
+                              borderSide: const BorderSide(color: AppColors.primary, width: 2),
                             ),
                             filled: true,
                             fillColor: Colors.grey[50],
@@ -382,7 +385,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Color(0xFFE8B86D), width: 2),
+                              borderSide: const BorderSide(color: AppColors.primary, width: 2),
                             ),
                             filled: true,
                             fillColor: Colors.grey[50],
@@ -417,7 +420,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Color(0xFFE8B86D), width: 2),
+                              borderSide: const BorderSide(color: AppColors.primary, width: 2),
                             ),
                             filled: true,
                             fillColor: Colors.grey[50],
@@ -461,7 +464,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Color(0xFFE8B86D), width: 2),
+                              borderSide: const BorderSide(color: AppColors.primary, width: 2),
                             ),
                             filled: true,
                             fillColor: Colors.grey[50],
@@ -505,7 +508,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Color(0xFFE8B86D), width: 2),
+                              borderSide: const BorderSide(color: AppColors.primary, width: 2),
                             ),
                             filled: true,
                             fillColor: Colors.grey[50],
@@ -527,13 +530,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               child: ElevatedButton(
                                 onPressed: _isLoading ? null : _register,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFE8B86D),
+                              backgroundColor: AppColors.primary,
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                               ),
                               elevation: 2,
-                              shadowColor: const Color(0xFFE8B86D).withOpacity(0.3),
+                              shadowColor: AppColors.primary.withOpacity(0.3),
                             ),
                                 child: _isLoading
                                     ? const SizedBox(
@@ -574,7 +577,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 'Iniciar sesión',
                                 style: TextStyle(
                                   fontSize: 14,
-                                  color: Color(0xFFE8B86D),
+                                  color: AppColors.primary,
                                   fontWeight: FontWeight.bold,
                                   decoration: TextDecoration.underline,
                                 ),

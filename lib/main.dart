@@ -9,6 +9,7 @@ import 'providers/business_provider.dart';     // Negocios
 import 'providers/community_store_provider.dart'; // Tienda comunitaria
 import 'providers/customer_provider.dart';     // Cliente
 import 'providers/theme_provider.dart';        // Tema
+import 'themes/app_theme.dart';               // Tema centralizado
 // 📱 Importar pantallas
 import 'screens/auth/user_type_router.dart';        // Router de tipos de usuario
 import 'screens/auth/register_screen.dart';         // Pantalla de registro
@@ -57,8 +58,8 @@ class DeliveryApp extends StatelessWidget {
         builder: (context, themeProvider, authProvider, child) {
           return MaterialApp(
             title: 'Delivery Comunitario',
-            theme: themeProvider.lightTheme,
-            darkTheme: themeProvider.darkTheme,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
             themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
             // 🔀 RUTAS NOMBRADAS
             routes: {

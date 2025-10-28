@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/app_animations.dart';
+import '../../themes/app_colors.dart';
 import '../main_navigation.dart';
 import '../business/business_home_screen.dart';
 
@@ -79,7 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ? '¡Bienvenido! Acceso completo al panel de gestión'
                 : '¡Bienvenido! Explora nuestros restaurantes'
             ),
-            backgroundColor: const Color(0xFFE8B86D),
+            backgroundColor: AppColors.primary,
             duration: const Duration(seconds: 3),
           ),
         );
@@ -115,7 +116,7 @@ class _LoginScreenState extends State<LoginScreen> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFFE8B86D), Color(0xFFD4A574)],
+            colors: [AppColors.primary, AppColors.primaryDark],
           ),
         ),
         child: SafeArea(
@@ -144,7 +145,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           child: const Icon(
                             Icons.delivery_dining,
                             size: 64,
-                            color: Color(0xFFE8B86D),
+                            color: AppColors.primary,
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -232,7 +233,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             height: 50,
                             child: AnimatedButton(
                               onPressed: _isLoading ? null : _login,
-                              backgroundColor: const Color(0xFFE8B86D),
+                              backgroundColor: AppColors.primary,
                               foregroundColor: Colors.white,
                               child: _isLoading
                                   ? const SizedBox(
@@ -276,7 +277,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   'Crear cuenta',
                                   style: TextStyle(
                                     fontSize: 14,
-                                    color: Color(0xFFE8B86D),
+                                    color: AppColors.primary,
                                     fontWeight: FontWeight.bold,
                                     decoration: TextDecoration.underline,
                                   ),

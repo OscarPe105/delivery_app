@@ -4,6 +4,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/business_provider.dart';
 import '../../models/order.dart';
 import '../../providers/theme_provider.dart';
+import '../../themes/app_colors.dart';
 import 'product_management_screen.dart';
 import '../../widgets/optimized_image.dart';
 
@@ -236,7 +237,7 @@ class ProductsTab extends StatelessWidget {
             ),
           );
         },
-        backgroundColor: const Color(0xFFE8B86D),
+        backgroundColor: AppColors.primary,
         child: const Icon(Icons.add, color: Colors.white),
       ),
     );
@@ -282,7 +283,7 @@ class ProductsTab extends StatelessWidget {
             icon: const Icon(Icons.add),
             label: const Text('Agregar Producto'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFE8B86D),
+              backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
