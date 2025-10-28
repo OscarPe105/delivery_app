@@ -5,6 +5,7 @@ import '../models/business.dart';
 import '../models/product.dart';
 import '../themes/app_colors.dart';
 import '../widgets/optimized_image.dart';
+import '../widgets/business_map_widget.dart';
 
 class BusinessDetailScreen extends StatelessWidget {
   final Business business;
@@ -109,6 +110,36 @@ class BusinessDetailScreen extends StatelessWidget {
                       ],
                     ),
                   ],
+                  
+                  const SizedBox(height: 24),
+                  
+                  // Mapa del negocio
+                  const Text(
+                    'Ubicación',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  BusinessMapWidget(
+                    business: business,
+                    height: 200,
+                    showInfoWindow: true,
+                    allowInteraction: true,
+                    onTap: () {
+                      // Navegar a vista expandida del mapa
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => BusinessMapExpanded(
+                            business: business,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                   
                   const SizedBox(height: 24),
                   
