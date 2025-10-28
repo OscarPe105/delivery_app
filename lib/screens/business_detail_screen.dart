@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/community_store_provider.dart';
 import '../models/business.dart';
 import '../models/product.dart';
+import '../themes/app_colors.dart';
 import '../widgets/optimized_image.dart';
 
 class BusinessDetailScreen extends StatelessWidget {
@@ -15,7 +16,7 @@ class BusinessDetailScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(business.name),
-        backgroundColor: const Color(0xFFE8B86D),
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
@@ -194,10 +195,10 @@ class BusinessDetailScreen extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     '\$${product.price.toStringAsFixed(0)}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFFE8B86D),
+                      color: AppColors.primary,
                     ),
                   ),
                 ],
@@ -216,7 +217,7 @@ class BusinessDetailScreen extends StatelessWidget {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFE8B86D),
+                backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),

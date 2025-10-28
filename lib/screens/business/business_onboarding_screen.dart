@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/business_provider.dart';
 import '../../services/api_service.dart';
 import '../../config/category_config.dart';
+import '../../themes/app_colors.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -263,7 +264,7 @@ class _BusinessOnboardingScreenState extends State<BusinessOnboardingScreen> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Colors.orange, Color(0xFFE8B86D)],
+            colors: [Colors.orange, AppColors.primary],
           ),
         ),
         child: SafeArea(

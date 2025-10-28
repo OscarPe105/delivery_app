@@ -6,6 +6,7 @@ import '../models/cart_item.dart';
 import '../services/api_service.dart';
 import '../models/order.dart';
 import '../services/notification_service.dart';
+import '../themes/app_colors.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -116,7 +117,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Confirmar Pedido'),
-        backgroundColor: const Color(0xFFE8B86D),
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
       body: _isProcessing
@@ -193,7 +194,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       child: ElevatedButton(
                         onPressed: _confirmOrder,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFE8B86D),
+                          backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
@@ -329,7 +330,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: Color(0xFFE8B86D),
+            color: AppColors.primary,
           ),
         ),
       ],

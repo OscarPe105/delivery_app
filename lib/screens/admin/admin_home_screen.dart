@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../themes/app_colors.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 
@@ -10,7 +11,7 @@ class AdminHomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Panel de Administración'),
-        backgroundColor: const Color(0xFFE8B86D),
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         actions: [
           IconButton(

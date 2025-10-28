@@ -5,6 +5,7 @@ import '../../providers/business_provider.dart';
 import '../../models/product.dart';
 import '../../services/image_service.dart';
 import '../../widgets/optimized_image.dart';
+import '../../themes/app_colors.dart';
 import 'dart:io';
 
 class ProductManagementScreen extends StatefulWidget {
@@ -41,7 +42,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_editingProduct == null ? 'Agregar Producto' : 'Editar Producto'),
-        backgroundColor: const Color(0xFFE8B86D),
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         actions: [
           if (_editingProduct != null)
@@ -324,7 +325,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
     return ElevatedButton(
       onPressed: _isLoading ? null : _saveProduct,
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFFE8B86D),
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(vertical: 16),
         shape: RoundedRectangleBorder(
