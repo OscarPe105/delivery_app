@@ -548,65 +548,69 @@ class CommunityStoreProvider with ChangeNotifier {
       Category(
         id: 'all',
         name: 'Todos',
-        description: 'Todos los productos',
+        description: 'Todos los negocios',
         icon: 'assets/images/icons/all.png',
       ),
       Category(
         id: 'food',
         name: 'Comida',
-        description: 'Platos preparados y alimentos',
+        description: 'Restaurantes y comida',
         icon: 'assets/images/icons/food.png',
       ),
       Category(
         id: 'groceries',
-        name: 'Abarrotes',
-        description: 'Productos básicos y despensa',
+        name: 'Supermercados',
+        description: 'Abarrotes y despensa',
         icon: 'assets/images/icons/despensa.png',
       ),
       Category(
-        id: 'bakery',
-        name: 'Panadería',
-        description: 'Panes y pasteles frescos',
-        icon: 'assets/images/icons/panadero.png',
+        id: 'pharmacy',
+        name: 'Farmacias',
+        description: 'Medicamentos y salud',
+        icon: 'assets/images/icons/farmacia.png',
       ),
       Category(
-        id: 'fruits',
-        name: 'Frutas y Verduras',
-        description: 'Productos frescos',
-        icon: 'assets/images/icons/verduras.png',
+        id: 'electronics',
+        name: 'Electrónicos',
+        description: 'Tecnología y gadgets',
+        icon: 'assets/images/icons/tienda-online.png',
       ),
-
-      // Nuevas categorías: marketplace
-              Category(
-          id: 'fashion',
-          name: 'Moda',
-          description: 'Ropa y accesorios',
-          icon: 'assets/images/icons/vestido-nuevo.png',
-        ),
-        Category(
-          id: 'jewelry',
-          name: 'Joyería',
-          description: 'Accesorios y joyas',
-          icon: 'assets/images/icons/joyeria.png',
-        ),
-        Category(
-          id: 'electronics',
-          name: 'Electrónica',
-          description: 'Gadgets y tecnología',
-          icon: 'assets/images/icons/tienda-online.png',
-        ),
-        Category(
-          id: 'home',
-          name: 'Hogar',
-          description: 'Decoración y utensilios',
-          icon: 'assets/images/icons/sala-de-estar.png',
-        ),
-        Category(
-          id: 'beauty',
-          name: 'Belleza',
-          description: 'Cosmética y cuidado personal',
-          icon: 'assets/images/icons/salon-de-belleza.png',
-        ),
+      Category(
+        id: 'fashion',
+        name: 'Moda',
+        description: 'Ropa y accesorios',
+        icon: 'assets/images/icons/vestido-nuevo.png',
+      ),
+      Category(
+        id: 'home',
+        name: 'Hogar',
+        description: 'Decoración y muebles',
+        icon: 'assets/images/icons/sala-de-estar.png',
+      ),
+      Category(
+        id: 'hardware',
+        name: 'Ferretería',
+        description: 'Herramientas y materiales',
+        icon: 'assets/images/icons/ferreteria.png',
+      ),
+      Category(
+        id: 'beauty',
+        name: 'Belleza',
+        description: 'Salones y cosmética',
+        icon: 'assets/images/icons/salon-de-belleza.png',
+      ),
+      Category(
+        id: 'automotive',
+        name: 'Automotriz',
+        description: 'Talleres y repuestos',
+        icon: 'assets/images/icons/automotriz.png',
+      ),
+      Category(
+        id: 'services',
+        name: 'Servicios',
+        description: 'Servicios profesionales',
+        icon: 'assets/images/icons/servicios.png',
+      ),
     ];
   }
 }
