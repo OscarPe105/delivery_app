@@ -64,6 +64,23 @@ class UserBusinessListView(generics.ListAPIView):
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def my_business(request):
+    """
+    Obtener el negocio del usuario autenticado (si existe)
+    """
+    try:
+        business = Business.objects.get(owner=request.user)
+        serializer = BusinessSerializer(business)
+        return Response(serializer.data)
+    except Business.DoesNotExist:
+        return Response(
+            {'error': 'Usuario no tiene negocio registrado'}, 
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+
+@api_view(['GET'])
 @permission_classes([AllowAny])
 def nearby_businesses(request):
     """

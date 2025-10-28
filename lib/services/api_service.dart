@@ -12,7 +12,7 @@ class ApiService {
   // Cliente HTTP con timeout
   final http.Client _client = http.Client();
   
-  // Para Android Emulator usar 10.0.2.2, para Web usar localhost
+  // Para Android Emulator usar 10.0.2.2, para WReb usar localhost
   static String get baseUrl {
     if (kIsWeb) {
       return 'http://localhost:8000/api';

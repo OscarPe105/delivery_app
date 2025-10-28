@@ -11,6 +11,7 @@ import 'providers/customer_provider.dart';     // Cliente
 import 'providers/theme_provider.dart';        // Tema
 // 📱 Importar pantallas
 import 'screens/auth/user_type_router.dart';        // Router de tipos de usuario
+import 'screens/auth/register_screen.dart';         // Pantalla de registro
 import 'screens/search_screen.dart';            // Pantalla de búsqueda
 import 'screens/test_screen.dart';              // Pantalla de prueba
 import 'screens/business/business_registration_screen.dart'; // 📝 Pantalla de registro de negocio
@@ -62,6 +63,7 @@ class DeliveryApp extends StatelessWidget {
             // 🔀 RUTAS NOMBRADAS
             routes: {
               '/': (context) => const UserTypeRouter(), // Usar el router de tipos de usuario
+              '/register': (context) => const RegisterScreen(),
               '/search': (context) => const SearchScreen(),
               '/test': (context) => const TestScreen(),
               '/firebase-test': (context) => const FirebaseTestScreen(),

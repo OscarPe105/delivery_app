@@ -25,7 +25,7 @@ class AuthProvider with ChangeNotifier {
   User? get currentUser => _currentUser;
   User? get user => _currentUser; // Agregar este getter
   
-  Future<bool> login(String email, String password, UserType type) async {
+  Future<bool> login(String email, String password, [UserType? type]) async {
     try {
       // Intentar login con Django API
       final apiService = ApiService();
@@ -51,7 +51,6 @@ class AuthProvider with ChangeNotifier {
           apiService.setDjangoToken(token);
           
           _isAuthenticated = true;
-          _userType = type;
           _userId = data['user']?['id']?.toString() ?? DateTime.now().millisecondsSinceEpoch.toString();
           _token = token;
           
@@ -63,6 +62,9 @@ class AuthProvider with ChangeNotifier {
             email: email,
             phone: userData['phone'] ?? '',
           );
+          
+          // Detectar automáticamente si el usuario tiene un negocio registrado
+          await _detectUserType();
           
           // Guardar en SharedPreferences
           final prefs = await SharedPreferences.getInstance();
@@ -77,7 +79,7 @@ class AuthProvider with ChangeNotifier {
       // Si falla Django, usar mock (fallback)
       if (email.isNotEmpty && password.isNotEmpty) {
         _isAuthenticated = true;
-        _userType = type;
+        _userType = type ?? UserType.customer; // Usar tipo pasado o cliente por defecto
         _userId = 'user_${DateTime.now().millisecondsSinceEpoch}';
         
         _currentUser = User(
@@ -98,7 +100,7 @@ class AuthProvider with ChangeNotifier {
       // Fallback a mock en caso de error
       if (email.isNotEmpty && password.isNotEmpty) {
         _isAuthenticated = true;
-        _userType = type;
+        _userType = type ?? UserType.customer; // Usar tipo pasado o cliente por defecto
         _userId = 'user_${DateTime.now().millisecondsSinceEpoch}';
         
         _currentUser = User(
@@ -116,25 +118,130 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  /// Detecta automáticamente si el usuario tiene un negocio registrado
+  Future<void> _detectUserType() async {
+    try {
+      if (_token == null) {
+        _userType = UserType.customer;
+        return;
+      }
+
+      // Verificar si el usuario tiene un negocio registrado
+      final response = await http.get(
+        Uri.parse('${ApiService.baseUrl}/businesses/my-business/'),
+        headers: {
+          'Authorization': 'Bearer $_token',
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        // El usuario tiene un negocio registrado
+        _userType = UserType.business;
+        debugPrint('Usuario detectado como dueño de negocio');
+      } else if (response.statusCode == 404) {
+        // El usuario no tiene negocio registrado
+        _userType = UserType.customer;
+        debugPrint('Usuario detectado como cliente');
+      } else {
+        // Error en la consulta, asumir cliente por defecto
+        _userType = UserType.customer;
+        debugPrint('Error al detectar tipo de usuario, usando cliente por defecto');
+      }
+    } catch (e) {
+      debugPrint('Error al detectar tipo de usuario: $e');
+      // En caso de error, asumir cliente por defecto
+      _userType = UserType.customer;
+    }
+  }
+
   Future<bool> register(String name, String email, String password, UserType type) async {
-    // Simulación de registro para el MVP
-    if (name.isNotEmpty && email.isNotEmpty && password.isNotEmpty) {
-      _isAuthenticated = true;
-      _userType = type;
-      _userId = 'user_${DateTime.now().millisecondsSinceEpoch}';
-      
-      // Crear usuario con datos del registro
-      _currentUser = User(
-        id: _userId,
-        name: name,
-        email: email,
-        phone: '+50300000000', // Teléfono por defecto
+    try {
+      // Intentar registro con Django API
+      final response = await http.post(
+        Uri.parse('${ApiService.baseUrl}/auth/register/'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: json.encode({
+          'name': name,
+          'email': email,
+          'password': password,
+          'user_type': type == UserType.business ? 'business' : 'customer',
+        }),
       );
       
-      notifyListeners();
-      return true;
+      if (response.statusCode == 201) {
+        final data = json.decode(response.body);
+        final token = data['tokens']?['access'];
+        
+        if (token != null) {
+          _isAuthenticated = true;
+          _userType = type;
+          _userId = data['user']?['id']?.toString() ?? DateTime.now().millisecondsSinceEpoch.toString();
+          _token = token;
+          
+          // Obtener datos del usuario
+          final userData = data['user'];
+          _currentUser = User(
+            id: _userId,
+            name: userData['name'] ?? name,
+            email: email,
+            phone: userData['phone'] ?? '+50300000000',
+          );
+          
+          // Guardar en SharedPreferences
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('auth_token', token);
+          await prefs.setBool('is_authenticated', true);
+          
+          notifyListeners();
+          return true;
+        }
+      }
+      
+      // Si falla Django, usar mock (fallback)
+      if (name.isNotEmpty && email.isNotEmpty && password.isNotEmpty) {
+        _isAuthenticated = true;
+        _userType = type;
+        _userId = 'user_${DateTime.now().millisecondsSinceEpoch}';
+        
+        _currentUser = User(
+          id: _userId,
+          name: name,
+          email: email,
+          phone: '+50300000000',
+        );
+        
+        notifyListeners();
+        return true;
+      }
+      
+      return false;
+    } catch (e) {
+      debugPrint('Error en registro Django: $e');
+      
+      // Fallback a mock en caso de error
+      if (name.isNotEmpty && email.isNotEmpty && password.isNotEmpty) {
+        _isAuthenticated = true;
+        _userType = type;
+        _userId = 'user_${DateTime.now().millisecondsSinceEpoch}';
+        
+        _currentUser = User(
+          id: _userId,
+          name: name,
+          email: email,
+          phone: '+50300000000',
+        );
+        
+        notifyListeners();
+        return true;
+      }
+      
+      return false;
     }
-    return false;
   }
 
   Future<bool> loginWithApi(String email, String password) async {

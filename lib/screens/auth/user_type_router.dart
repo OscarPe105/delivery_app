@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../widgets/app_animations.dart';
 import '../main_navigation.dart';
 import '../business/business_home_screen.dart';
 
@@ -29,7 +30,7 @@ class UserTypeRouter extends StatelessWidget {
   }
 }
 
-/// Pantalla de login mejorada con selección de tipo de usuario
+/// Pantalla de login mejorada con modo discreto
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -44,7 +45,6 @@ class _LoginScreenState extends State<LoginScreen> {
   
   bool _obscurePassword = true;
   bool _isLoading = false;
-  UserType _selectedUserType = UserType.customer;
 
   @override
   void dispose() {
@@ -52,6 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
     _passwordController.dispose();
     super.dispose();
   }
+
 
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
@@ -63,14 +64,25 @@ class _LoginScreenState extends State<LoginScreen> {
       final ok = await authProvider.login(
         _emailController.text.trim(),
         _passwordController.text,
-        _selectedUserType, // Pasar el tipo de usuario seleccionado
+        // No pasamos tipo de usuario - se detectará automáticamente
       );
       
       if (!mounted) return;
 
       if (ok) {
         // La navegación se manejará automáticamente por UserTypeRouter
-        // No necesitamos navegar manualmente aquí
+        // El tipo de usuario se detectará automáticamente según si tiene negocio registrado
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              authProvider.userType == UserType.business 
+                ? '¡Bienvenido! Acceso completo al panel de gestión'
+                : '¡Bienvenido! Explora nuestros restaurantes'
+            ),
+            backgroundColor: const Color(0xFFE8B86D),
+            duration: const Duration(seconds: 3),
+          ),
+        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -122,11 +134,18 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Logo y título
-                        const Icon(
-                          Icons.delivery_dining,
-                          size: 64,
-                          color: Color(0xFFE8B86D),
+                        // Logo simple
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            color: Colors.white.withOpacity(0.1),
+                          ),
+                          child: const Icon(
+                            Icons.delivery_dining,
+                            size: 64,
+                            color: Color(0xFFE8B86D),
+                          ),
                         ),
                         const SizedBox(height: 16),
                         const Text(
@@ -147,170 +166,121 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 32),
 
-                        // Selector de tipo de usuario
-                        Card(
-                          color: Colors.grey[50],
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Tipo de Usuario',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: RadioListTile<UserType>(
-                                        title: const Text('Cliente'),
-                                        subtitle: const Text('Realizar pedidos'),
-                                        value: UserType.customer,
-                                        groupValue: _selectedUserType,
-                                        onChanged: (value) {
-                                          setState(() {
-                                            _selectedUserType = value!;
-                                          });
-                                        },
-                                        activeColor: const Color(0xFFE8B86D),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: RadioListTile<UserType>(
-                                        title: const Text('Negocio'),
-                                        subtitle: const Text('Gestionar productos'),
-                                        value: UserType.business,
-                                        groupValue: _selectedUserType,
-                                        onChanged: (value) {
-                                          setState(() {
-                                            _selectedUserType = value!;
-                                          });
-                                        },
-                                        activeColor: const Color(0xFFE8B86D),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                        // Campo de email con animación
+                        AppAnimations.fadeIn(
+                          duration: const Duration(milliseconds: 400),
+                          child: TextFormField(
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: const InputDecoration(
+                              labelText: 'Email',
+                              prefixIcon: Icon(Icons.email_outlined),
+                              border: OutlineInputBorder(),
                             ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Por favor ingresa tu email';
+                              }
+                              if (!value.contains('@')) {
+                                return 'Por favor ingresa un email válido';
+                              }
+                              return null;
+                            },
                           ),
-                        ),
-                        const SizedBox(height: 24),
-
-                        // Campo de email
-                        TextFormField(
-                          controller: _emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          decoration: const InputDecoration(
-                            labelText: 'Email',
-                            prefixIcon: Icon(Icons.email_outlined),
-                            border: OutlineInputBorder(),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Por favor ingresa tu email';
-                            }
-                            if (!value.contains('@')) {
-                              return 'Por favor ingresa un email válido';
-                            }
-                            return null;
-                          },
                         ),
                         const SizedBox(height: 16),
 
-                        // Campo de contraseña
-                        TextFormField(
-                          controller: _passwordController,
-                          obscureText: _obscurePassword,
-                          decoration: InputDecoration(
-                            labelText: 'Contraseña',
-                            prefixIcon: const Icon(Icons.lock_outlined),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                        // Campo de contraseña con animación
+                        AppAnimations.fadeIn(
+                          duration: const Duration(milliseconds: 600),
+                          child: TextFormField(
+                            controller: _passwordController,
+                            obscureText: _obscurePassword,
+                            decoration: InputDecoration(
+                              labelText: 'Contraseña',
+                              prefixIcon: const Icon(Icons.lock_outlined),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    _obscurePassword = !_obscurePassword;
+                                  });
+                                },
                               ),
-                              onPressed: () {
-                                setState(() {
-                                  _obscurePassword = !_obscurePassword;
-                                });
-                              },
+                              border: const OutlineInputBorder(),
                             ),
-                            border: const OutlineInputBorder(),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Por favor ingresa tu contraseña';
+                              }
+                              if (value.length < 6) {
+                                return 'La contraseña debe tener al menos 6 caracteres';
+                              }
+                              return null;
+                            },
                           ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Por favor ingresa tu contraseña';
-                            }
-                            if (value.length < 6) {
-                              return 'La contraseña debe tener al menos 6 caracteres';
-                            }
-                            return null;
-                          },
                         ),
                         const SizedBox(height: 24),
 
-                        // Botón de inicio de sesión
-                        SizedBox(
-                          width: double.infinity,
-                          height: 50,
-                          child: ElevatedButton(
-                            onPressed: _isLoading ? null : _login,
-                            style: ElevatedButton.styleFrom(
+                        // Botón de inicio de sesión con animación
+                        AppAnimations.scaleIn(
+                          duration: const Duration(milliseconds: 800),
+                          child: SizedBox(
+                            width: double.infinity,
+                            height: 50,
+                            child: AnimatedButton(
+                              onPressed: _isLoading ? null : _login,
                               backgroundColor: const Color(0xFFE8B86D),
                               foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
+                              child: _isLoading
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                      ),
+                                    )
+                                  : const Text(
+                                      'Iniciar Sesión',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                             ),
-                            child: _isLoading
-                                ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                    ),
-                                  )
-                                : const Text(
-                                    'Iniciar Sesión',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
                           ),
                         ),
                         const SizedBox(height: 16),
-
-                        // Información sobre tipos de usuario
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.blue[50],
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.blue[200]!),
-                          ),
-                          child: Column(
+                        
+                        // Opción para crear cuenta con animación
+                        AppAnimations.fadeIn(
+                          duration: const Duration(milliseconds: 1000),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(
-                                Icons.info_outline,
-                                color: Colors.blue,
-                                size: 20,
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                _selectedUserType == UserType.customer
-                                    ? 'Como cliente podrás ver productos, realizar pedidos y gestionar tu historial de compras.'
-                                    : 'Como dueño de negocio podrás gestionar tus productos, ver pedidos y estadísticas de ventas.',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.blue,
+                              const Text(
+                                '¿No tienes cuenta? ',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey,
                                 ),
-                                textAlign: TextAlign.center,
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).pushNamed('/register');
+                                },
+                                child: const Text(
+                                  'Crear cuenta',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Color(0xFFE8B86D),
+                                    fontWeight: FontWeight.bold,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                ),
                               ),
                             ],
                           ),
