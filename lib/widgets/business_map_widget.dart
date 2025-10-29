@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../models/business.dart';
 import '../../themes/app_colors.dart';
+import 'web_map_widget.dart';
 
 /// Widget de mapa individual para cada negocio
 class BusinessMapWidget extends StatefulWidget {
@@ -63,6 +65,19 @@ class _BusinessMapWidgetState extends State<BusinessMapWidget> {
 
   @override
   Widget build(BuildContext context) {
+    // Si estamos en web y hay problemas con Google Maps, usar WebMapWidget
+    if (kIsWeb) {
+      return WebMapWidget(
+        businessName: widget.business.name,
+        address: widget.business.address,
+        latitude: widget.business.latitude,
+        longitude: widget.business.longitude,
+        height: widget.height,
+        onTap: widget.onTap,
+      );
+    }
+
+    // Para Android/iOS, usar Google Maps normal
     if (widget.business.latitude == null || widget.business.longitude == null) {
       return _buildNoLocationWidget();
     }
@@ -268,6 +283,96 @@ class _BusinessMapExpandedState extends State<BusinessMapExpanded> {
 
   @override
   Widget build(BuildContext context) {
+    // Si estamos en web, mostrar una pantalla simple con información
+    if (kIsWeb) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('${widget.business.name} - Ubicación'),
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.location_on,
+                  size: 64,
+                  color: AppColors.primary,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  widget.business.name,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                if (widget.business.address != null)
+                  Text(
+                    widget.business.address!,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: AppColors.textSecondary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                const SizedBox(height: 16),
+                if (widget.business.latitude != null && widget.business.longitude != null)
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                    ),
+                    child: Column(
+                      children: [
+                        const Text(
+                          'Coordenadas:',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Lat: ${widget.business.latitude!.toStringAsFixed(6)}',
+                          style: const TextStyle(fontFamily: 'monospace'),
+                        ),
+                        Text(
+                          'Lng: ${widget.business.longitude!.toStringAsFixed(6)}',
+                          style: const TextStyle(fontFamily: 'monospace'),
+                        ),
+                      ],
+                    ),
+                  ),
+                const SizedBox(height: 24),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    // Abrir en Google Maps web
+                    final url = 'https://www.google.com/maps?q=${widget.business.latitude},${widget.business.longitude}';
+                    debugPrint('Abrir en Google Maps: $url');
+                  },
+                  icon: const Icon(Icons.open_in_new),
+                  label: const Text('Abrir en Google Maps'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Para Android/iOS, usar Google Maps normal
     if (widget.business.latitude == null || widget.business.longitude == null) {
       return Scaffold(
         appBar: AppBar(

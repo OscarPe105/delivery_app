@@ -21,6 +21,7 @@ dependencies:
   geocoding: ^2.2.2
   permission_handler: ^12.0.1
   google_maps_flutter: ^2.5.0
+  google_maps_flutter_web: ^0.5.0+1
   
   # Firebase - Versiones compatibles entre sí
   firebase_core: 2.14.0
