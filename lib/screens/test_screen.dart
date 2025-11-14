@@ -1,8 +1,6 @@
-/**
- * 🧪 PANTALLA DE PRUEBA
- * 
- * Pantalla simple para verificar que los cambios se estén aplicando
- */
+/// 🧪 PANTALLA DE PRUEBA
+/// 
+/// Pantalla simple para verificar que los cambios se estén aplicando
 
 import 'package:flutter/material.dart';
 import '../widgets/improved_buttons.dart';
@@ -47,12 +45,12 @@ class TestScreen extends StatelessWidget {
                 // Efecto de partículas
                 FloatingParticles(
                   particleCount: 20,
-                  particleColor: Colors.white.withOpacity(0.3),
+                  particleColor: Colors.white.withValues(alpha: 0.3),
                   child: Container(
                     height: 200,
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: const Center(
@@ -126,7 +124,7 @@ class TestScreen extends StatelessWidget {
                   icon: const Icon(Icons.arrow_back),
                   label: const Text('Volver'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white.withOpacity(0.2),
+                    backgroundColor: Colors.white.withValues(alpha: 0.2),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                   ),

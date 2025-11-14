@@ -1,0 +1,6 @@
+[
+  {
+    "type": "sqlite",
+    "path": "c:\\Projects\\delivery_app\\django_backend\\db.sqlite3"
+  }
+]

@@ -1,19 +1,15 @@
-/**
- * 🎨 COMPONENTES ANIMADOS REUTILIZABLES
- * 
- * Widgets personalizados con animaciones para mejorar la experiencia del usuario
- * 
- * @author Sistema de Delivery Comunitario
- * @version 1.0.0
- */
+/// COMPONENTES ANIMADOS REUTILIZABLES
+/// 
+/// Widgets personalizados con animaciones para mejorar la experiencia del usuario
+/// 
+/// @author Sistema de Delivery Comunitario
+/// @version 1.0.0
 
 import 'package:flutter/material.dart';
 
-/**
- * 🔘 BOTÓN ANIMADO PERSONALIZADO
- * 
- * Botón con animaciones de hover, press y loading states
- */
+/// 🔘 BOTÓN ANIMADO PERSONALIZADO
+/// 
+/// Botón con animaciones de hover, press y loading states
 class AnimatedButton extends StatefulWidget {
   final String text;
   final VoidCallback? onPressed;
@@ -124,7 +120,7 @@ class _AnimatedButtonState extends State<AnimatedButton>
                   boxShadow: widget.hasShadow
                       ? [
                           BoxShadow(
-                            color: backgroundColor.withOpacity(0.3),
+                            color: backgroundColor.withValues(alpha: 0.3),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
@@ -172,11 +168,9 @@ class _AnimatedButtonState extends State<AnimatedButton>
   }
 }
 
-/**
- * 🃏 TARJETA ANIMADA
- * 
- * Tarjeta con animaciones de entrada y hover
- */
+/// 🃏 TARJETA ANIMADA
+/// 
+/// Tarjeta con animaciones de entrada y hover
 class AnimatedCard extends StatefulWidget {
   final Widget child;
   final EdgeInsetsGeometry? margin;
@@ -275,11 +269,9 @@ class _AnimatedCardState extends State<AnimatedCard>
   }
 }
 
-/**
- * 📊 INDICADOR DE PROGRESO ANIMADO
- * 
- * Indicador de carga con animación personalizada
- */
+/// 📊 INDICADOR DE PROGRESO ANIMADO
+/// 
+/// Indicador de carga con animación personalizada
 class AnimatedProgressIndicator extends StatefulWidget {
   final double progress;
   final Color? backgroundColor;
@@ -348,7 +340,7 @@ class _AnimatedProgressIndicatorState extends State<AnimatedProgressIndicator>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final backgroundColor = widget.backgroundColor ?? theme.primaryColor.withOpacity(0.2);
+    final backgroundColor = widget.backgroundColor ?? theme.primaryColor.withValues(alpha: 0.2);
     final progressColor = widget.progressColor ?? theme.primaryColor;
 
     return Container(
@@ -369,7 +361,7 @@ class _AnimatedProgressIndicatorState extends State<AnimatedProgressIndicator>
                 borderRadius: BorderRadius.circular(widget.height / 2),
                 boxShadow: [
                   BoxShadow(
-                    color: progressColor.withOpacity(0.3),
+                    color: progressColor.withValues(alpha: 0.3),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -383,11 +375,9 @@ class _AnimatedProgressIndicatorState extends State<AnimatedProgressIndicator>
   }
 }
 
-/**
- * 🌟 EFECTO DE PARTÍCULAS
- * 
- * Efecto visual de partículas flotantes
- */
+/// 🌟 EFECTO DE PARTÍCULAS
+/// 
+/// Efecto visual de partículas flotantes
 class ParticleEffect extends StatefulWidget {
   final Widget child;
   final int particleCount;
@@ -472,7 +462,7 @@ class _ParticleEffectState extends State<ParticleEffect>
                     width: 4,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: widget.particleColor ?? Colors.orange.withOpacity(0.6),
+                      color: widget.particleColor ?? Colors.orange.withValues(alpha: 0.6),
                       shape: BoxShape.circle,
                     ),
                   ),

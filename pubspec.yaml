@@ -16,10 +16,13 @@ dependencies:
   shared_preferences: ^2.3.2
   http: ^1.2.0
   
-  # Para geolocalización
+  # Para geolocalización y mapas
   geolocator: ^9.0.2
   geocoding: ^2.2.2
   permission_handler: ^12.0.1
+  google_maps_flutter: ^2.5.0
+  google_maps_flutter_web: ^0.5.0+1
+  url_launcher: ^6.2.4
   
   # Firebase - Versiones compatibles entre sí
   firebase_core: 2.14.0
@@ -33,6 +36,13 @@ dependencies:
   # Para notificaciones y archivos
   flutter_local_notifications: ^17.2.3
   image_picker: ^1.0.4
+  
+  # Para optimización de imágenes
+  cached_network_image: ^3.3.1
+  path_provider: ^2.1.2
+  pdf: ^3.10.7
+  printing: ^5.11.0
+  intl: ^0.19.0
 
 dev_dependencies:
   flutter_test:

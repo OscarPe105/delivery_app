@@ -43,3 +43,32 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Firebase configuration files (contienen credenciales sensibles)
+# NOTA: Para facilitar el setup en otra máquina, estos archivos están incluidos
+# en el repositorio. Si el repo es PRIVADO y solo para uso académico, está bien.
+# Si planeas hacer el repo PÚBLICO, deberías:
+# 1. git rm --cached android/app/google-services.json
+# 2. git rm --cached ios/Runner/GoogleService-Info.plist
+# 3. git rm --cached lib/firebase_options.dart
+# 4. Descomentar las líneas siguientes para ignorarlos
+# 5. Seguir las instrucciones del README.md para configurar Firebase
+
+# Descomentar si quieres ignorar estos archivos (recomendado para repos públicos):
+# android/app/google-services.json
+# ios/Runner/GoogleService-Info.plist
+# lib/firebase_options.dart
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Firebase service account keys
+*firebase-service-account*.json
+service-account*.json
+
+# API keys y secretos
+*.secret
+*.key
+secrets/

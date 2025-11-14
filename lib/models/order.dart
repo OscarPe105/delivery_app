@@ -1,3 +1,4 @@
+import 'delivery.dart';
 enum OrderStatus { pending, inProgress, delivered, cancelled }
 
 // Helper function to safely convert string/dynamic to double
@@ -16,12 +17,14 @@ class OrderItem {
   final String name;
   final double price;
   final int quantity;
+  final String? imageUrl;
   
   OrderItem({
     required this.productId,
     required this.name,
     required this.price,
     required this.quantity,
+    this.imageUrl,
   });
 
   factory OrderItem.fromJson(Map<String, dynamic> json) {
@@ -30,6 +33,7 @@ class OrderItem {
       name: json['product_name'] ?? json['name'] ?? '',
       price: _safeToDouble(json['price']),
       quantity: json['quantity'] ?? 1,
+      imageUrl: json['image_url']?.toString() ?? json['imageUrl']?.toString(),
     );
   }
 
@@ -37,6 +41,7 @@ class OrderItem {
     return {
       'product': productId,
       'quantity': quantity,
+      if (imageUrl != null) 'image_url': imageUrl,
     };
   }
 }
@@ -50,6 +55,13 @@ class Order {
   final OrderStatus status;
   final DateTime createdAt;
   final String deliveryAddress;
+  final int? displayNumber;
+  final String? paymentMethod;
+  final String? driverId;
+  final String? driverName;
+  final DeliveryStatus? deliveryStatus;
+  final DateTime? assignedAt;
+  final DateTime? deliveredAt;
   
   Order({
     required this.id,
@@ -60,6 +72,13 @@ class Order {
     required this.status,
     required this.createdAt,
     required this.deliveryAddress,
+    this.displayNumber,
+    this.paymentMethod,
+    this.driverId,
+    this.driverName,
+    this.deliveryStatus,
+    this.assignedAt,
+    this.deliveredAt,
   });
   
   Order copyWith({
@@ -71,6 +90,13 @@ class Order {
     OrderStatus? status,
     DateTime? createdAt,
     String? deliveryAddress,
+    int? displayNumber,
+    String? paymentMethod,
+    String? driverId,
+    String? driverName,
+    DeliveryStatus? deliveryStatus,
+    DateTime? assignedAt,
+    DateTime? deliveredAt,
   }) {
     return Order(
       id: id ?? this.id,
@@ -81,6 +107,13 @@ class Order {
       status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
       deliveryAddress: deliveryAddress ?? this.deliveryAddress,
+      displayNumber: displayNumber ?? this.displayNumber,
+      paymentMethod: paymentMethod ?? this.paymentMethod,
+      driverId: driverId ?? this.driverId,
+      driverName: driverName ?? this.driverName,
+      deliveryStatus: deliveryStatus ?? this.deliveryStatus,
+      assignedAt: assignedAt ?? this.assignedAt,
+      deliveredAt: deliveredAt ?? this.deliveredAt,
     );
   }
 
@@ -96,6 +129,13 @@ class Order {
           ? DateTime.parse(json['created_at']) 
           : DateTime.now(),
       deliveryAddress: json['delivery_address']?.toString() ?? '',
+      displayNumber: _parseDisplayNumber(json['display_number'] ?? json['displayNumber']),
+      paymentMethod: json['payment_method']?.toString() ?? json['paymentMethod']?.toString(),
+      driverId: json['driverId']?.toString() ?? json['driver_id']?.toString(),
+      driverName: json['driverName']?.toString() ?? json['driver_name']?.toString(),
+      deliveryStatus: _parseDeliveryStatus(json['deliveryStatus']?.toString()),
+      assignedAt: _parseDate(json['assignedAt']),
+      deliveredAt: _parseDate(json['deliveredAt']),
     );
   }
 
@@ -113,5 +153,23 @@ class Order {
       default:
         return OrderStatus.pending;
     }
+  }
+
+  static int? _parseDisplayNumber(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    return int.tryParse(value.toString());
+  }
+
+  static DeliveryStatus? _parseDeliveryStatus(String? status) {
+    if (status == null) return null;
+    return parseDeliveryStatus(status);
+  }
+
+  static DateTime? _parseDate(dynamic value) {
+    if (value == null) return null;
+    if (value is DateTime) return value;
+    if (value is String) return DateTime.tryParse(value);
+    return null;
   }
 }

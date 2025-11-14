@@ -12,6 +12,7 @@ class Business {
   final bool isActive;
   final bool isOpen;
   final List<String>? tags;
+  final String? ownerId; // ID del dueño del negocio
 
   Business({
     required this.id,
@@ -27,6 +28,7 @@ class Business {
     this.isActive = true,
     this.isOpen = true,
     this.tags,
+    this.ownerId,
   });
 
   factory Business.fromJson(Map<String, dynamic> json) {
@@ -44,6 +46,10 @@ class Business {
       isActive: json['is_active'] ?? true,
       isOpen: json['is_open'] ?? true,
       tags: json['tags'] != null ? List<String>.from(json['tags']) : null,
+      ownerId: json['ownerId']?.toString() ??
+          json['ownerUid']?.toString() ??
+          json['owner_uid']?.toString() ??
+          json['owner']?.toString(),
     );
   }
 
@@ -62,6 +68,41 @@ class Business {
       'isActive': isActive,
       'isOpen': isOpen,
       'tags': tags,
+      'ownerId': ownerId,
     };
+  }
+
+  Business copyWith({
+    String? id,
+    String? name,
+    String? category,
+    String? description,
+    String? address,
+    String? phone,
+    double? latitude,
+    double? longitude,
+    double? rating,
+    String? imageUrl,
+    bool? isActive,
+    bool? isOpen,
+    List<String>? tags,
+    String? ownerId,
+  }) {
+    return Business(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      category: category ?? this.category,
+      description: description ?? this.description,
+      address: address ?? this.address,
+      phone: phone ?? this.phone,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      rating: rating ?? this.rating,
+      imageUrl: imageUrl ?? this.imageUrl,
+      isActive: isActive ?? this.isActive,
+      isOpen: isOpen ?? this.isOpen,
+      tags: tags ?? this.tags,
+      ownerId: ownerId ?? this.ownerId,
+    );
   }
 }

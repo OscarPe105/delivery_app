@@ -7,6 +7,7 @@ class CartItem {
   final String? imageUrl;
   final String businessId;
   final String businessName;
+  final String? businessFirestoreId;
   
   CartItem({
     required this.id,
@@ -17,6 +18,7 @@ class CartItem {
     this.imageUrl,
     required this.businessId,
     required this.businessName,
+    this.businessFirestoreId,
   });
   
   double get total => price * quantity;
@@ -30,6 +32,7 @@ class CartItem {
     String? imageUrl,
     String? businessId,
     String? businessName,
+    String? businessFirestoreId,
   }) {
     return CartItem(
       id: id ?? this.id,
@@ -40,6 +43,7 @@ class CartItem {
       imageUrl: imageUrl ?? this.imageUrl,
       businessId: businessId ?? this.businessId,
       businessName: businessName ?? this.businessName,
+      businessFirestoreId: businessFirestoreId ?? this.businessFirestoreId,
     );
   }
 
@@ -54,6 +58,7 @@ class CartItem {
       'imageUrl': imageUrl,
       'businessId': businessId,
       'businessName': businessName,
+      'businessFirestoreId': businessFirestoreId,
     };
   }
 
@@ -67,6 +72,7 @@ class CartItem {
       imageUrl: json['imageUrl'] as String?,
       businessId: json['businessId'] as String,
       businessName: json['businessName'] as String,
+      businessFirestoreId: json['businessFirestoreId'] as String?,
     );
   }
 }

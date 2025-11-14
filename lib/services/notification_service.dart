@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../providers/community_store_provider.dart';
-import '../providers/auth_provider.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -65,7 +62,7 @@ class NotificationService {
       SnackBar(
         content: Row(
           children: [
-            Icon(Icons.update, color: Colors.white),
+            const Icon(Icons.update, color: Colors.white),
             const SizedBox(width: 8),
             Expanded(
               child: Column(

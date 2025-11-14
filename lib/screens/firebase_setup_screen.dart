@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../services/firebase_auth_service.dart';
 import '../services/firebase_storage_service.dart';
 import '../services/firebase_messaging_service.dart';
@@ -47,6 +46,9 @@ class _FirebaseSetupScreenState extends State<FirebaseSetupScreen> {
   Future<void> _handleSubmit() async {
     if (!_formKey.currentState!.validate()) return;
 
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+
     setState(() => _isLoading = true);
 
     try {
@@ -73,36 +75,33 @@ class _FirebaseSetupScreenState extends State<FirebaseSetupScreen> {
           result['user'].id
         );
 
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(result['message']),
-              backgroundColor: Colors.green,
-            ),
-          );
-          
-          // Navegar a la pantalla principal
-          Navigator.of(context).pushReplacementNamed('/main');
-        }
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(result['error']),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        if (!mounted) return;
+        messenger.showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text(result['message']),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        if (!navigator.mounted) return;
+        navigator.pushReplacementNamed('/main');
+      } else {
+        if (!mounted) return;
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(result['error']),
             backgroundColor: Colors.red,
           ),
         );
       }
+    } catch (e) {
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Error: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -111,41 +110,42 @@ class _FirebaseSetupScreenState extends State<FirebaseSetupScreen> {
   }
 
   Future<void> _handleGoogleSignIn() async {
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+
     setState(() => _isLoading = true);
     
     try {
       Map<String, dynamic> result = await _authService.signInWithGoogle();
       
       if (result['success']) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Login con Google exitoso'),
-              backgroundColor: Colors.green,
-            ),
-          );
-          
-          Navigator.of(context).pushReplacementNamed('/main');
-        }
+        if (!mounted) return;
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text('Login con Google exitoso'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        if (!navigator.mounted) return;
+        navigator.pushReplacementNamed('/main');
       } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(result['error']),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        if (!mounted) return;
+        messenger.showSnackBar(
           SnackBar(
-            content: Text('Error con Google Sign-In: $e'),
+            content: Text(result['error']),
             backgroundColor: Colors.red,
           ),
         );
       }
+    } catch (e) {
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Error con Google Sign-In: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -154,11 +154,14 @@ class _FirebaseSetupScreenState extends State<FirebaseSetupScreen> {
   }
 
   Future<void> _testFirebaseStorage() async {
+    final messenger = ScaffoldMessenger.of(context);
+
     try {
       // Test de selección de imagen
       final image = await _storageService.pickImage();
       if (image != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        if (!mounted) return;
+        messenger.showSnackBar(
           const SnackBar(
             content: Text('Imagen seleccionada exitosamente'),
             backgroundColor: Colors.green,
@@ -166,7 +169,8 @@ class _FirebaseSetupScreenState extends State<FirebaseSetupScreen> {
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      if (!mounted) return;
+      messenger.showSnackBar(
         SnackBar(
           content: Text('Error con Firebase Storage: $e'),
           backgroundColor: Colors.red,
@@ -331,25 +335,25 @@ class _FirebaseSetupScreenState extends State<FirebaseSetupScreen> {
               ),
 
               // Información de Firebase
-              Card(
+              const Card(
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         '🔥 Firebase Configurado',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      const Text('✅ Autenticación'),
-                      const Text('✅ Firestore Database'),
-                      const Text('✅ Firebase Storage'),
-                      const Text('✅ Cloud Messaging'),
-                      const Text('✅ Analytics'),
+                      SizedBox(height: 8),
+                      Text('✅ Autenticación'),
+                      Text('✅ Firestore Database'),
+                      Text('✅ Firebase Storage'),
+                      Text('✅ Cloud Messaging'),
+                      Text('✅ Analytics'),
                     ],
                   ),
                 ),

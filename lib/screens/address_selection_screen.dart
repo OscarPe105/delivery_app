@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
-// import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart'; // Comentado temporalmente
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../widgets/delivery_map.dart';
 import '../services/location_service.dart';
-import '../providers/theme_provider.dart';
+import '../themes/app_colors.dart';
 
 class AddressSelectionScreen extends StatefulWidget {
-  const AddressSelectionScreen({Key? key}) : super(key: key);
+  const AddressSelectionScreen({super.key});
   
   @override
   State<AddressSelectionScreen> createState() => _AddressSelectionScreenState();
 }
 
 class _AddressSelectionScreenState extends State<AddressSelectionScreen> {
-  Point? selectedLocation;
+  LatLng? selectedLocation;
   String selectedAddress = '';
   bool isLoadingAddress = false;
   
@@ -24,7 +24,7 @@ class _AddressSelectionScreenState extends State<AddressSelectionScreen> {
           'Seleccionar Dirección',
           style: TextStyle(color: Colors.white),
         ),
-        backgroundColor: ThemeProvider.primaryColor,
+        backgroundColor: AppColors.primary,
         iconTheme: const IconThemeData(color: Colors.white),
         elevation: 0,
       ),
@@ -32,18 +32,17 @@ class _AddressSelectionScreenState extends State<AddressSelectionScreen> {
         children: [
           // Mapa
           DeliveryMap(
-            onLocationSelected: (Point point) async {
+            onLocationSelected: (LatLng position) async {
               setState(() {
-                selectedLocation = point;
+                selectedLocation = position;
                 isLoadingAddress = true;
                 selectedAddress = 'Obteniendo dirección...';
               });
               
-              // Obtener dirección usando las coordenadas correctas
+              // Obtener dirección usando las coordenadas
               String address = await LocationService.getAddressFromCoordinates(
-                point.coordinates.lat.toDouble(),
-                point.coordinates.lng.toDouble(),
-                
+                position.latitude,
+                position.longitude,
               );
               
               setState(() {
@@ -54,11 +53,11 @@ class _AddressSelectionScreenState extends State<AddressSelectionScreen> {
           ),
           
           // Indicador de selección en el centro del mapa
-          Center(
+          const Center(
             child: Icon(
               Icons.location_on,
               size: 40,
-              color: ThemeProvider.primaryColor,
+              color: AppColors.primary,
             ),
           ),
           
@@ -74,7 +73,7 @@ class _AddressSelectionScreenState extends State<AddressSelectionScreen> {
                 borderRadius: BorderRadius.circular(8),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -153,12 +152,12 @@ class _AddressSelectionScreenState extends State<AddressSelectionScreen> {
                           Navigator.pop(context, {
                             'location': selectedLocation,
                             'address': selectedAddress,
-                            'latitude': selectedLocation!.coordinates.lat,
-                            'longitude': selectedLocation!.coordinates.lng,
+                            'latitude': selectedLocation!.latitude,
+                            'longitude': selectedLocation!.longitude,
                           });
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: ThemeProvider.primaryColor,
+                          backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(

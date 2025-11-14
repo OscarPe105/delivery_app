@@ -1,6 +1,7 @@
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'dart:io';
 
 class FirebaseStorageService {
@@ -14,21 +15,35 @@ class FirebaseStorageService {
   /// Subir imagen de perfil de usuario
   Future<String?> uploadUserProfileImage(String userId, XFile imageFile) async {
     try {
-      Reference ref = _storage.ref().child('users/$userId/profile/profile.jpg');
+      final path = 'users/$userId/profile/profile.jpg';
+      Reference ref = _storage.ref().child(path);
+
+      final metadata = SettableMetadata(
+        contentType: imageFile.mimeType ?? 'image/jpeg',
+      );
+
+      UploadTask uploadTask;
+      if (kIsWeb) {
+        // En web, usar putData con bytes
+        final bytes = await imageFile.readAsBytes();
+        uploadTask = ref.putData(bytes, metadata);
+      } else {
+        // En móvil, usar putFile
+        uploadTask = ref.putFile(File(imageFile.path), metadata);
+      }
       
-      UploadTask uploadTask = ref.putFile(File(imageFile.path));
       TaskSnapshot snapshot = await uploadTask;
       
       String downloadUrl = await snapshot.ref.getDownloadURL();
       
       if (kDebugMode) {
-        print('✅ Imagen de perfil subida: $downloadUrl');
+        debugPrint('✅ Imagen de perfil subida: $downloadUrl');
       }
       
       return downloadUrl;
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error subiendo imagen de perfil: $e');
+        debugPrint('❌ Error subiendo imagen de perfil: $e');
       }
       return null;
     }
@@ -37,21 +52,35 @@ class FirebaseStorageService {
   /// Subir imagen de negocio
   Future<String?> uploadBusinessImage(String businessId, XFile imageFile) async {
     try {
-      Reference ref = _storage.ref().child('businesses/$businessId/business.jpg');
+      final path = 'businesses/$businessId/business.jpg';
+      Reference ref = _storage.ref().child(path);
+
+      final metadata = SettableMetadata(
+        contentType: imageFile.mimeType ?? 'image/jpeg',
+      );
+
+      UploadTask uploadTask;
+      if (kIsWeb) {
+        // En web, usar putData con bytes
+        final bytes = await imageFile.readAsBytes();
+        uploadTask = ref.putData(bytes, metadata);
+      } else {
+        // En móvil, usar putFile
+        uploadTask = ref.putFile(File(imageFile.path), metadata);
+      }
       
-      UploadTask uploadTask = ref.putFile(File(imageFile.path));
       TaskSnapshot snapshot = await uploadTask;
       
       String downloadUrl = await snapshot.ref.getDownloadURL();
       
       if (kDebugMode) {
-        print('✅ Imagen de negocio subida: $downloadUrl');
+        debugPrint('✅ Imagen de negocio subida: $downloadUrl');
       }
       
       return downloadUrl;
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error subiendo imagen de negocio: $e');
+        debugPrint('❌ Error subiendo imagen de negocio: $e');
       }
       return null;
     }
@@ -60,21 +89,45 @@ class FirebaseStorageService {
   /// Subir imagen de producto
   Future<String?> uploadProductImage(String productId, XFile imageFile) async {
     try {
-      Reference ref = _storage.ref().child('products/$productId/product.jpg');
+      final path = 'products/$productId/product.jpg';
+      if (kDebugMode) {
+        debugPrint('📤 Subiendo imagen de producto: $path');
+      }
+
+      Reference ref = _storage.ref().child(path);
       
-      UploadTask uploadTask = ref.putFile(File(imageFile.path));
+      UploadTask uploadTask;
+      if (kIsWeb) {
+        // En web, usar putData con bytes
+        final bytes = await imageFile.readAsBytes();
+        if (kDebugMode) {
+          debugPrint('📦 Bytes a subir (web): ${bytes.length}');
+        }
+        uploadTask = ref.putData(bytes, SettableMetadata(contentType: imageFile.mimeType ?? 'image/jpeg'));
+      } else {
+        // En móvil, usar putFile
+        uploadTask = ref.putFile(
+          File(imageFile.path),
+          SettableMetadata(contentType: 'image/jpeg'),
+        );
+      }
+      
+      if (kDebugMode) {
+        debugPrint('⏳ Esperando resultado de subida...');
+      }
+
       TaskSnapshot snapshot = await uploadTask;
       
       String downloadUrl = await snapshot.ref.getDownloadURL();
       
       if (kDebugMode) {
-        print('✅ Imagen de producto subida: $downloadUrl');
+        debugPrint('✅ Imagen de producto subida: $downloadUrl');
       }
       
       return downloadUrl;
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error subiendo imagen de producto: $e');
+        debugPrint('❌ Error subiendo imagen de producto: $e');
       }
       return null;
     }
@@ -92,14 +145,14 @@ class FirebaseStorageService {
       
       if (image != null) {
         if (kDebugMode) {
-          print('✅ Imagen seleccionada desde galería');
+          debugPrint('✅ Imagen seleccionada desde galería');
         }
       }
       
       return image;
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error seleccionando imagen: $e');
+        debugPrint('❌ Error seleccionando imagen: $e');
       }
       return null;
     }
@@ -117,14 +170,14 @@ class FirebaseStorageService {
       
       if (image != null) {
         if (kDebugMode) {
-          print('✅ Imagen tomada con cámara');
+          debugPrint('✅ Imagen tomada con cámara');
         }
       }
       
       return image;
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error tomando imagen: $e');
+        debugPrint('❌ Error tomando imagen: $e');
       }
       return null;
     }
@@ -133,15 +186,54 @@ class FirebaseStorageService {
   /// Mostrar opciones de selección de imagen
   Future<XFile?> pickImage() async {
     try {
-      // En un caso real, mostrarías un diálogo con opciones
       // Por ahora, usamos galería por defecto
       return await pickImageFromGallery();
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error seleccionando imagen: $e');
+        debugPrint('❌ Error seleccionando imagen: $e');
       }
       return null;
     }
+  }
+  
+  /// Mostrar diálogo para elegir fuente de imagen
+  Future<XFile?> showImageSourceDialog(BuildContext context) async {
+    return showModalBottomSheet<XFile?>(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_library, color: Colors.blue),
+                title: const Text('Galería'),
+                onTap: () async {
+                  final image = await pickImageFromGallery();
+                  if (context.mounted) {
+                    Navigator.of(context).pop(image);
+                  }
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_camera, color: Colors.green),
+                title: const Text('Cámara'),
+                onTap: () async {
+                  final image = await pickImageFromCamera();
+                  if (context.mounted) {
+                    Navigator.of(context).pop(image);
+                  }
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.cancel, color: Colors.red),
+                title: const Text('Cancelar'),
+                onTap: () => Navigator.of(context).pop(),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   /// Eliminar imagen
@@ -151,13 +243,13 @@ class FirebaseStorageService {
       await ref.delete();
       
       if (kDebugMode) {
-        print('✅ Imagen eliminada exitosamente');
+        debugPrint('✅ Imagen eliminada exitosamente');
       }
       
       return true;
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error eliminando imagen: $e');
+        debugPrint('❌ Error eliminando imagen: $e');
       }
       return false;
     }
@@ -170,7 +262,7 @@ class FirebaseStorageService {
       return await ref.getDownloadURL();
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error obteniendo URL de descarga: $e');
+        debugPrint('❌ Error obteniendo URL de descarga: $e');
       }
       return null;
     }
@@ -187,13 +279,13 @@ class FirebaseStorageService {
       String downloadUrl = await snapshot.ref.getDownloadURL();
       
       if (kDebugMode) {
-        print('✅ Archivo subido: $downloadUrl');
+        debugPrint('✅ Archivo subido: $downloadUrl');
       }
       
       return downloadUrl;
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error subiendo archivo: $e');
+        debugPrint('❌ Error subiendo archivo: $e');
       }
       return null;
     }
@@ -217,7 +309,7 @@ class FirebaseStorageService {
         }
       } catch (e) {
         if (kDebugMode) {
-          print('❌ Error subiendo imagen $i: $e');
+          debugPrint('❌ Error subiendo imagen $i: $e');
         }
       }
     }
@@ -233,7 +325,7 @@ class FirebaseStorageService {
       return File(imageFile.path);
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error comprimiendo imagen: $e');
+        debugPrint('❌ Error comprimiendo imagen: $e');
       }
       return null;
     }

@@ -1,0 +1,325 @@
+Carrera:
+Ingeniería en Sistemas Y Computación	
+Asignatura:
+Técnicas de Calidad de Software
+Ciclo:
+02-2025
+Sección:
+01
+Docente:
+Ing. José Guillermo Rivera
+Equipo:
+5
+Actividad:
+Esquema del proyecto - Capítulo 2
+Integrantes:
+Nombres:	Carnet:
+Alvarado Villareal, Douglas Isaías	25-3112-2020
+Gonzales Escobar, Gerson Balmore	25-0645-2021
+(Líder) Guardado Monge, Roberto Wilfredo	25-0447-2018
+Ordoñez González, Oscar Alfredo 	25-0681-2020
+Pérez Benítez, Oscar Elías 	25-2723-2020
+Rosales Chavez, Steven Isaí	25-1006-2017
+
+San Salvador, 19 de octubre de 202 
+Índice
+Introducción	1
+CAPÍTULO I: Especificación de proyecto	2
+a.	Situación Actual	2
+i.	Antecedentes	2
+ii.	Descripción del problema	2
+iii.	Planteamiento del problema	2
+iv.	Hipótesis	3
+b.	Tema	3
+c.	Sistema de Objetivos	3
+Objetivo General	3
+Objetivos Específicos	3
+d.	Alcances	4
+Alcance 1:	4
+Producto 1:	4
+Alcance 2:	4
+Producto 2:	4
+Alcance 3:	4
+Producto 3:	4
+Limitantes	5
+e.	Justificación	5
+f.	Cronograma	7
+g.	Presupuesto	8
+CAPÍTULO II: Análisis y diseño de la propuesta de solución	10
+a.	Metodología de trabajo	10
+Taller de requerimientos	10
+Gestión de usuarios y roles	10
+Visualización y navegación de productos	11
+Generación de pedidos e informes	11
+Metodología de desarrollo con Flutter	11
+b.	Descripción de la propuesta de solución	12
+d.	Evaluación de tecnología disponible	14
+e.	Diagrama arquitectónico de la solución	15
+f.	Descripción de cada componente de la solución	16
+Conclusión	18
+Recomendaciones	19
+Bibliografía	20
+Anexos	21
+
+
+
+ 
+Introducción
+Hoy en día, las aplicaciones móviles han ido transformado la manera en que las personas acceden a los productos y servicios, especialmente en el campo del comercio electrónico y la entrega a domicilio, lo cual a provocado una gran demanda por soluciones tecnológicas que ayuden a los usuarios a realizar pedidos de manera rápida, segura y eficiente con los proveedores.
+Este proyecto tiene como propósito el desarrollo de una aplicación móvil de delivery utilizando Flutter, un framework de código abierto creado por Google que permite construir aplicaciones nativas para Android e iOS desde una única base de código. Este proyecto busca aprovechar las ventajas de Flutter para construir una solución de manera digital que ayude a solventar las exigencias en el mercado actual, promoviendo la innovación y la mejora continua en los procesos de compra y entrega mediante el uso de tecnologías móviles.
+
+
+
+ 
+CAPÍTULO I: Especificación de proyecto
+a.	Situación Actual
+i.	Antecedentes 
+Diversos estudios y encuestas han evidenciado que las microempresas representan una parte significativa de la economía local, pero carecen de herramientas tecnológicas accesibles. Las plataformas existentes imponen comisiones elevadas, lo que reduce los márgenes de ganancia y desincentiva su uso. Además, la logística de reparto suele ser fragmentada y costosa.
+Esta situación refleja una brecha tecnológica que limita el desarrollo de las microempresas, especialmente en contextos donde los recursos son escasos y la competencia con grandes plataformas digitales es cada vez más desafiante. La falta de soluciones adaptadas a sus necesidades impide que estos negocios aprovechen el potencial del comercio electrónico, afectando su capacidad para crecer, fidelizar clientes y contribuir de manera más efectiva al fortalecimiento de la economía local.
+ii.	Descripción del problema
+Las microempresas locales no cuentan con una solución tecnológica que les permita gestionar pedidos y entregas de forma eficiente, económica y colaborativa. Esto genera:
+•	Pérdida de clientes potenciales por falta de presencia digital.
+•	Altos costos operativos por logística individual.
+•	Dificultad para competir con grandes plataformas
+iii.	Planteamiento del problema 
+¿Cómo desarrollar una aplicación móvil que permita a las microempresas gestionar pedidos y entregas de forma colaborativa, reduciendo costos operativos y mejorando su competitividad frente a plataformas tradicionales? 
+iv.	Hipótesis 
+Si se diseña y desarrolla una aplicación móvil de delivery comunitario que integre funcionalidades clave como la gestión de pedidos, la planificación de rutas compartidas entre negocios cercanos y la incorporación de pagos digitales seguros, entonces las microempresas podrán:
+•	Optimizar sus procesos logísticos mediante la colaboración entre negocios.
+•	Reducir significativamente los costos operativos asociados al reparto.
+•	Ampliar su alcance comercial al mejorar su presencia digital.
+b.	Tema
+Aplicación Móvil de Delivery en Flutter
+c.	Sistema de Objetivos
+Objetivo General
+Desarrollar una aplicación móvil multiplataforma en Flutter que permita gestionar de manera eficiente el proceso de entrega de productos a domicilio, integrando funcionalidades para usuarios, repartidores y administradores de negocios.
+Objetivos Específicos
+•	Diseñar una interfaz fácil de comprender que permita al usuario navegar fácilmente por la app y realizar pedidos sin ninguna complicación.
+•	Ofrecer al usuario un historial de pedidos y notificaciones, para que pueda revisar compras anteriores y recibir actualizaciones importantes.
+•	Permitir a los usuarios registrarse e iniciar sesión de manera segura, garantizando que cada cliente tenga acceso personalizado a sus pedidos y datos.
+•	Conectar la app con una base de datos que almacene productos, pedidos y usuarios, permitiendo que la información esté siempre actualizada.
+
+d.	Alcances
+Alcance 1:
+Definir la arquitectura del sistema, crear los mockups y establecer la base del proyecto en Flutter, incluyendo la navegación entre pantallas
+Producto 1:
+•	Bocetos y mockups aprobados que muestren las pantallas principales (inicio de sesión, pantalla principal, perfil).
+•	Proyecto base en Flutter con estructura inicial, rutas configuradas y navegación funcional entre pantallas.
+Alcance 2:
+Implementación de autenticación segura y gestión completa de pedidos, garantizando la interacción básica del usuario con la aplicación.
+Producto 2:
+•	Módulo de registro e inicio de sesión seguro con validación de datos.
+•	Gestión completa de pedidos: creación, edición, cancelación y visualización.
+Alcance 3:
+Integración del sistema de notificaciones y ejecución de pruebas para asegurar la estabilidad y preparación de la aplicación para su lanzamiento.
+Producto 3:
+•	Sistema de notificaciones push en tiempo real para informar sobre el estado de los pedidos.
+•	Aplicación probada con corrección de errores críticos y lista para lanzamiento en entornos de prueba y producción.
+
+Limitantes
+1.	Integraciones externas limitadas
+No se pueden usar servicios reales como pagos en línea, mapas o mensajería por falta de permisos, tiempo y acceso a cuentas comerciales.
+2.	Simulación en lugar de operaciones reales
+La logística de microempresas y repartidores se simula, lo que puede ocultar problemas como lentitud, errores o fallos que solo aparecen en situaciones reales.
+3.	Seguridad y privacidad básica
+No se implementan medidas completas de protección de datos (como cifrado o control de accesos) por falta de recursos legales y técnicos, lo que deja vulnerabilidades en el prototipo.
+4.	Limitada validación con usuarios reales
+No se realizarán pruebas con microempresarios o clientes reales, lo que puede afectar la precisión del diseño y la funcionalidad de la aplicación en situaciones reales.
+5.	Restricciones de tiempo y recursos humanos
+El desarrollo está condicionado por un calendario académico y la disponibilidad del equipo, lo que limita la implementación de funciones avanzadas como optimización de rutas o análisis de datos en tiempo real.
+e.	Justificación
+Estas limitantes surgen porque el proyecto es una solución socio-técnica que requiere validación con actores reales, acceso a servicios de terceros y garantías legales que resultan costosas o impracticables en el contexto estudiantil.
+Primero, las integraciones con proveedores externos implican credenciales, manejo de comisiones y condiciones contractuales; sin estas integraciones reales, los estudiantes pueden construir flujos funcionales, pero no validar latencias, fallos intermitentes, reversiones de pago ni límites de uso que condicionan la arquitectura y los costos operativos.
+Segundo, la logística colaborativa depende de dinámicas humanas y de escala: rutas en tiempo real, variaciones de demanda, disponibilidad de repartidores y gestión de excepciones (pérdidas, devoluciones, cancelaciones) se evidencian con datos y usuarios reales; la simulación facilita el desarrollo inicial pero no revela costos ocultos, congestiones de mensajes ni degradaciones de rendimiento al aumentar participantes.
+Tercero, los aspectos de seguridad y cumplimiento no son periféricos: el manejo de datos de clientes, pagos y direcciones exige cifrado, roles, auditoría y, en muchos casos, verificación legal; omitir o simplificar estos requisitos acelera el prototipo, pero genera artefactos que no pueden desplegarse comercialmente sin rediseños y auditorías.
+Reconocer estas limitantes convierte el trabajo en una experiencia de aprendizaje más valiosa. Al definir límites claros, los estudiantes pueden:
+a)	Diseñar una arquitectura extensible con puntos de integración para servicios reales.
+b)	Construir conjuntos de datos y pruebas de esfuerzo que simulen cargas y excepciones plausibles.
+c)	Especificar requisitos no funcionales de seguridad, privacidad y cumplimiento como criterios de aceptación, aun si su implementación completa queda fuera del alcance del curso.
+Esta aproximación reduce riesgos al escalar el prototipo y facilita la transición hacia un producto desplegable, al tiempo que enseña mejores prácticas de ingeniería, gestión de proyectos y gobernanza tecnológica.
+Además, este proyecto también busca generar un impacto social y económico positivo. Al facilitar la colaboración entre microempresas locales, se promueve la economía solidaria y se fortalece el comercio comunitario. La aplicación digitaliza procesos clave, ayudando a pequeños negocios a competir en un mercado dominado por grandes plataformas, lo que contribuye a la inclusión tecnológica y al desarrollo sostenible.
+f.	Cronograma
+El desarrollo de la aplicación de delivery en Flutter se organizará en un periodo de 12 semanas con actividades distribuidas de forma progresiva para lograr una planificación clara, ordenada y enfocada en cumplir los objetivos del proyecto. A continuación, se muestra cómo se dividirán las tareas por semana:
+•	Semana 1–2: Se identifican los requisitos funcionales y no funcionales del sistema, se definen los módulos principales y se elaboran los primeros bocetos y mockups de las pantallas clave para establecer la estructura visual de la aplicación.
+•	Semana 3–4: Se configura el entorno de desarrollo en Flutter, se establece la arquitectura base del sistema y se implementa la navegación entre pantallas, asegurando una interfaz clara y coherente.
+•	Semana 5–6: Se desarrollan los módulos de registro e inicio de sesión con validación de datos, se crean perfiles personalizados y se aplican medidas básicas de seguridad para el acceso de los usuarios.
+•	Semana 7–8: Se programan las funciones para gestionar pedidos y restaurantes, se conecta la aplicación con la base de datos y se asegura la correcta manipulación de la información de productos y usuarios.
+•	Semana 9–10: Se realizan pruebas unitarias e integración de módulos, se corrigen errores detectados, se optimiza el rendimiento general y se integra el sistema de notificaciones push para mejorar la experiencia del usuario.
+•	Semana 11: Se despliega la aplicación en un entorno de pruebas, se configura la infraestructura necesaria y se realizan pruebas de compatibilidad en distintos dispositivos y sistemas operativos.
+•	Semana 12: Se realiza el lanzamiento interno de la aplicación, se ejecutan pruebas finales del sistema y se verifica el funcionamiento completo en condiciones simuladas para validar la estabilidad y usabilidad.
+
+
+g.	Presupuesto
+1. Recursos Humanos – $2,280
+Este rubro contempla el trabajo realizado por los integrantes del equipo en distintas áreas del desarrollo del proyecto:
+•	Douglas Isaías Alvarado Villareal – Programación backend y documentación técnica.
+•	Gerson Balmore Gonzales Escobar – Diseño de interfaz (UI/UX) y pruebas de usabilidad.
+•	Roberto Wilfredo Guardado Monge – Coordinación general del equipo y gestión del proyecto.
+•	Oscar Alfredo Ordoñez González – Programación frontend y conexión con base de datos.
+•	Oscar Elías Pérez Benítez – Integración de funcionalidades y pruebas técnicas.
+•	Steven Isaí Rosales Chávez – Configuración de infraestructura, despliegue y control de calidad.
+Cada miembro contribuye en tareas específicas como diseño, desarrollo, pruebas, documentación y coordinación, lo que justifica el monto asignado.
+2. Herramientas y Servicios – $139
+Incluye licencias, plataformas y servicios utilizados durante el desarrollo:
+•	Firebase – Backend como servicio para autenticación y base de datos.
+•	Figma – Herramienta de diseño colaborativo para prototipos y mockups.
+•	GitHub – Control de versiones y colaboración en el código fuente.
+•	Servidor de pruebas – Espacio para realizar despliegues y pruebas funcionales.
+
+
+3. Equipos y Dispositivos – $400
+Recursos físicos utilizados para el desarrollo y pruebas de la aplicación:
+•	Smartphones Android/iOS – Para validar la funcionalidad multiplataforma.
+•	Laptop – Equipos de desarrollo y pruebas de rendimiento.
+4. Marketing y Lanzamiento – $274
+Actividades relacionadas con la presentación y difusión del proyecto:
+•	Diseño de logo – Identidad visual de la aplicación.
+•	Publicación en entorno de pruebas – Simulación de lanzamiento.
+•	Publicidad en redes sociales – Difusión del proyecto y captación de usuarios de prueba.
+Resumen General del Presupuesto
+Categoría	Descripción breve	Costo (USD)
+Recursos Humanos	Trabajo técnico y de gestión del equipo	$2,280
+Herramientas y Servicios	Plataformas, licencias y servicios online	$139
+Equipos y Dispositivos	Hardware para desarrollo y pruebas	$400
+Marketing y Lanzamiento	Imagen del proyecto y difusión	$274
+Total General		$3,093
+
+
+
+
+
+ 
+CAPÍTULO II: Análisis y diseño de la propuesta de solución
+a.	Metodología de trabajo
+Taller de requerimientos
+Se realizó un análisis funcional para identificar las necesidades del sistema. Se definieron los siguientes módulos principales:
+• 	Autenticación de usuarios
+• 	Catálogo de empresas
+• 	Visualización de mapa con ubicaciones
+• 	Panel administrativo para gestión de contenido
+La recopilación se basó en entrevistas con usuarios tipo y revisión de aplicaciones similares del sector delivery, aunque en este caso el enfoque es exclusivamente informativo y publicitario: los usuarios no realizan pedidos, solo visualizan ubicación y promociones de empresas.
+Gestión de usuarios y roles
+Se implementa un sistema de autenticación utilizando el framework Django, aprovechando su sistema integrado de gestión de usuarios y permisos. Los roles definidos son:
+•	Usuario visitante: acceso a la visualización del catálogo de empresas, ubicación en el mapa y promociones disponibles.
+•	Administrador: acceso al panel de gestión para registrar empresas, editar información, subir imágenes publicitarias y administrar ubicaciones.
+La persistencia de datos se maneja con Django ORM sobre una base de datos relacional (como PostgreSQL o MySQL), estructurando los modelos por tipo de usuario y entidad empresarial.
+
+
+Visualización y navegación de productos
+La interfaz móvil se desarrolla como una APK en Flutter, integrando:
+• 	ListView y GridView para renderizado dinámico de empresas.
+• 	Categorías para segmentar por tipo de negocio (restaurantes, tiendas, servicios, etc.).
+• 	Google Maps API para mostrar ubicaciones geográficas de cada empresa.
+El diseño sigue principios de Material Design, optimizado para dispositivos móviles Android.
+Generación de pedidos e informes
+El flujo de interacción del usuario incluye:
+• 	Exploración del catálogo con imágenes, descripciones y promociones.
+• 	Visualización de ubicación en el mapa con marcadores personalizados.
+• 	Sin gestión de pedidos: el sistema no contempla compras ni entregas, solo información y contacto.
+Los administradores pueden generar reportes básicos desde el panel, como:
+• 	Empresas más vistas
+• 	Promociones activas
+• 	Zonas con mayor concentración de negocios
+Metodología de desarrollo con Flutter
+Se utiliza una metodología ágil tipo Scrum, con enfoque colaborativo y entregas incrementales:
+• 	Sprints semanales con funcionalidades específicas.
+• 	Control de versiones con Git y GitHub.
+• 	Integración de Django REST Framework para la API que conecta con Flutter.
+• 	Pruebas unitarias con  y pruebas de integración en ambos entornos.
+El enfoque prioriza modularidad, escalabilidad y mantenibilidad, facilitando futuras expansiones como filtros por ubicación, notificaciones push o integración con redes sociales.
+b.	Descripción de la propuesta de solución
+La propuesta de solución se centra en el desarrollo de una aplicación móvil de delivery diseñada especialmente para apoyar a las microempresas locales que son las que no cuentan con herramientas tecnológicas avanzadas que los ayuden a gestionar sus ventas y entregas. Mediante esta aplicación se busca ofrecer una alternativa económica, funcional y accesible, que busque el aprovechar el potencial de la tecnología móvil para así optimizar los procesos de compra, venta y distribución de productos en el ámbito de las entregas a domicilio.
+La aplicación será desarrollada con Flutter, un framework de código abierto creado por Google para construir aplicaciones móviles, web y de escritorio desde una sola base de código, lo que permitirá construir una solución que sea compatible con Android e iOS a partir de un solo código base, reduciendo así los costos de mantenimiento y facilitando futuras actualizaciones. La propuesta trata de resolver los principales problemas de las microempresas, como son la falta de presencia digital, los altos costos logísticos y la dificultad para competir con plataformas grandes de reparto. La app integrará funciones como:
+•	Registro e inicio de sesión seguro, garantizando que cada usuario tenga su propio perfil.
+•	Gestión completa de pedidos, donde los usuarios podrán crear, editar, cancelar y revisar sus compras anteriores.
+•	Sistema de notificaciones en tiempo real, para mantener informados a los usuarios sobre el estado de sus pedidos.
+•	Historial de compras, que permitirá visualizar pedidos anteriores y volver a pedir fácilmente.
+•	Interfaz intuitiva, diseñada para que cualquier persona pueda usar la app sin complicaciones.
+Esta solución busca mejorar la eficiencia operativa de los pequeños negocios y fomentar la colaboración entre comercios locales mediante rutas compartidas. Además, promueve el uso de tecnología para impulsar la inclusión y modernización de las microempresas.
+c.	Descripción de la tecnología disponible
+Para desarrollar la aplicación, el equipo empleará tecnologías modernas, accesibles y eficientes que facilitarán tanto la creación como la gestión del sistema, incluyendo herramientas que optimizan los procesos de desarrollo, pruebas y mantenimiento, como:
+•	Flutter: Framework de código abierto creado por Google que permite construir aplicaciones nativas para Android e iOS desde una única base de código.
+•	Firebase: Servicio en la nube utilizado como backend para la aplicación, proporcionando autenticación y base de datos.
+•	Figma: Herramienta colaborativa para el diseño de prototipos y mockups de la aplicación.
+•	GitHub: Plataforma para el control de versiones y colaboración en el código fuente.
+•	Visual Studio Code: Entorno de desarrollo utilizado para programar, depurar y organizar el código del proyecto.
+•	Servidor de pruebas: Espacio destinado para realizar despliegues y pruebas funcionales.
+•	Smartphones Android/iOS y laptops: Equipos utilizados para el desarrollo y validación del funcionamiento multiplataforma.
+Estas tecnologías fueron seleccionadas por su accesibilidad y facilidad de integración, permitiendo construir una aplicación funcional y escalable dentro de los recursos disponibles para el proyecto.
+
+
+d.	Evaluación de tecnología disponible
+La selección tecnológica para esta solución se fundamenta en la búsqueda de la eficiencia, el bajo costo operativo y la escalabilidad, factores cruciales para apoyar a las microempresas. La combinación de un framework multiplataforma con una arquitectura serverless garantiza un producto robusto y accesible.
+1. Framework de Desarrollo (Frontend)
+El proyecto utilizará Flutter, el framework de código abierto de Google. Esta es la elección principal porque permite construir aplicaciones nativas de alto rendimiento para Android e iOS desde una única base de código. Esta característica es fundamental, ya que reduce a la mitad los tiempos y costos de desarrollo y mantenimiento, cumpliendo directamente con el objetivo de ofrecer una alternativa económica. Su soporte para el Material Design asegura una interfaz intuitiva y moderna, facilitando el uso a cualquier persona.
+2. Servicios Backend y Base de Datos (Firebase)
+Hemos optado por Firebase como el Backend as a Service (BaaS). Esta decisión elimina la necesidad de gestionar infraestructura de servidores compleja, minimizando los altos costos logísticos y de infraestructura.
+•	Firebase Authentication: Proporciona un sistema de registro e inicio de sesión seguro y listo para usar, gestionando de forma eficiente los roles de Clientes, Administradores y Repartidores.
+•	Firebase Firestore: Utilizada como la base de datos NoSQL. Su capacidad de sincronización en tiempo real es crítica para la funcionalidad de delivery, asegurando que los usuarios y repartidores vean el estado de los pedidos actualizado al instante, mejorando la eficiencia operativa.
+
+
+
+3. Herramientas de Diseño y Colaboración
+La gestión del ciclo de vida del desarrollo se optimiza con herramientas colaborativas líderes en la industria:
+•	Figma: Es esencial para la etapa de diseño, permitiendo el prototipado rápido y colaborativo de la interfaz (mockups). Esto garantiza que la interfaz intuitiva se valide antes de la codificación.
+•	GitHub / Git: Se utiliza para el control de versiones, asegurando la trazabilidad de los cambios y facilitando la colaboración estructurada del equipo bajo una metodología ágil tipo Scrum.
+4. Entorno de Desarrollo 
+Para asegurar la calidad y la eficiencia del desarrollo, se emplearán las siguientes herramientas:
+•	Visual Studio Code (VS Code): Un Entorno de Desarrollo Integrado (IDE) ligero pero potente, altamente compatible con Flutter y Dart, que optimiza la programación y la depuración código.   
+e.	Diagrama arquitectónico de la solución
+ 
+f.	Descripción de cada componente de la solución
+1.	Interfaz de Usuario (Frontend)
+Es la parte visual de la aplicación desarrollada en Flutter, donde los usuarios pueden registrarse, iniciar sesión, realizar pedidos y ver su historial. Se diseñó con una interfaz simple e intuitiva que facilita la navegación, usando componentes modernos y compatibles con Android e iOS.
+2.	Gestor de Usuarios
+Este módulo permite registrar, autenticar y administrar usuarios (clientes, repartidores y administradores). Se usa Firebase Authentication para el inicio de sesión seguro y la validación de datos personales.
+3.	Gestión de Pedidos
+Componente encargado de crear, modificar, cancelar y visualizar pedidos. Permite a los clientes seleccionar productos, confirmar compras y ver el estado de entrega en tiempo real (simulado en el prototipo).
+4.	Base de Datos (Backend)
+Se utiliza Firebase Firestore para almacenar información de usuarios, productos y pedidos. Garantiza sincronización rápida y almacenamiento en la nube, permitiendo que los datos se actualicen automáticamente en la app.
+5.	Módulo de Notificaciones
+Sistema que envía notificaciones push al usuario para mantenerlo informado sobre el estado de su pedido, promociones o actualizaciones importantes. Mejora la interacción entre cliente y negocio.
+6.	Módulo de Administración
+Permite al administrador o dueño del negocio gestionar productos, revisar pedidos y ver reportes básicos. Facilita el control interno y la toma de decisiones mediante una interfaz sencilla.
+7.	Módulo de Repartidores
+Facilita la asignación de entregas a repartidores cercanos y les permite actualizar el estado de los pedidos. Simula la logística de envío en tiempo real dentro del entorno de pruebas.
+8.	Conexión con Firebase
+Sirve como puente entre la aplicación y la base de datos en la nube. Gestiona la comunicación en tiempo real y garantiza la disponibilidad de los datos, incluso si varios usuarios acceden simultáneamente.
+9.	Sistema de Notificaciones y Alertas
+Además de los avisos de pedidos, puede enviar alertas internas sobre fallos, errores o mensajes del sistema. Aumenta la confiabilidad y el monitoreo del funcionamiento de la aplicación.
+10.	Módulo de Pruebas y Control de Calidad
+Este componente se usa para verificar el correcto funcionamiento de cada módulo, asegurando estabilidad y detección temprana de errores. Incluye pruebas unitarias y de integración dentro del entorno de desarrollo.
+ 
+Conclusión
+La creciente demanda por soluciones digitales eficientes en el ámbito del comercio electrónico y la entrega a domicilio ha impulsado el desarrollo de aplicaciones móviles que optimicen la experiencia del usuario. Este proyecto, basado en Flutter, responde a esa necesidad mediante una plataforma moderna, intuitiva y multiplataforma que facilita la gestión de pedidos, el seguimiento de compras y la interacción directa con los proveedores.
+Las pantallas diseñadas —como el perfil del usuario y el historial de pedidos— reflejan el compromiso con la usabilidad, la transparencia y la personalización, elementos clave para fomentar la confianza y la fidelización del cliente. Al integrar funcionalidades como la billetera digital, favoritos, direcciones de entrega y la opción de volver a pedir, se promueve una experiencia fluida y centrada en el usuario.
+En conjunto, esta aplicación representa una propuesta innovadora que no solo aprovecha las capacidades técnicas de Flutter, sino que también impulsa la transformación digital en los procesos de compra y entrega, contribuyendo al desarrollo de soluciones escalables, seguras y alineadas con las exigencias del mercado actual.
+ 
+Recomendaciones
+1.	Optimizar la interfaz de usuario:
+Se recomienda realizar pruebas de usabilidad con diferentes tipos de usuarios para garantizar que la aplicación sea intuitiva, clara y fácil de usar.
+2.	Mejorar la seguridad de los datos:
+Implementar medidas de seguridad en el proceso de autenticación, cifrado de contraseñas y protección de la información personal de los usuarios.
+3.	Usar una base de datos escalable:
+Optar por soluciones como Firebase o PostgreSQL, que permitan manejar un alto volumen de pedidos y usuarios sin afectar el rendimiento.
+4.	Realizar pruebas continuas:
+Ejecutar pruebas unitarias y de integración durante todo el desarrollo para detectar errores a tiempo y asegurar la estabilidad del sistema.
+5.	Mantener la aplicación actualizada:
+Incorporar mejoras periódicas, nuevas funciones y actualizaciones de seguridad para mantener la app competitiva y funcional a largo plazo.
+6.	Promover la retroalimentación de los usuarios:
+Incluir un espacio en la app para recibir sugerencias o reportes, con el fin de mejorar la experiencia y la calidad del servicio.
+
+
+ 
+Bibliografía
+Granado, A. (2024). El impacto del desarrollo de aplicaciones móviles con Flutter. Revista API. Recuperado de: https://revista-api.com/el-impacto-del-desarrollo-de-aplicacionesmoviles-con-flutter/ 
+Appvizer. (s.f.). ¿Qué es y cómo definir el alcance de un proyecto? Ejemplo y 5 pasos. Recuperado de: https://www.appvizer.es/revista/organizacion-planificacion/gestionproyectos/alcance-de-un-proyecto 
+Orienteed. (s.f.). Guía definitiva para el desarrollo de aplicaciones móviles. Recuperado de: https://orienteed.com/es/guia-definitiva-para-el-desarrollo-de-aplicaciones-moviles/ 
+AppMySite. (s.f.). Gestión de proyectos de desarrollo de aplicaciones móviles: una guía detallada sobre metodologías. Recuperado de: https://www.appmysite.com/blog/es/gestionde-proyectos-de-desarrollo-de-aplicaciones-moviles-una-guia-detallada-sobremetodologias/ 
+Toolify. (2024). Construye una app de entrega en tiempo real con Flutter y Firebase. Recuperado de: https://www.toolify.ai/es/ai-news-es/construye-una-app-de-entrega-entiempo-real-con-flutter-y-firebase-2051433 
+Wolf Agencia Marketing. (2024). Desarrollo de aplicaciones móviles de comercio electrónico con Flutter y Firebase. Recuperado de: https://wolfagenciademarketing.com/build-mobileecommerce-shop-app-with-flutter firebase/ 
+ 
+Anexos
+   
+
+   

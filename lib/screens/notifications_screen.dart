@@ -1,16 +1,13 @@
-/**
- * 🔔 PANTALLA DE NOTIFICACIONES
- * 
- * Pantalla para mostrar notificaciones del usuario con diferentes tipos
- * y animaciones modernas
- * 
- * @author Sistema de Delivery Comunitario
- * @version 2.0.0
- */
+/// 🔔 PANTALLA DE NOTIFICACIONES
+/// 
+/// Pantalla para mostrar notificaciones del usuario con diferentes tipos
+/// y animaciones modernas
+/// 
+/// @author Sistema de Delivery Comunitario
+/// @version 2.0.0
 
 import 'package:flutter/material.dart' hide IconButton;
 import 'package:flutter/material.dart' as material show IconButton;
-import '../widgets/improved_buttons.dart';
 import '../widgets/animated_components.dart';
 
 class NotificationsScreen extends StatefulWidget {
@@ -176,7 +173,7 @@ class _NotificationsScreenState extends State<NotificationsScreen>
                     ? '$unreadCount notificaciones nuevas'
                     : 'Todas las notificaciones leídas',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white.withValues(alpha: 0.8),
                     fontSize: 16,
                   ),
                 ),
@@ -209,7 +206,7 @@ class _NotificationsScreenState extends State<NotificationsScreen>
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
+        color: Colors.white.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -284,7 +281,7 @@ class _NotificationsScreenState extends State<NotificationsScreen>
         border: isRead ? null : Border.all(color: color, width: 2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -308,7 +305,7 @@ class _NotificationsScreenState extends State<NotificationsScreen>
                   width: 60,
                   height: 60,
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
+                    color: color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Icon(
@@ -395,7 +392,7 @@ class _NotificationsScreenState extends State<NotificationsScreen>
           Container(
             padding: const EdgeInsets.all(40),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(20),
             ),
             child: const Icon(
@@ -417,7 +414,7 @@ class _NotificationsScreenState extends State<NotificationsScreen>
           Text(
             'Te notificaremos cuando tengas nuevas actualizaciones',
             style: TextStyle(
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
               fontSize: 16,
             ),
             textAlign: TextAlign.center,

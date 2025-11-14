@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'dart:convert';
 import '../models/user.dart' as app_user;
 
 class FirebaseAuthService {
@@ -29,11 +28,19 @@ class FirebaseAuthService {
     required String userType,
   }) async {
     try {
+      if (kDebugMode) {
+        debugPrint('🔥 Iniciando creación de usuario en Firebase Auth');
+      }
+      
       // Crear usuario en Firebase Auth
       UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
+
+      if (kDebugMode) {
+        debugPrint('✅ Usuario creado en Firebase Auth');
+      }
 
       User? user = userCredential.user;
       if (user == null) {
@@ -42,7 +49,16 @@ class FirebaseAuthService {
 
       // Actualizar perfil
       await user.updateDisplayName(name);
+      
+      if (kDebugMode) {
+        debugPrint('✅ Display name actualizado');
+      }
+      
       await user.sendEmailVerification();
+      
+      if (kDebugMode) {
+        debugPrint('✅ Email de verificación enviado');
+      }
 
       // Crear documento en Firestore
       await _createUserDocument(user, {
@@ -55,8 +71,16 @@ class FirebaseAuthService {
         'updatedAt': FieldValue.serverTimestamp(),
       });
 
+      if (kDebugMode) {
+        debugPrint('✅ Documento creado en Firestore');
+      }
+
       // Guardar token FCM
       await _saveFCMToken(user.uid);
+
+      if (kDebugMode) {
+        debugPrint('✅ Token FCM guardado');
+      }
 
       return {
         'success': true,
@@ -64,11 +88,18 @@ class FirebaseAuthService {
         'message': 'Usuario creado exitosamente',
       };
     } on FirebaseAuthException catch (e) {
+      if (kDebugMode) {
+        debugPrint('❌ FirebaseAuthException: ${e.code} - ${e.message}');
+      }
       return {
         'success': false,
         'error': _getErrorMessage(e.code),
       };
-    } catch (e) {
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        debugPrint('❌ Exception en signUpWithEmail: $e');
+        debugPrint('📍 Stack trace: $stackTrace');
+      }
       return {
         'success': false,
         'error': 'Error inesperado: ${e.toString()}',
@@ -76,8 +107,62 @@ class FirebaseAuthService {
     }
   }
 
-  /// Login con email y contraseña
+  /// Registro con email y contraseña (método simplificado para AuthProvider)
+  Future<Map<String, dynamic>> createUserWithEmail({
+    required String email,
+    required String password,
+    required String displayName,
+    required String userType,
+  }) async {
+    if (kDebugMode) {
+      debugPrint('🔐 Creando usuario con Firebase Auth');
+      debugPrint('📧 Email: $email');
+      debugPrint('👤 Nombre: $displayName');
+      debugPrint('🏷️ Tipo: $userType');
+    }
+    
+    try {
+      final result = await signUpWithEmail(
+        email: email,
+        password: password,
+        name: displayName,
+        phone: '+50300000000', // Teléfono por defecto
+        userType: userType,
+      );
+      
+      if (kDebugMode) {
+        debugPrint('✅ Resultado del registro: ${result['success']}');
+        if (result['success'] == false) {
+          debugPrint('❌ Error: ${result['error']}');
+        }
+      }
+      
+      return result;
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        debugPrint('❌ Excepción en createUserWithEmail: $e');
+        debugPrint('📍 Stack trace: $stackTrace');
+      }
+      return {
+        'success': false,
+        'error': 'Error inesperado: ${e.toString()}',
+      };
+    }
+  }
+
+  /// Login con email y contraseña (método simplificado para AuthProvider)
   Future<Map<String, dynamic>> signInWithEmail({
+    required String email,
+    required String password,
+  }) async {
+    return await _signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+  }
+
+  /// Login interno con email y contraseña
+  Future<Map<String, dynamic>> _signInWithEmailAndPassword({
     required String email,
     required String password,
   }) async {
@@ -132,11 +217,11 @@ class FirebaseAuthService {
       await prefs.remove('user_data');
       
       if (kDebugMode) {
-        print('✅ Usuario deslogueado exitosamente');
+        debugPrint('✅ Usuario deslogueado exitosamente');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error en logout: $e');
+        debugPrint('❌ Error en logout: $e');
       }
       rethrow;
     }
@@ -153,7 +238,7 @@ class FirebaseAuthService {
       return false;
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error enviando email de verificación: $e');
+        debugPrint('❌ Error enviando email de verificación: $e');
       }
       return false;
     }
@@ -166,7 +251,7 @@ class FirebaseAuthService {
       return true;
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error enviando email de restablecimiento: $e');
+        debugPrint('❌ Error enviando email de restablecimiento: $e');
       }
       return false;
     }
@@ -176,6 +261,7 @@ class FirebaseAuthService {
   Future<bool> updateProfile({
     String? displayName,
     String? photoURL,
+    String? phone,
   }) async {
     try {
       User? user = currentUser;
@@ -193,6 +279,7 @@ class FirebaseAuthService {
       Map<String, dynamic> updates = {};
       if (displayName != null) updates['name'] = displayName;
       if (photoURL != null) updates['profileImage'] = photoURL;
+      if (phone != null) updates['phone'] = phone;
       updates['updatedAt'] = FieldValue.serverTimestamp();
 
       if (updates.isNotEmpty) {
@@ -202,7 +289,7 @@ class FirebaseAuthService {
       return true;
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error actualizando perfil: $e');
+        debugPrint('❌ Error actualizando perfil: $e');
       }
       return false;
     }
@@ -218,7 +305,7 @@ class FirebaseAuthService {
       return null;
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error obteniendo datos del usuario: $e');
+        debugPrint('❌ Error obteniendo datos del usuario: $e');
       }
       return null;
     }
@@ -250,7 +337,7 @@ class FirebaseAuthService {
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error guardando token FCM: $e');
+        debugPrint('❌ Error guardando token FCM: $e');
       }
     }
   }
@@ -264,7 +351,7 @@ class FirebaseAuthService {
       });
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error removiendo token FCM: $e');
+        debugPrint('❌ Error removiendo token FCM: $e');
       }
     }
 
@@ -326,7 +413,7 @@ class FirebaseAuthService {
         return {'success': false, 'error': 'Error al obtener usuario de Firebase'};
       }
     } catch (e) {
-      print('Error en Google Sign-In: $e');
+      debugPrint('Error en Google Sign-In: $e');
       // Manejo específico del error de compatibilidad
       if (e.toString().contains('PigeonUserDetails')) {
         return {'success': false, 'error': 'Error de compatibilidad con Google Sign-In. Intenta con email y contraseña.'};
@@ -368,7 +455,7 @@ class FirebaseAuthService {
         await _firestore.collection('users').doc(firebaseUser.uid).set(userData);
       }
     } catch (e) {
-      print('Error creando/actualizando usuario en Firestore: $e');
+      debugPrint('Error creando/actualizando usuario en Firestore: $e');
     }
   }
 

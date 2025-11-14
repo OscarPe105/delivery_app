@@ -3,7 +3,6 @@
 Script para configurar Firebase en el proyecto
 """
 import os
-import json
 import subprocess
 import sys
 
@@ -86,44 +85,13 @@ def main():
     else:
         print("⚠️  Configuración iOS no encontrada - Solo Android funcionará")
     
-    # Paso 5: Configurar Django Backend
-    print_step(5, "Configurando Django Backend")
-    
-    # Verificar si existe el archivo .env
-    env_file = "django_backend/.env"
-    if not os.path.exists(env_file):
-        print("📝 Creando archivo .env desde plantilla")
-        if os.path.exists("django_backend/env_example.txt"):
-            run_command(f"copy django_backend\\env_example.txt {env_file}", "Copiando plantilla de variables de entorno")
-        else:
-            print("❌ Archivo env_example.txt no encontrado")
-    
-    # Instalar dependencias Python
-    if not run_command("cd django_backend && pip install -r requirements.txt", "Instalando dependencias Python"):
-        return False
-    
-    # Paso 6: Ejecutar migraciones Django
-    print_step(6, "Ejecutando migraciones Django")
-    
-    if not run_command("cd django_backend && python manage.py makemigrations", "Creando migraciones Django"):
-        return False
-    
-    if not run_command("cd django_backend && python manage.py migrate", "Ejecutando migraciones Django"):
-        return False
-    
-    # Paso 7: Crear superusuario Django
-    print_step(7, "Creando superusuario Django")
-    print("⚠️  Ejecuta manualmente: cd django_backend && python manage.py createsuperuser")
-    
-    # Paso 8: Verificar configuración
-    print_step(8, "Verificación final")
+    # Paso 5: Verificación final
+    print_step(5, "Verificación final")
     
     print("\n📋 RESUMEN DE CONFIGURACIÓN:")
     print("✅ Android: google-services.json configurado")
     print("✅ Flutter: firebase_options.dart configurado")
-    print("✅ Django: Backend configurado")
     print("✅ Dependencias: Instaladas")
-    print("✅ Migraciones: Ejecutadas")
     
     print("\n🚀 PRÓXIMOS PASOS:")
     print("1. Configura Firebase Console:")
@@ -132,18 +100,8 @@ def main():
     print("   - Habilita Firebase Storage")
     print("   - Habilita Cloud Messaging")
     
-    print("\n2. Obtén credenciales de servicio:")
-    print("   - Ve a Firebase Console > Configuración del proyecto")
-    print("   - Pestaña 'Cuentas de servicio'")
-    print("   - Genera nueva clave privada")
-    print("   - Reemplaza django_backend/firebase/firebase-service-account.json")
-    
-    print("\n3. Actualiza variables de entorno:")
-    print("   - Edita django_backend/.env con tus credenciales")
-    
-    print("\n4. Ejecuta la aplicación:")
-    print("   - Backend: cd django_backend && python manage.py runserver")
-    print("   - Flutter: flutter run")
+    print("\n2. Ejecuta la aplicación con `flutter run` en el dispositivo deseado.")
+    print("3. Para web, recuerda ejecutar `flutter run -d chrome --web-port 5000` si aplicaste reglas CORS específicas.")
     
     print("\n🔥 ¡Firebase configurado exitosamente!")
     return True
