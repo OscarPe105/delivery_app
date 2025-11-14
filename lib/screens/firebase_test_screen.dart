@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import '../services/firebase_service.dart';
 import '../services/firebase_auth_service.dart';
-import '../services/firebase_storage_service.dart';
 import '../services/firebase_messaging_service.dart';
 
 class FirebaseTestScreen extends StatefulWidget {
@@ -17,7 +13,6 @@ class FirebaseTestScreen extends StatefulWidget {
 
 class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
   final _authService = FirebaseAuthService();
-  final _storageService = FirebaseStorageService();
   final _messagingService = FirebaseMessagingService();
   
   String _status = 'Inicializando...';
@@ -79,7 +74,7 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
     
     try {
       // Crear un archivo de prueba
-      final testData = 'Test data from Flutter app';
+      const testData = 'Test data from Flutter app';
       final ref = FirebaseService.storage.ref().child('test/test-file.txt');
       
       await ref.putString(testData);
@@ -272,21 +267,21 @@ class _FirebaseTestScreenState extends State<FirebaseTestScreen> {
             const SizedBox(height: 24),
             
             // Información del proyecto
-            Card(
+            const Card(
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Información del Proyecto Firebase',
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
-                    const SizedBox(height: 8),
-                    const Text('Proyecto ID: delivery-app-15f53'),
-                    const Text('Storage Bucket: delivery-app-15f53.firebasestorage.app'),
-                    const Text('Sender ID: 397640943349'),
-                    const Text('App ID: 1:397640943349:android:46f26f58525316e2a5a7bc'),
+                    SizedBox(height: 8),
+                    Text('Proyecto ID: delivery-app-15f53'),
+                    Text('Storage Bucket: delivery-app-15f53.firebasestorage.app'),
+                    Text('Sender ID: 397640943349'),
+                    Text('App ID: 1:397640943349:android:46f26f58525316e2a5a7bc'),
                   ],
                 ),
               ),

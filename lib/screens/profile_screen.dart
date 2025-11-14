@@ -1,12 +1,10 @@
-/**
- * 👤 PANTALLA DE PERFIL DE USUARIO
- * 
- * Pantalla completa para mostrar y editar el perfil del usuario
- * con animaciones y efectos visuales modernos
- * 
- * @author Sistema de Delivery Comunitario
- * @version 2.0.0
- */
+/// 👤 PANTALLA DE PERFIL DE USUARIO
+/// 
+/// Pantalla completa para mostrar y editar el perfil del usuario
+/// con animaciones y efectos visuales modernos
+/// 
+/// @author Sistema de Delivery Comunitario
+/// @version 2.0.0
 
 import 'package:flutter/material.dart' hide IconButton;
 import 'package:flutter/material.dart' as material show IconButton;
@@ -100,7 +98,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                                 Positioned.fill(
                                   child: ParticleEffect(
                                     particleCount: 20,
-                                    particleColor: Colors.white.withOpacity(0.1),
+                                    particleColor: Colors.white.withValues(alpha: 0.1),
                                     child: Container(),
                                   ),
                                 ),
@@ -120,7 +118,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                                           ),
                                           boxShadow: [
                                             BoxShadow(
-                                              color: Colors.black.withOpacity(0.2),
+                                              color: Colors.black.withValues(alpha: 0.2),
                                               blurRadius: 20,
                                               offset: const Offset(0, 10),
                                             ),
@@ -147,7 +145,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                                       Text(
                                         authProvider.user?.email ?? 'usuario@email.com',
                                         style: TextStyle(
-                                          color: Colors.white.withOpacity(0.8),
+                                          color: Colors.white.withValues(alpha: 0.8),
                                           fontSize: 16,
                                         ),
                                       ),
@@ -239,7 +237,7 @@ class _ProfileScreenState extends State<ProfileScreen>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -318,7 +316,7 @@ class _ProfileScreenState extends State<ProfileScreen>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -410,7 +408,7 @@ class _ProfileScreenState extends State<ProfileScreen>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -474,7 +472,7 @@ class _ProfileScreenState extends State<ProfileScreen>
             onChanged: (value) {
               // TODO: Implementar cambio de configuración
             },
-            activeColor: const Color(0xFF667eea),
+            activeThumbColor: const Color(0xFF667eea),
           ),
         ],
       ),
@@ -489,7 +487,7 @@ class _ProfileScreenState extends State<ProfileScreen>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -526,6 +524,8 @@ class _ProfileScreenState extends State<ProfileScreen>
         return 'Cliente';
       case UserType.business:
         return 'Negocio';
+      case UserType.driver:
+        return 'Repartidor';
     }
   }
 }

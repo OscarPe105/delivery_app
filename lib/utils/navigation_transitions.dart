@@ -1,19 +1,15 @@
-/**
- * 🚀 TRANSICIONES DE NAVEGACIÓN SUAVES
- * 
- * Utilidades para crear transiciones personalizadas entre pantallas
- * 
- * @author Sistema de Delivery Comunitario
- * @version 1.0.0
- */
+/// 🚀 TRANSICIONES DE NAVEGACIÓN SUAVES
+/// 
+/// Utilidades para crear transiciones personalizadas entre pantallas
+/// 
+/// @author Sistema de Delivery Comunitario
+/// @version 1.0.0
 
 import 'package:flutter/material.dart';
 
-/**
- * 🎬 TRANSICIÓN DESLIZANTE DESDE ABAJO
- * 
- * Transición suave que desliza la pantalla desde abajo
- */
+/// 🎬 TRANSICIÓN DESLIZANTE DESDE ABAJO
+/// 
+/// Transición suave que desliza la pantalla desde abajo
 class SlideUpRoute extends PageRouteBuilder {
   final Widget page;
   final Duration duration;
@@ -37,11 +33,9 @@ class SlideUpRoute extends PageRouteBuilder {
         );
 }
 
-/**
- * 🎬 TRANSICIÓN DESLIZANTE DESDE LA DERECHA
- * 
- * Transición suave que desliza la pantalla desde la derecha
- */
+/// 🎬 TRANSICIÓN DESLIZANTE DESDE LA DERECHA
+/// 
+/// Transición suave que desliza la pantalla desde la derecha
 class SlideRightRoute extends PageRouteBuilder {
   final Widget page;
   final Duration duration;
@@ -65,11 +59,9 @@ class SlideRightRoute extends PageRouteBuilder {
         );
 }
 
-/**
- * 🎬 TRANSICIÓN CON ESCALA Y FADE
- * 
- * Transición que combina escala y desvanecimiento
- */
+/// 🎬 TRANSICIÓN CON ESCALA Y FADE
+/// 
+/// Transición que combina escala y desvanecimiento
 class ScaleFadeRoute extends PageRouteBuilder {
   final Widget page;
   final Duration duration;
@@ -99,11 +91,9 @@ class ScaleFadeRoute extends PageRouteBuilder {
         );
 }
 
-/**
- * 🎬 TRANSICIÓN CON ROTACIÓN
- * 
- * Transición que rota la pantalla mientras aparece
- */
+/// 🎬 TRANSICIÓN CON ROTACIÓN
+/// 
+/// Transición que rota la pantalla mientras aparece
 class RotationRoute extends PageRouteBuilder {
   final Widget page;
   final Duration duration;
@@ -130,11 +120,9 @@ class RotationRoute extends PageRouteBuilder {
         );
 }
 
-/**
- * 🎬 TRANSICIÓN PERSONALIZADA PARA MODALES
- * 
- * Transición especial para pantallas modales con blur de fondo
- */
+/// 🎬 TRANSICIÓN PERSONALIZADA PARA MODALES
+/// 
+/// Transición especial para pantallas modales con blur de fondo
 class ModalRoute extends PageRouteBuilder {
   final Widget page;
   final Duration duration;
@@ -167,11 +155,9 @@ class ModalRoute extends PageRouteBuilder {
         );
 }
 
-/**
- * 🎬 TRANSICIÓN CON ELASTICIDAD
- * 
- * Transición con efecto elástico
- */
+/// 🎬 TRANSICIÓN CON ELASTICIDAD
+/// 
+/// Transición con efecto elástico
 class ElasticRoute extends PageRouteBuilder {
   final Widget page;
   final Duration duration;
@@ -195,11 +181,9 @@ class ElasticRoute extends PageRouteBuilder {
         );
 }
 
-/**
- * 🎬 UTILIDADES DE NAVEGACIÓN
- * 
- * Métodos helper para usar las transiciones fácilmente
- */
+/// 🎬 UTILIDADES DE NAVEGACIÓN
+/// 
+/// Métodos helper para usar las transiciones fácilmente
 class NavigationUtils {
   /// Navegar con transición deslizante desde abajo
   static Future<T?> slideUp<T>(

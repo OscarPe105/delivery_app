@@ -60,6 +60,9 @@ class OptimizedImage extends StatelessWidget {
   }
 
   Widget _buildNetworkImage() {
+    final cacheWidth = (width != null && width!.isFinite) ? width!.toInt() : null;
+    final cacheHeight = (height != null && height!.isFinite) ? height!.toInt() : null;
+
     Widget image = CachedNetworkImage(
       imageUrl: imageUrl!,
       width: width,
@@ -68,8 +71,8 @@ class OptimizedImage extends StatelessWidget {
       placeholder: (context, url) => _buildPlaceholder(),
       errorWidget: (context, url, error) => _buildErrorWidget(),
       // Optimizaciones de caché
-      memCacheWidth: width?.toInt(),
-      memCacheHeight: height?.toInt(),
+      memCacheWidth: cacheWidth,
+      memCacheHeight: cacheHeight,
       maxWidthDiskCache: 800,
       maxHeightDiskCache: 800,
     );

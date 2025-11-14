@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -37,12 +38,12 @@ class LocationService {
       // Obtener ubicación
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
-        timeLimit: Duration(seconds: 10),
+        timeLimit: const Duration(seconds: 10),
       );
       
       return position;
     } catch (e) {
-      print('Error obteniendo ubicación: $e');
+      debugPrint('Error obteniendo ubicación: $e');
       return null;
     }
   }
@@ -74,7 +75,7 @@ class LocationService {
       
       return 'Dirección no encontrada';
     } catch (e) {
-      print('Error obteniendo dirección: $e');
+      debugPrint('Error obteniendo dirección: $e');
       return 'Error al obtener dirección';
     }
   }

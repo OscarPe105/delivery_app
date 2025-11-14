@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../themes/app_colors.dart';
 
 /// Widget de mapa alternativo para web que muestra información de ubicación
@@ -30,7 +30,7 @@ class WebMapWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -46,8 +46,8 @@ class WebMapWidget extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  AppColors.primary.withOpacity(0.1),
-                  AppColors.primaryDark.withOpacity(0.05),
+                  AppColors.primary.withValues(alpha: 0.1),
+                  AppColors.primaryDark.withValues(alpha: 0.05),
                 ],
               ),
             ),
@@ -60,98 +60,110 @@ class WebMapWidget extends StatelessWidget {
                   ),
                 ),
                 // Contenido principal
-                Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Icono de ubicación
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.primary.withOpacity(0.3),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.location_on,
-                          color: Colors.white,
-                          size: 32,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      // Información del negocio
-                      if (businessName != null)
-                        Text(
-                          businessName!,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      const SizedBox(height: 8),
-                      // Dirección
-                      if (address != null)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Text(
-                            address!,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: AppColors.textSecondary,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      const SizedBox(height: 16),
-                      // Coordenadas
-                      if (latitude != null && longitude != null)
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: SingleChildScrollView(
+                    physics: const NeverScrollableScrollPhysics(),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Icono de ubicación
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
+                          padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: AppColors.primary.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: AppColors.primary.withOpacity(0.3),
-                            ),
+                            color: AppColors.primary,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.primary.withValues(alpha: 0.3),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
-                          child: Text(
-                            '${latitude!.toStringAsFixed(4)}, ${longitude!.toStringAsFixed(4)}',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: AppColors.textSecondary,
-                              fontFamily: 'monospace',
-                            ),
-                          ),
-                        ),
-                      const SizedBox(height: 16),
-                      // Botón para abrir en Google Maps
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          _openInGoogleMaps();
-                        },
-                        icon: const Icon(Icons.open_in_new, size: 16),
-                        label: const Text('Abrir en Google Maps'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
+                          child: const Icon(
+                            Icons.location_on,
+                            color: Colors.white,
+                            size: 32,
                           ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 12),
+                        // Información del negocio
+                        if (businessName != null)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Text(
+                              businessName!,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textPrimary,
+                              ),
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        const SizedBox(height: 4),
+                        // Dirección
+                        if (address != null)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Text(
+                              address!,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textSecondary,
+                              ),
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        const SizedBox(height: 8),
+                        // Coordenadas
+                        if (latitude != null && longitude != null)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: AppColors.primary.withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: Text(
+                              '${latitude!.toStringAsFixed(4)}, ${longitude!.toStringAsFixed(4)}',
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: AppColors.textSecondary,
+                                fontFamily: 'monospace',
+                              ),
+                            ),
+                          ),
+                        const SizedBox(height: 8),
+                        // Botón para abrir en Google Maps
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            _openInGoogleMaps();
+                          },
+                          icon: const Icon(Icons.open_in_new, size: 14),
+                          label: const Text('Abrir en Google Maps'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            textStyle: const TextStyle(fontSize: 12),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 // Indicador de que es una vista web
@@ -164,7 +176,7 @@ class WebMapWidget extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.7),
+                      color: Colors.black.withValues(alpha: 0.7),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Text(
@@ -185,14 +197,14 @@ class WebMapWidget extends StatelessWidget {
     );
   }
 
-  void _openInGoogleMaps() {
+  void _openInGoogleMaps() async {
     if (latitude != null && longitude != null) {
-      final url = 'https://www.google.com/maps?q=$latitude,$longitude';
-      // En web, esto abrirá Google Maps en una nueva pestaña
-      if (kIsWeb) {
-        // Para web, usaríamos url_launcher si estuviera disponible
-        // Por ahora, solo mostramos un mensaje
-        debugPrint('Abrir en Google Maps: $url');
+      final url = Uri.parse('https://www.google.com/maps?q=$latitude,$longitude');
+      // Abrir en Google Maps
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      } else {
+        debugPrint('No se pudo abrir Google Maps: $url');
       }
     }
   }
@@ -203,7 +215,7 @@ class MapPatternPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = AppColors.primary.withOpacity(0.05)
+      ..color = AppColors.primary.withValues(alpha: 0.05)
       ..strokeWidth = 1.0;
 
     // Dibujar líneas de cuadrícula
@@ -229,10 +241,10 @@ class MapPatternPainter extends CustomPainter {
 
     // Dibujar algunos puntos para simular marcadores
     final dotPaint = Paint()
-      ..color = AppColors.primary.withOpacity(0.1)
+      ..color = AppColors.primary.withValues(alpha: 0.1)
       ..style = PaintingStyle.fill;
 
-    final dotSpacing = spacing * 2;
+    const dotSpacing = spacing * 2;
     for (double x = dotSpacing; x < size.width; x += dotSpacing) {
       for (double y = dotSpacing; y < size.height; y += dotSpacing) {
         canvas.drawCircle(Offset(x, y), 2, dotPaint);

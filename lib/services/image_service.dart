@@ -60,8 +60,8 @@ class ImageService {
                 leading: const Icon(Icons.photo_library),
                 title: const Text('Galería'),
                 onTap: () async {
-                  Navigator.of(context).pop();
                   final image = await pickImageFromGallery();
+                  if (!context.mounted) return;
                   Navigator.of(context).pop(image);
                 },
               ),
@@ -69,8 +69,8 @@ class ImageService {
                 leading: const Icon(Icons.photo_camera),
                 title: const Text('Cámara'),
                 onTap: () async {
-                  Navigator.of(context).pop();
                   final image = await pickImageFromCamera();
+                  if (!context.mounted) return;
                   Navigator.of(context).pop(image);
                 },
               ),
@@ -98,7 +98,7 @@ class ImageService {
     }
   }
   
-  /// Subir imagen al servidor Django
+  /// Subir imagen a un servidor externo (no se usa actualmente)
   static Future<String?> uploadImage(File imageFile, String endpoint) async {
     try {
       // Crear multipart request
@@ -147,7 +147,7 @@ class ImageService {
     
     if (width != null || height != null) {
       final separator = baseUrl.contains('?') ? '&' : '?';
-      optimizedUrl += '$separator';
+      optimizedUrl += separator;
       
       if (width != null) optimizedUrl += 'w=$width';
       if (height != null) optimizedUrl += '&h=$height';

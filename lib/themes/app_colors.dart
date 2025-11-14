@@ -86,6 +86,8 @@ class AppColors {
         return customerColor;
       case 'business':
         return businessColor;
+      case 'driver':
+        return const Color(0xFF10B981);
       case 'admin':
         return adminColor;
       default:
@@ -114,7 +116,7 @@ class AppColors {
 extension AppColorExtensions on Color {
   /// Crea una versión con opacidad del color
   Color withAppOpacity(double opacity) {
-    return withOpacity(opacity);
+    return withValues(alpha: opacity);
   }
   
   /// Crea una versión más clara del color

@@ -88,7 +88,7 @@ class _BusinessMapWidgetState extends State<BusinessMapWidget> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -297,7 +297,7 @@ class _BusinessMapExpandedState extends State<BusinessMapExpanded> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
+                const Icon(
                   Icons.location_on,
                   size: 64,
                   color: AppColors.primary,
@@ -325,9 +325,9 @@ class _BusinessMapExpandedState extends State<BusinessMapExpanded> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
+                      color: AppColors.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                      border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
                     ),
                     child: Column(
                       children: [

@@ -1,4 +1,4 @@
-// 🎨 PROVEEDOR DE TEMAS Y COLORES
+// PROVEEDOR DE TEMAS Y COLORES
 // Este archivo controla todos los colores, estilos y temas de la aplicación
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -19,13 +19,13 @@ class ThemeProvider extends ChangeNotifier {
   }
   
   // COLORES PRINCIPALES
-  static Color get primaryColor => const Color(0xFF34656D);      // Verde azulado oscuro
-  static Color get secondaryColor => const Color(0xFF334443);    // Verde muy oscuro
-  static Color get accentColor => const Color(0xFFFAEAB1);       // Beige dorado
+  static Color get primaryColor => const Color(0xFFE8B86D);      // Dorado/ámbar
+  static Color get secondaryColor => const Color(0xFFD4A574);    // Dorado oscuro
+  static Color get accentColor => const Color(0xFFF2D4A3);       // Dorado claro
   
   // COLORES DE TEXTO
-  static Color get primaryTextColor => const Color(0xFF334443);    // Verde muy oscuro
-  static Color get secondaryTextColor => const Color(0xFF34656D);  // Verde azulado oscuro
+  static Color get primaryTextColor => const Color(0xFF2C3E50);    // Azul oscuro
+  static Color get secondaryTextColor => const Color(0xFF7F8C8D);  // Gris medio
   static Color get lightTextColor => const Color(0xFFFAF8F1);      // Beige muy claro
   
   // COLORES DE FONDO
@@ -43,7 +43,7 @@ class ThemeProvider extends ChangeNotifier {
   static LinearGradient get primaryGradient => const LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF34656D), Color(0xFF334443)],
+    colors: [Color(0xFFE8B86D), Color(0xFFD4A574)],
   );
   
   static LinearGradient get secondaryGradient => const LinearGradient(
@@ -104,8 +104,8 @@ class ThemeProvider extends ChangeNotifier {
     primaryColor: primaryColor,
     scaffoldBackgroundColor: const Color(0xFF1A1A1A),
     cardColor: const Color(0xFF2D2D2D),
-    appBarTheme: AppBarTheme(
-      backgroundColor: const Color(0xFF2D2D2D),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Color(0xFF2D2D2D),
       foregroundColor: Colors.white,
       elevation: 0,
       centerTitle: true,
@@ -125,7 +125,7 @@ class ThemeProvider extends ChangeNotifier {
   }
   
   // COLORES ADICIONALES
-  static Color get primaryColorDark => const Color(0xFF334443);   // Verde muy oscuro
-  static Color get primaryColorLight => const Color(0xFFFAEAB1);  // Beige dorado
-  static Color get mutedTextColor => const Color(0xFF34656D);     // Verde azulado oscuro
+  static Color get primaryColorDark => const Color(0xFFD4A574);   // Dorado oscuro
+  static Color get primaryColorLight => const Color(0xFFF2D4A3);  // Dorado claro
+  static Color get mutedTextColor => const Color(0xFF7F8C8D);     // Gris medio
 }

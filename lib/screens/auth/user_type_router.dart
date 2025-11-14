@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../widgets/animated_components.dart' as animated_components;
 import '../../widgets/app_animations.dart';
 import '../../themes/app_colors.dart';
+import '../../constants/app_assets.dart';
+import '../../services/firebase_storage_service.dart';
 import '../main_navigation.dart';
-import '../business/business_home_screen.dart';
+import '../business/business_dashboard_screen.dart';
+import '../driver/driver_dashboard_screen.dart';
 
 /// Widget que determina qué pantalla mostrar según el tipo de usuario
 class UserTypeRouter extends StatelessWidget {
@@ -24,7 +28,9 @@ class UserTypeRouter extends StatelessWidget {
           case UserType.customer:
             return const MainNavigation(); // Pantalla de cliente
           case UserType.business:
-            return const BusinessHomeScreen(); // Pantalla de dueño de negocio
+            return const BusinessDashboardScreen(); // Pantalla de dueño de negocio
+          case UserType.driver:
+            return const DriverDashboardScreen();
         }
       },
     );
@@ -46,6 +52,13 @@ class _LoginScreenState extends State<LoginScreen> {
   
   bool _obscurePassword = true;
   bool _isLoading = false;
+  String? _logoUrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLogoFromStorage();
+  }
 
   @override
   void dispose() {
@@ -108,6 +121,34 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _loadLogoFromStorage() async {
+    try {
+      final storageService = FirebaseStorageService();
+      final url = await storageService.getDownloadURL(
+        AppAssets.ready2GoLogoStoragePath,
+      );
+
+      if (!mounted) return;
+
+      if (url != null && url.isNotEmpty) {
+        setState(() {
+          _logoUrl = url;
+        });
+        return;
+      }
+    } catch (_) {
+      // Ignorar y usar fallback
+    }
+
+    if (!mounted) return;
+
+    if (AppAssets.ready2GoLogoFallbackUrl.isNotEmpty) {
+      setState(() {
+        _logoUrl = AppAssets.ready2GoLogoFallbackUrl;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -120,181 +161,298 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
         child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24.0),
-              child: Card(
-                elevation: 8,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Logo simple
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            color: Colors.white.withOpacity(0.1),
-                          ),
-                          child: const Icon(
-                            Icons.delivery_dining,
-                            size: 64,
-                            color: AppColors.primary,
-                          ),
+          child: Stack(
+            children: [
+              Positioned(
+                top: -60,
+                left: -40,
+                child: _buildBackgroundOrb(110, Colors.white.withValues(alpha: 0.12)),
+              ),
+              Positioned(
+                bottom: -80,
+                right: -50,
+                child: _buildBackgroundOrb(160, Colors.white.withValues(alpha: 0.08)),
+              ),
+              Positioned(
+                bottom: 120,
+                left: 30,
+                child: _buildBackgroundOrb(70, AppColors.primaryLight.withValues(alpha: 0.18)),
+              ),
+              Center(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 600),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(32),
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.white.withValues(alpha: 0.95),
+                            Colors.white.withValues(alpha: 0.90),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'Delivery App',
-                          style: TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF2C3E50),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.15),
+                            blurRadius: 30,
+                            offset: const Offset(0, 18),
                           ),
+                        ],
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.6),
+                          width: 1.2,
                         ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'Inicia sesión para continuar',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        const SizedBox(height: 32),
-
-                        // Campo de email con animación
-                        AppAnimations.fadeIn(
-                          duration: const Duration(milliseconds: 400),
-                          child: TextFormField(
-                            controller: _emailController,
-                            keyboardType: TextInputType.emailAddress,
-                            decoration: const InputDecoration(
-                              labelText: 'Email',
-                              prefixIcon: Icon(Icons.email_outlined),
-                              border: OutlineInputBorder(),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Por favor ingresa tu email';
-                              }
-                              if (!value.contains('@')) {
-                                return 'Por favor ingresa un email válido';
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Campo de contraseña con animación
-                        AppAnimations.fadeIn(
-                          duration: const Duration(milliseconds: 600),
-                          child: TextFormField(
-                            controller: _passwordController,
-                            obscureText: _obscurePassword,
-                            decoration: InputDecoration(
-                              labelText: 'Contraseña',
-                              prefixIcon: const Icon(Icons.lock_outlined),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    _obscurePassword = !_obscurePassword;
-                                  });
-                                },
-                              ),
-                              border: const OutlineInputBorder(),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Por favor ingresa tu contraseña';
-                              }
-                              if (value.length < 6) {
-                                return 'La contraseña debe tener al menos 6 caracteres';
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-
-                        // Botón de inicio de sesión con animación
-                        AppAnimations.scaleIn(
-                          duration: const Duration(milliseconds: 800),
-                          child: SizedBox(
-                            width: double.infinity,
-                            height: 50,
-                            child: AnimatedButton(
-                              onPressed: _isLoading ? null : _login,
-                              backgroundColor: AppColors.primary,
-                              foregroundColor: Colors.white,
-                              child: _isLoading
-                                  ? const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                      ),
-                                    )
-                                  : const Text(
-                                      'Iniciar Sesión',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        
-                        // Opción para crear cuenta con animación
-                        AppAnimations.fadeIn(
-                          duration: const Duration(milliseconds: 1000),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 20),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              const Text(
-                                '¿No tienes cuenta? ',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey,
+                              AppAnimations.fadeIn(
+                                duration: const Duration(milliseconds: 500),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    _buildLogoBadge(),
+                                  ],
                                 ),
                               ),
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.of(context).pushNamed('/register');
+                              const SizedBox(height: 4),
+                              _buildLabel('Correo electrónico'),
+                              const SizedBox(height: 8),
+                              _buildTextField(
+                                controller: _emailController,
+                                hint: 'nombre@correo.com',
+                                icon: Icons.email_outlined,
+                                keyboardType: TextInputType.emailAddress,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Por favor ingresa tu email';
+                                  }
+                                  if (!value.contains('@')) {
+                                    return 'Por favor ingresa un email válido';
+                                  }
+                                  return null;
                                 },
-                                child: const Text(
-                                  'Crear cuenta',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: AppColors.primary,
-                                    fontWeight: FontWeight.bold,
-                                    decoration: TextDecoration.underline,
+                              ),
+                              const SizedBox(height: 20),
+                              _buildLabel('Contraseña'),
+                              const SizedBox(height: 8),
+                              _buildPasswordField(),
+                              const SizedBox(height: 12),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: TextButton(
+                                  onPressed: () {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Recuperación de contraseña próximamente'),
+                                      ),
+                                    );
+                                  },
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: AppColors.primary,
+                                    padding: EdgeInsets.zero,
+                                    visualDensity: VisualDensity.compact,
                                   ),
+                                  child: const Text('¿Olvidaste tu contraseña?'),
                                 ),
+                              ),
+                              const SizedBox(height: 24),
+                              animated_components.AnimatedButton(
+                                text: 'Iniciar sesión',
+                                onPressed: _isLoading ? null : _login,
+                                isLoading: _isLoading,
+                                icon: Icons.login,
+                                width: double.infinity,
+                                height: 52,
+                              ),
+                              const SizedBox(height: 20),
+                              Row(
+                                children: [
+                                  Expanded(child: Divider(color: Colors.grey[300])),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                                    child: Text(
+                                      '¿Eres nuevo?',
+                                      style: TextStyle(color: Colors.grey[600]),
+                                    ),
+                                  ),
+                                  Expanded(child: Divider(color: Colors.grey[300])),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              animated_components.AnimatedButton(
+                                text: 'Crear cuenta',
+                                onPressed: () => Navigator.of(context).pushNamed('/register'),
+                                backgroundColor: Colors.transparent,
+                                textColor: AppColors.primary,
+                                hasShadow: false,
+                                height: 50,
                               ),
                             ],
                           ),
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
+            ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildBackgroundOrb(double size, Color color) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: color,
+      ),
+    );
+  }
+
+  Widget _buildLogoBadge() {
+    return Center(
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 400),
+        switchInCurve: Curves.easeOut,
+        switchOutCurve: Curves.easeIn,
+        child: FittedBox(
+          key: ValueKey(_logoUrl ?? 'logo_asset'),
+          fit: BoxFit.contain,
+          child: SizedBox(
+            width: 780,
+            height: 620,
+            child: _buildLogoImage(),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLogoImage() {
+    final placeholder = Image.asset(
+      AppAssets.ready2GoLogoAsset,
+      fit: BoxFit.contain,
+      alignment: Alignment.center,
+    );
+
+    if (_logoUrl == null || _logoUrl!.isEmpty) {
+      return placeholder;
+    }
+
+    return Image.network(
+      _logoUrl!,
+      fit: BoxFit.contain,
+      alignment: Alignment.center,
+      errorBuilder: (context, error, stackTrace) => placeholder,
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return Center(
+          child: SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(
+              value: loadingProgress.expectedTotalBytes != null
+                  ? loadingProgress.cumulativeBytesLoaded /
+                      loadingProgress.expectedTotalBytes!
+                  : null,
+              strokeWidth: 2.4,
+              color: AppColors.primary,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildLabel(String text) {
+    return Text(
+      text,
+      style: const TextStyle(
+        fontWeight: FontWeight.w700,
+        fontSize: 14,
+        color: Color(0xFF2C3E50),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hint,
+    required IconData icon,
+    TextInputType? keyboardType,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      validator: validator,
+      decoration: InputDecoration(
+        hintText: hint,
+        prefixIcon: Icon(icon, color: AppColors.primary),
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: BorderSide(color: Colors.grey.shade200),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: const BorderSide(color: AppColors.primary, width: 1.6),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPasswordField() {
+    return TextFormField(
+      controller: _passwordController,
+      obscureText: _obscurePassword,
+      decoration: InputDecoration(
+        hintText: '••••••••',
+        prefixIcon: const Icon(Icons.lock_outline, color: AppColors.primary),
+        suffixIcon: IconButton(
+          icon: Icon(
+            _obscurePassword ? Icons.visibility : Icons.visibility_off,
+            color: AppColors.primary,
+          ),
+          onPressed: () {
+            setState(() {
+              _obscurePassword = !_obscurePassword;
+            });
+          },
+        ),
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: BorderSide(color: Colors.grey.shade200),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: const BorderSide(color: AppColors.primary, width: 1.6),
+        ),
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Por favor ingresa tu contraseña';
+        }
+        if (value.length < 6) {
+          return 'La contraseña debe tener al menos 6 caracteres';
+        }
+        return null;
+      },
     );
   }
 }

@@ -1,34 +1,24 @@
 import 'package:flutter/material.dart';
-// import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart'; // Comentado temporalmente
-//import '../config/mapbox_config.dart';
+import 'package:flutter/foundation.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../services/location_service.dart';
-
-
-// Tipos temporales para reemplazar los de Mapbox
-class Point {
-  final Position coordinates;
-  Point({required this.coordinates});
-}
-
-class Position {
-  final double lng;
-  final double lat;
-  Position(this.lng, this.lat);
-}
+import '../providers/community_store_provider.dart';
+import 'package:provider/provider.dart';
+import 'web_map_widget.dart';
 
 class DeliveryMap extends StatefulWidget {
-  final Function(Point)? onLocationSelected;
-  final List<Point>? deliveryPoints;
-  final Point? currentLocation;
-  final Point? businessLocation; // Nueva propiedad para ubicación del negocio
+  final Function(LatLng)? onLocationSelected;
+  final List<LatLng>? deliveryPoints;
+  final LatLng? currentLocation;
+  final LatLng? businessLocation;
   final bool showCurrentLocation;
-  final bool showBusinessMarker; // Nueva propiedad para mostrar marcador del negocio
-  final String? businessName; // Nombre del negocio para el marcador
+  final bool showBusinessMarker;
+  final String? businessName;
   final double initialZoom;
-  final bool isBusinessView; // Modo de vista para negocios
+  final bool isBusinessView;
 
   const DeliveryMap({
-    Key? key,
+    super.key,
     this.onLocationSelected,
     this.deliveryPoints,
     this.currentLocation,
@@ -38,14 +28,19 @@ class DeliveryMap extends StatefulWidget {
     this.businessName,
     this.initialZoom = 14.0,
     this.isBusinessView = false,
-  }) : super(key: key);
+  });
 
   @override
   State<DeliveryMap> createState() => _DeliveryMapState();
 }
 
 class _DeliveryMapState extends State<DeliveryMap> {
-  Point? userLocation;
+  GoogleMapController? _mapController;
+  final Set<Marker> _markers = {};
+  LatLng? _userLocation;
+
+  // Coordenadas central de San Salvador, El Salvador
+  static const LatLng sanSalvadorCenter = LatLng(13.6929, -89.2182);
 
   @override
   void initState() {
@@ -53,145 +48,186 @@ class _DeliveryMapState extends State<DeliveryMap> {
     if (widget.showCurrentLocation) {
       _getCurrentLocation();
     }
+    _initializeMarkers();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Stack(
-        children: [
-          // Mapa temporal (placeholder)
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.map,
-                  size: 64,
-                  color: Colors.grey,
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Mapa temporalmente no disponible',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Obtén un token de Mapbox para habilitar',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                  ),
-                ),
-                if (widget.businessLocation != null) ...[
-                  const SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.orange,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      'Ubicación del negocio: ${widget.businessName ?? 'Negocio'}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                ],
-              ],
+  Future<void> _getCurrentLocation() async {
+    final location = await LocationService.getCurrentLocation();
+    if (location != null) {
+      setState(() {
+        _userLocation = LatLng(location.latitude, location.longitude);
+      });
+      _initializeMarkers();
+    }
+  }
+
+  void _initializeMarkers() {
+    _markers.clear();
+
+    // Agregar marcadores de negocios desde el provider
+    if (!widget.isBusinessView) {
+      final storeProvider = Provider.of<CommunityStoreProvider>(context, listen: false);
+      for (var business in storeProvider.businesses) {
+        if (business.latitude != null && business.longitude != null) {
+          _markers.add(
+            Marker(
+              markerId: MarkerId(business.id),
+              position: LatLng(business.latitude!, business.longitude!),
+              infoWindow: InfoWindow(
+                title: business.name,
+                snippet: business.description,
+              ),
+              icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
             ),
+          );
+        }
+      }
+    }
+
+    // Agregar ubicación actual del usuario
+    if (widget.showCurrentLocation && _userLocation != null) {
+      _markers.add(
+        Marker(
+          markerId: const MarkerId('currentLocation'),
+          position: _userLocation!,
+          infoWindow: const InfoWindow(title: 'Tu ubicación'),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+        ),
+      );
+    }
+
+    // Agregar ubicación del negocio si se especifica
+    if (widget.showBusinessMarker && widget.businessLocation != null) {
+      _markers.add(
+        Marker(
+          markerId: const MarkerId('businessLocation'),
+          position: widget.businessLocation!,
+          infoWindow: InfoWindow(
+            title: widget.businessName ?? 'Negocio',
+            snippet: 'Ubicación del negocio',
           ),
-          
-          // Botones de ubicación
-          if (widget.showCurrentLocation && !widget.isBusinessView)
-            Positioned(
-              bottom: 20,
-              right: 20,
-              child: FloatingActionButton(
-                mini: true,
-                onPressed: _centerOnUserLocation,
-                backgroundColor: Colors.blue,
-                child: const Icon(Icons.my_location, color: Colors.white),
-              ),
-            ),
-          
-          if (widget.isBusinessView && widget.businessLocation != null)
-            Positioned(
-              bottom: 20,
-              right: 20,
-              child: FloatingActionButton(
-                mini: true,
-                onPressed: _centerOnBusinessLocation,
-                backgroundColor: Colors.orange,
-                child: const Icon(Icons.store, color: Colors.white),
-              ),
-            ),
-        ],
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+        ),
+      );
+    }
+
+    // Agregar puntos de entrega
+    if (widget.deliveryPoints != null) {
+      for (int i = 0; i < widget.deliveryPoints!.length; i++) {
+        _markers.add(
+          Marker(
+            markerId: MarkerId('deliveryPoint_$i'),
+            position: widget.deliveryPoints![i],
+            infoWindow: InfoWindow(title: 'Punto de Entrega ${i + 1}'),
+            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow),
+          ),
+        );
+      }
+    }
+  }
+
+  void _onMapCreated(GoogleMapController controller) {
+    _mapController = controller;
+    _adjustCameraToFitMarkers();
+  }
+
+  void _adjustCameraToFitMarkers() {
+    if (_markers.isEmpty) {
+      _mapController?.animateCamera(
+        CameraUpdate.newLatLngZoom(sanSalvadorCenter, 13.0),
+      );
+      return;
+    }
+
+    double minLat = _markers.first.position.latitude;
+    double maxLat = _markers.first.position.latitude;
+    double minLng = _markers.first.position.longitude;
+    double maxLng = _markers.first.position.longitude;
+
+    for (var marker in _markers) {
+      minLat = minLat < marker.position.latitude ? minLat : marker.position.latitude;
+      maxLat = maxLat > marker.position.latitude ? maxLat : marker.position.latitude;
+      minLng = minLng < marker.position.longitude ? minLng : marker.position.longitude;
+      maxLng = maxLng > marker.position.longitude ? maxLng : marker.position.longitude;
+    }
+
+    _mapController?.animateCamera(
+      CameraUpdate.newLatLngBounds(
+        LatLngBounds(
+          southwest: LatLng(minLat, minLng),
+          northeast: LatLng(maxLat, maxLng),
+        ),
+        100.0,
       ),
     );
   }
 
-  void _centerOnUserLocation() async {
-    if (!mounted) return;
-    
-    if (userLocation == null) {
-      await _getCurrentLocation();
-    }
-
-    if (!mounted) return;
-    
-    if (userLocation != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Ubicación: ${userLocation!.coordinates.lat.toStringAsFixed(4)}, '
-            '${userLocation!.coordinates.lng.toStringAsFixed(4)}',
+  @override
+  Widget build(BuildContext context) {
+    // Si estamos en web, usar WebMapWidget como fallback
+    if (kIsWeb) {
+      return Container(
+        height: 400,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: WebMapWidget(
+            businessName: widget.businessName ?? 'Ubicación',
+            address: 'San Salvador, El Salvador',
+            latitude: widget.businessLocation?.latitude ?? sanSalvadorCenter.latitude,
+            longitude: widget.businessLocation?.longitude ?? sanSalvadorCenter.longitude,
+            height: 400,
+            onTap: widget.onLocationSelected != null
+                ? () {
+                    if (widget.onLocationSelected != null) {
+                      widget.onLocationSelected!(widget.businessLocation ?? sanSalvadorCenter);
+                    }
+                  }
+                : null,
           ),
-          backgroundColor: Colors.blue,
         ),
       );
     }
-  }
 
-  void _centerOnBusinessLocation() async {
-    if (widget.businessLocation != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Ubicación del negocio: ${widget.businessLocation!.coordinates.lat.toStringAsFixed(4)}, '
-            '${widget.businessLocation!.coordinates.lng.toStringAsFixed(4)}',
+    // Para Android/iOS, usar Google Maps normal
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
-          backgroundColor: Colors.orange,
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: GoogleMap(
+          initialCameraPosition: CameraPosition(
+            target: _userLocation ?? widget.businessLocation ?? sanSalvadorCenter,
+            zoom: widget.initialZoom,
+          ),
+          onMapCreated: _onMapCreated,
+          markers: _markers,
+          zoomControlsEnabled: true,
+          myLocationEnabled: widget.showCurrentLocation,
+          myLocationButtonEnabled: widget.showCurrentLocation,
+          mapType: MapType.normal,
+          onTap: widget.onLocationSelected != null
+              ? (position) => widget.onLocationSelected!(position)
+              : null,
         ),
-      );
-    }
-  }
-
-  Future<void> _getCurrentLocation() async {
-    try {
-      final location = await LocationService.getCurrentLocation();
-      if (!mounted) return;
-      
-      if (location != null) {
-        setState(() {
-          userLocation = Point(
-            coordinates: Position(location.longitude, location.latitude),
-          );
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        print('Error getting location: $e');
-      }
-    }
+      ),
+    );
   }
 }

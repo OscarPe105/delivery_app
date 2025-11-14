@@ -13,6 +13,7 @@ class CategoryConfig {
       'Bebidas',
       'Carnicería',
       'Panadería',
+      'Comida',
     ],
     'groceries': [
       'Supermercado',
@@ -20,23 +21,27 @@ class CategoryConfig {
       'Frutas y Verduras',
       'Carnicería',
       'Panadería',
+      'Supermercados',
     ],
     'pharmacy': [
       'Farmacia',
       'Óptica',
       'Laboratorio',
+      'Farmacias',
     ],
     'electronics': [
       'Electrónicos',
       'Computadoras',
       'Teléfonos',
       'Reparaciones',
+      'Electrónicos',
     ],
     'fashion': [
       'Ropa',
       'Calzado',
       'Joyería',
       'Relojes',
+      'Moda',
     ],
     'home': [
       'Hogar',
@@ -71,6 +76,7 @@ class CategoryConfig {
       'Fotografía',
       'Impresiones',
       'Lavandería',
+      'Servicios',
     ],
   };
 
@@ -81,14 +87,38 @@ class CategoryConfig {
 
   /// Obtener todas las subcategorías disponibles
   static List<String> getAllSubcategories() {
-    List<String> allSubcategories = [];
-    for (List<String> subcategories in categoryMapping.values) {
-      allSubcategories.addAll(subcategories);
-    }
-    // Eliminar duplicados y agregar "Otro"
-    allSubcategories = allSubcategories.toSet().toList();
-    allSubcategories.add('Otro');
-    return allSubcategories;
+    const businessSectionCategories = [
+      'Comida',
+      'Supermercados',
+      'Farmacias',
+      'Electrónicos',
+      'Moda',
+      'Hogar',
+      'Ferretería',
+      'Belleza',
+      'Automotriz',
+      'Servicios',
+    ];
+
+    return [...businessSectionCategories, 'Otro'];
+  }
+
+  static const Map<String, IconData> businessCategoryIcons = {
+    'Comida': Icons.restaurant_menu,
+    'Supermercados': Icons.local_grocery_store,
+    'Farmacias': Icons.local_pharmacy,
+    'Electrónicos': Icons.devices_other,
+    'Moda': Icons.checkroom,
+    'Hogar': Icons.chair_alt,
+    'Ferretería': Icons.home_repair_service,
+    'Belleza': Icons.brush,
+    'Automotriz': Icons.directions_car_filled,
+    'Servicios': Icons.handshake,
+    'Otro': Icons.storefront,
+  };
+
+  static IconData getIconForBusinessCategory(String category) {
+    return businessCategoryIcons[category] ?? Icons.store;
   }
 
   /// Determinar la categoría principal basada en una subcategoría

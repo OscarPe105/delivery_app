@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../providers/auth_provider.dart';
 import '../../providers/business_provider.dart';
 import '../../models/product.dart';
-import '../../services/image_service.dart';
+import '../../services/firebase_storage_service.dart';
 import '../../widgets/optimized_image.dart';
 import '../../themes/app_colors.dart';
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ProductManagementScreen extends StatefulWidget {
-  const ProductManagementScreen({super.key});
+  final Product? product;
+  const ProductManagementScreen({super.key, this.product});
 
   @override
   State<ProductManagementScreen> createState() => _ProductManagementScreenState();
@@ -24,9 +28,27 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
   
   bool _isAvailable = true;
   bool _isPopular = false;
-  File? _selectedImage;
+  XFile? _selectedXFile;
   bool _isLoading = false;
   Product? _editingProduct;
+
+  @override
+  void initState() {
+    super.initState();
+    _editingProduct = widget.product;
+
+    if (_editingProduct != null) {
+      final product = _editingProduct!;
+      _nameController.text = product.name;
+      _descriptionController.text = product.description;
+      _priceController.text = product.price.toStringAsFixed(2);
+      _stockController.text = product.stock.toString();
+      _isAvailable = product.available;
+      _isPopular = product.isPopular;
+    } else {
+      _stockController.text = '0';
+    }
+  }
 
   @override
   void dispose() {
@@ -101,15 +123,30 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
             border: Border.all(color: Colors.grey[300]!),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: _selectedImage != null
+          child: _selectedXFile != null
               ? ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: Image.file(
-                    _selectedImage!,
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    height: 200,
-                  ),
+                  child: kIsWeb
+                      ? FutureBuilder<List<int>>(
+                          future: _selectedXFile!.readAsBytes(),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              return Image.memory(
+                                Uint8List.fromList(snapshot.data!),
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                height: 200,
+                              );
+                            }
+                            return const Center(child: CircularProgressIndicator());
+                          },
+                        )
+                      : Image.file(
+                          File(_selectedXFile!.path),
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: 200,
+                        ),
                 )
               : _editingProduct?.imageUrl != null
                   ? ClipRRect(
@@ -166,7 +203,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
                 label: const Text('Cámara'),
               ),
             ),
-            if (_selectedImage != null || _editingProduct?.imageUrl != null) ...[
+            if (_selectedXFile != null || _editingProduct?.imageUrl != null) ...[
               const SizedBox(width: 12),
               Expanded(
                 child: OutlinedButton.icon(
@@ -353,26 +390,28 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
   }
 
   Future<void> _selectImage() async {
-    final image = await ImageService.pickImageFromGallery();
+    final storageService = FirebaseStorageService();
+    final image = await storageService.showImageSourceDialog(context);
     if (image != null) {
       setState(() {
-        _selectedImage = image;
+        _selectedXFile = image;
       });
     }
   }
 
   Future<void> _takePhoto() async {
-    final image = await ImageService.pickImageFromCamera();
+    final storageService = FirebaseStorageService();
+    final image = await storageService.pickImageFromCamera();
     if (image != null) {
       setState(() {
-        _selectedImage = image;
+        _selectedXFile = image;
       });
     }
   }
 
   void _removeImage() {
     setState(() {
-      _selectedImage = null;
+      _selectedXFile = null;
     });
   }
 
@@ -381,46 +420,150 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
       return;
     }
 
+    final businessProvider = Provider.of<BusinessProvider>(context, listen: false);
+
     setState(() {
       _isLoading = true;
     });
 
     try {
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) {
+        throw Exception('Usuario no autenticado');
+      }
+
+      // Obtener el ID del documento del negocio (para relacionar productos correctamente)
+      String effectiveBusinessId = widget.product?.businessId ?? currentUser.uid;
+      String? businessFirestoreId = widget.product?.firestoreBusinessId;
+      try {
+        final businessQuery = await FirebaseFirestore.instance
+            .collection('businesses')
+            .where('ownerUid', isEqualTo: currentUser.uid)
+            .limit(1)
+            .get();
+
+        if (businessQuery.docs.isNotEmpty) {
+          final businessDoc = businessQuery.docs.first;
+          businessFirestoreId = businessDoc.id;
+          final businessData = businessDoc.data();
+          final djangoBusinessId = businessData['django_id']?.toString();
+
+          if (djangoBusinessId != null && djangoBusinessId.isNotEmpty) {
+            effectiveBusinessId = djangoBusinessId;
+          } else if (businessData['businessId'] != null) {
+            effectiveBusinessId = businessData['businessId'].toString();
+          }
+        } else if (_editingProduct != null && _editingProduct!.businessId.isNotEmpty) {
+          effectiveBusinessId = _editingProduct!.businessId;
+          businessFirestoreId ??= _editingProduct!.firestoreBusinessId;
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint('⚠️ No se pudo obtener el negocio del usuario: $e');
+        }
+        // Mantener fallback al UID del usuario
+      }
+
+      businessFirestoreId ??= widget.product?.firestoreBusinessId ?? currentUser.uid;
+
+      String? imageUrl;
+
+      // Si hay una nueva imagen, subirla a Firebase Storage
+      if (_selectedXFile != null) {
+        final storageService = FirebaseStorageService();
+        imageUrl = await storageService.uploadProductImage(
+          _editingProduct?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+          _selectedXFile!,
+        );
+        if (kDebugMode) {
+          debugPrint('📸 Imagen subida: $imageUrl');
+        }
+      } else if (_editingProduct?.imageUrl != null) {
+        // Si estamos editando y no hay nueva imagen, mantener la existente
+        imageUrl = _editingProduct!.imageUrl;
+      }
+
       // Crear objeto Product
       final product = Product(
         id: _editingProduct?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
-        name: _nameController.text,
-        description: _descriptionController.text,
+        name: _nameController.text.trim(),
+        description: _descriptionController.text.trim(),
         price: double.parse(_priceController.text),
-        businessId: Provider.of<AuthProvider>(context, listen: false).userId,
+        businessId: effectiveBusinessId,
         available: _isAvailable,
         isPopular: _isPopular,
-        imageUrl: _selectedImage?.path, // Temporal, se actualizará con URL del servidor
+        imageUrl: imageUrl,
+        stock: int.tryParse(_stockController.text) ?? 0,
+        firestoreBusinessId: businessFirestoreId,
       );
 
-      // Aquí iría la lógica para subir la imagen y crear/actualizar el producto
-      // Por ahora, solo agregamos al provider local
+      // Guardar en Firestore
+      final firestore = FirebaseFirestore.instance;
       if (_editingProduct == null) {
-        Provider.of<BusinessProvider>(context, listen: false).addProduct(product);
+        // Crear nuevo producto
+        await firestore.collection('products').doc(product.id).set({
+          'name': product.name,
+          'description': product.description,
+          'price': product.price,
+          'businessId': product.businessId,
+          'businessFirestoreId': businessFirestoreId,
+          'ownerUid': currentUser.uid,
+          'available': product.available,
+          'isPopular': product.isPopular,
+          'imageUrl': product.imageUrl ?? '',
+          'stock': product.stock,
+          'createdAt': FieldValue.serverTimestamp(),
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+        
+        // También agregar al provider local para la UI
+        businessProvider.addProduct(product);
+        
+        if (kDebugMode) {
+          debugPrint('✅ Producto agregado a Firestore');
+        }
       } else {
-        Provider.of<BusinessProvider>(context, listen: false).updateProduct(product);
+        // Actualizar producto existente
+        await firestore.collection('products').doc(product.id).update({
+          'name': product.name,
+          'description': product.description,
+          'price': product.price,
+          'businessId': product.businessId,
+          'businessFirestoreId': businessFirestoreId,
+          'ownerUid': currentUser.uid,
+          'available': product.available,
+          'isPopular': product.isPopular,
+          'imageUrl': product.imageUrl ?? '',
+          'stock': product.stock,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+        
+        // También actualizar en el provider local
+        businessProvider.updateProduct(product);
+        
+        if (kDebugMode) {
+          debugPrint('✅ Producto actualizado en Firestore');
+        }
       }
 
       // Mostrar mensaje de éxito
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(_editingProduct == null 
-                ? 'Producto agregado exitosamente' 
-                : 'Producto actualizado exitosamente'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        
-        // Regresar a la pantalla anterior
-        Navigator.of(context).pop();
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_editingProduct == null 
+              ? 'Producto agregado exitosamente' 
+              : 'Producto actualizado exitosamente'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      
+      // Regresar a la pantalla anterior
+      Navigator.of(context).pop();
     } catch (e) {
+      if (kDebugMode) {
+        debugPrint('❌ Error guardando producto: $e');
+      }
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -439,6 +582,10 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
   }
 
   Future<void> _deleteProduct() async {
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    final provider = Provider.of<BusinessProvider>(context, listen: false);
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -460,27 +607,34 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
 
     if (confirmed == true && _editingProduct != null) {
       try {
-        Provider.of<BusinessProvider>(context, listen: false)
-            .removeProduct(_editingProduct!.id);
-        
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Producto eliminado exitosamente'),
-              backgroundColor: Colors.green,
-            ),
-          );
-          Navigator.of(context).pop();
+        final success = await provider.deleteProduct(_editingProduct!);
+
+        if (!context.mounted) return;
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(success
+                ? 'Producto eliminado exitosamente'
+                : 'No se pudo eliminar el producto. Intenta nuevamente'),
+            backgroundColor: success ? Colors.green : Colors.red,
+          ),
+        );
+
+        if (success) {
+          if (!navigator.mounted) return;
+          navigator.pop();
         }
       } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error: $e'),
-              backgroundColor: Colors.red,
-            ),
-          );
+        if (kDebugMode) {
+          debugPrint('❌ Error eliminando producto: $e');
         }
+
+        if (!context.mounted) return;
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }

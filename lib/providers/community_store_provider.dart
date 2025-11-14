@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../services/map_service.dart';
 import '../models/business.dart';
 import '../models/product.dart';
 import '../models/cart_item.dart';
 import '../models/category.dart';
-import '../services/api_service.dart';
+import '../models/promotion.dart';
+import '../config/category_config.dart';
 
 class CommunityStoreProvider with ChangeNotifier {
   List<Business> _businesses = [];
@@ -13,6 +16,8 @@ class CommunityStoreProvider with ChangeNotifier {
   final List<CartItem> _cartItems = [];
   List<Category> _categories = [];
   final List<String> _favorites = [];
+  final List<String> _favoriteProductIds = [];
+  final List<Promotion> _promotions = [];
   String _selectedCategory = 'all';
   String _searchQuery = '';
   bool _isLoading = false;
@@ -24,6 +29,7 @@ class CommunityStoreProvider with ChangeNotifier {
   // Constantes para SharedPreferences
   static const String _cartKey = 'cart_items';
   static const String _favoritesKey = 'favorites';
+  static const String _favoriteProductsKey = 'favorite_products';
   
   // Constructor - cargar datos persistentes al inicializar
   CommunityStoreProvider() {
@@ -37,6 +43,41 @@ class CommunityStoreProvider with ChangeNotifier {
   List<CartItem> get cartItems => _cartItems;
   List<Category> get categories => _categories;
   List<String> get favorites => _favorites;
+  List<String> get favoriteProducts => _favoriteProductIds;
+  List<Promotion> get promotions => List.unmodifiable(_promotions);
+  List<Promotion> get activePromotions => _promotions
+      .where((promotion) => promotion.isCurrentlyActive)
+      .toList();
+
+  Promotion? getPromotionForProduct(String productId) {
+    final now = DateTime.now();
+    Promotion? bestPromotion;
+    for (final promotion in _promotions) {
+      if (promotion.productId != productId) continue;
+      if (!promotion.isActive) continue;
+      if (promotion.startDate != null && promotion.startDate!.isAfter(now)) {
+        continue;
+      }
+      if (promotion.endDate != null && promotion.endDate!.isBefore(now)) {
+        continue;
+      }
+      if (bestPromotion == null ||
+          promotion.discountPercent > bestPromotion.discountPercent) {
+        bestPromotion = promotion;
+      }
+    }
+    return bestPromotion;
+  }
+
+  Product _applyPromotionToProduct(Product product, {Promotion? promotion}) {
+    final effectivePromotion = promotion ?? getPromotionForProduct(product.id);
+    return product.copyWith(
+      promotionalPrice: effectivePromotion?.promotionalPrice,
+      promotionalDiscountPercent: effectivePromotion?.discountPercent,
+      promotionId: effectivePromotion?.id,
+      promotionEndDate: effectivePromotion?.endDate,
+    );
+  }
   String get selectedCategory => _selectedCategory;
   String get searchQuery => _searchQuery;
   bool get isLoading => _isLoading;
@@ -56,16 +97,32 @@ class CommunityStoreProvider with ChangeNotifier {
       return null;
     }
   }
+
+  Product? getProductById(String productId) {
+    try {
+      return _products.firstWhere((product) => product.id == productId);
+    } catch (e) {
+      return null;
+    }
+  }
   
   // Filtros
   List<Business> get filteredBusinesses {
-    var filtered = _businesses.where((business) {
-      final matchesCategory = _selectedCategory == 'all' || business.category == _selectedCategory;
-      final matchesSearch = business.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-                        (business.description?.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false);
-      return matchesCategory && matchesSearch;
+    final lowerQuery = _searchQuery.toLowerCase();
+
+    final filtered = _businesses.where((business) {
+      final matchesCategory = _selectedCategory == 'all' || _businessMatchesCategory(business, _selectedCategory);
+      if (!matchesCategory) return false;
+
+      if (lowerQuery.isEmpty) return true;
+
+      final nameMatch = business.name.toLowerCase().contains(lowerQuery);
+      final descriptionMatch = business.description?.toLowerCase().contains(lowerQuery) ?? false;
+      final tagsMatch = business.tags?.any((tag) => tag.toLowerCase().contains(lowerQuery)) ?? false;
+
+      return nameMatch || descriptionMatch || tagsMatch;
     }).toList();
-    
+
     return filtered;
   }
   
@@ -97,14 +154,44 @@ class CommunityStoreProvider with ChangeNotifier {
     
     return filtered;
   }
+
+  bool _businessMatchesCategory(Business business, String categoryId) {
+    if (categoryId == 'all') return true;
+    final normalizedCategory = categoryId.toLowerCase().trim();
+
+    final categories = <String>{
+      business.category.toLowerCase().trim(),
+      CategoryConfig.getMainCategory(business.category).toLowerCase(),
+    };
+
+    final tags = business.tags ?? const [];
+    for (final tag in tags) {
+      categories.add(tag.toLowerCase().trim());
+      categories.add(CategoryConfig.getMainCategory(tag).toLowerCase());
+    }
+
+    return categories.contains(normalizedCategory);
+  }
   
   List<Product> getProductsByBusiness(String businessId) {
-    return _products.where((product) => product.businessId == businessId).toList();
+    final business = getBusinessById(businessId);
+    final ownerId = business?.ownerId;
+
+    return _products.where((product) {
+      if (product.businessId == businessId) {
+        return true;
+      }
+      if (ownerId != null && ownerId.isNotEmpty && product.businessId == ownerId) {
+        return true;
+      }
+      return false;
+    }).toList();
   }
   
   // Método loadData (alias para loadBusinesses)
   Future<void> loadData() async {
-    return loadBusinesses();
+    await loadBusinesses();
+    await loadPromotions();
   }
   
   // Métodos principales
@@ -113,35 +200,171 @@ class CommunityStoreProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     
+    List<Business> allBusinesses = [];
+    
+    _products = [];
+    final firestore = FirebaseFirestore.instance;
+
+    // Cargar desde Firestore
     try {
-      // Cargar desde Django API SOLAMENTE
-      debugPrint('📞 Llamando a ApiService.getBusinesses()...');
-      final apiService = ApiService();
-      final businesses = await apiService.getBusinesses();
+      debugPrint('📞 Intentando cargar desde Firestore...');
+      final querySnapshot = await firestore.collection('businesses').get();
       
-      debugPrint('📞 Llamando a ApiService.getProducts()...');
-      final products = await apiService.getProducts();
-      
-      // Asignar datos de la API (incluso si está vacío)
-      _businesses = businesses;
-      _products = products;
-      _loadCategories();
-      
-      debugPrint('✅ Negocios cargados desde Django: ${businesses.length}');
-      debugPrint('✅ Productos cargados desde Django: ${products.length}');
-      
-      if (businesses.isNotEmpty) {
-        debugPrint('📋 Primer negocio: ${businesses.first.name}');
+      if (querySnapshot.docs.isNotEmpty) {
+        final firestoreBusinesses = querySnapshot.docs.map((doc) {
+          final data = doc.data();
+          GeoPoint? geoPoint;
+          final locationField = data['location'];
+          if (locationField is GeoPoint) {
+            geoPoint = locationField;
+          }
+          final latitude = _extractLatitude(data) ?? geoPoint?.latitude;
+          final longitude = _extractLongitude(data) ?? geoPoint?.longitude;
+          return Business(
+            id: doc.id,
+            name: data['name'] ?? '',
+            category: data['category'] ?? data['category_name'] ?? '',
+            description: data['description'],
+            address: data['address'],
+            phone: data['phone'],
+            latitude: latitude,
+            longitude: longitude,
+            rating: _nullableDouble(data['rating']),
+            imageUrl: data['imageUrl'] ?? data['image_url'],
+            isActive: data['isActive'] ?? data['is_active'] ?? true,
+            isOpen: data['isOpen'] ?? data['is_open'] ?? true,
+            tags: data['tags'] != null ? List<String>.from(data['tags']) : null,
+            ownerId: data['ownerId']?.toString() ??
+                data['ownerUid']?.toString() ??
+                data['owner_uid']?.toString(),
+          );
+        }).toList();
+        
+        // Combinar negocios de API y Firestore (sin duplicados)
+        final existingIds = allBusinesses.map((b) => b.id).toSet();
+        final newBusinesses = firestoreBusinesses.where((b) => !existingIds.contains(b.id));
+        
+        if (newBusinesses.isNotEmpty) {
+          allBusinesses.addAll(newBusinesses);
+          debugPrint('✅ Agregados ${newBusinesses.length} negocios nuevos desde Firestore');
+        } else {
+          debugPrint('ℹ️ No hay negocios nuevos en Firestore');
+        }
       }
-    } catch (e, stackTrace) {
-      // Error conectando con Django
-      debugPrint('❌ Error cargando desde API: $e');
-      debugPrint('📚 Stack trace: $stackTrace');
-      // Dejar listas vacías si hay error
-      _businesses = [];
-      _products = [];
-      _loadCategories();
+    } catch (e) {
+      debugPrint('⚠️ Error cargando desde Firestore: $e');
     }
+    
+    // Combinar productos desde Firestore (incluye productos creados desde el panel de negocio)
+    try {
+      debugPrint('📦 Sincronizando productos desde Firestore...');
+      final firestoreInstance = FirebaseFirestore.instance;
+      final productSnapshot = await firestoreInstance.collection('products').get();
+
+      final existingProductIds = _products.map((p) => p.id).toSet();
+      final Map<String, String> ownerToBusinessId = {};
+
+      for (final business in allBusinesses) {
+        final ownerId = business.ownerId;
+        if (ownerId != null && ownerId.isNotEmpty) {
+          ownerToBusinessId[ownerId] = business.id;
+        }
+      }
+
+      for (final doc in productSnapshot.docs) {
+        try {
+          final data = doc.data();
+          final ownerUid = data['ownerUid']?.toString();
+          String businessId = data['businessId']?.toString() ?? '';
+
+          if (ownerUid != null && ownerToBusinessId.containsKey(ownerUid)) {
+            businessId = ownerToBusinessId[ownerUid]!;
+          } else if (ownerToBusinessId.containsKey(businessId)) {
+            businessId = ownerToBusinessId[businessId]!;
+          } else if (businessId.isEmpty && ownerUid != null) {
+            businessId = ownerUid;
+          }
+
+          final product = Product(
+            id: doc.id,
+            name: data['name'] ?? '',
+            description: data['description'] ?? '',
+            price: _safeToDouble(data['price']),
+            imageUrl: data['imageUrl'] ?? data['image_url'],
+            businessId: businessId,
+            available: data['available'] ?? true,
+            isPopular: data['isPopular'] ?? data['is_popular'] ?? false,
+            stock: _safeToInt(data['stock']),
+            firestoreBusinessId: data['businessFirestoreId']?.toString() ?? doc.id,
+          );
+
+          if (!existingProductIds.contains(product.id)) {
+            _products.add(_applyPromotionToProduct(product));
+            existingProductIds.add(product.id);
+          }
+
+          // Normalizar el businessId en Firestore si encontramos el documento del negocio
+          if (ownerUid != null && ownerToBusinessId.containsKey(ownerUid)) {
+            final resolvedBusinessId = ownerToBusinessId[ownerUid]!;
+            final updates = <String, dynamic>{};
+            if (data['businessId'] != resolvedBusinessId) {
+              updates['businessId'] = resolvedBusinessId;
+            }
+            if ((data['businessFirestoreId']?.toString() ?? doc.id) != product.firestoreBusinessId) {
+              updates['businessFirestoreId'] = product.firestoreBusinessId;
+            }
+            if ((data['ownerUid']?.toString() ?? '') != ownerUid) {
+              updates['ownerUid'] = ownerUid;
+            }
+            if (updates.isNotEmpty) {
+              await doc.reference.update(updates);
+            }
+          }
+        } catch (e) {
+          debugPrint('⚠️ Error parseando producto ${doc.id}: $e');
+        }
+      }
+    } catch (e) {
+      debugPrint('⚠️ Error sincronizando productos desde Firestore: $e');
+    }
+
+    // Asignar todos los negocios combinados
+    for (var i = 0; i < allBusinesses.length; i++) {
+      final business = allBusinesses[i];
+      final needsCoordinates = business.latitude == null || business.longitude == null;
+      final hasAddress = (business.address?.trim().isNotEmpty ?? false);
+
+      if (needsCoordinates && hasAddress) {
+        try {
+          final normalizedAddress = MapService.normalizeAddress(business.address!.trim());
+          final coords = await MapService.getCoordinatesFromAddress(normalizedAddress);
+          if (coords != null) {
+            final updatedBusiness = business.copyWith(
+              latitude: coords.latitude,
+              longitude: coords.longitude,
+            );
+            allBusinesses[i] = updatedBusiness;
+            try {
+              await firestore.collection('businesses').doc(business.id).update({
+                'latitude': coords.latitude,
+                'longitude': coords.longitude,
+                'location': GeoPoint(coords.latitude, coords.longitude),
+              });
+              debugPrint('📍 Coordenadas actualizadas para negocio ${business.id}');
+            } catch (e) {
+              debugPrint('ℹ️ No se pudo persistir ubicación para ${business.id}: $e');
+            }
+          }
+        } catch (e) {
+          debugPrint('⚠️ Error obteniendo coordenadas para ${business.id}: $e');
+        }
+      }
+    }
+
+    _businesses = allBusinesses;
+    _loadCategories();
+    
+    debugPrint('📊 Total de negocios cargados: ${_businesses.length}');
     
     _isLoading = false;
     notifyListeners();
@@ -153,17 +376,76 @@ class CommunityStoreProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     
+    final List<Product> combinedProducts = [];
+    final existingIds = <String>{};
+
+    void addProduct(Product product) {
+      if (existingIds.add(product.id)) {
+        combinedProducts.add(product);
+      }
+    }
+
     try {
-      final apiService = ApiService();
-      final products = await apiService.getProducts(businessId: businessId);
-      
-      if (products.isNotEmpty) {
-        // Filtrar productos del negocio
-        _products = products;
+      final firestoreInstance = FirebaseFirestore.instance;
+      final business = getBusinessById(businessId);
+      final ownerId = business?.ownerId;
+
+      final queries = <QuerySnapshot<Map<String, dynamic>>>[];
+
+      final primary = await firestoreInstance
+          .collection('products')
+          .where('businessId', isEqualTo: businessId)
+          .get();
+      queries.add(primary);
+
+      if (ownerId != null && ownerId.isNotEmpty && ownerId != businessId) {
+        final ownerQuery = await firestoreInstance
+            .collection('products')
+            .where('ownerUid', isEqualTo: ownerId)
+            .get();
+        queries.add(ownerQuery);
+      }
+
+      for (final query in queries) {
+        for (final doc in query.docs) {
+          try {
+            final data = doc.data();
+            final ownerUid = data['ownerUid']?.toString();
+            String resolvedBusinessId = data['businessId']?.toString() ?? businessId;
+
+            if (resolvedBusinessId == businessId) {
+              // ok
+            } else if (ownerUid != null && ownerUid == ownerId) {
+              resolvedBusinessId = businessId;
+              if (data['businessId'] != resolvedBusinessId) {
+                await doc.reference.update({'businessId': resolvedBusinessId});
+              }
+            }
+
+            final product = Product(
+              id: doc.id,
+              name: data['name'] ?? '',
+              description: data['description'] ?? '',
+              price: _safeToDouble(data['price']),
+              imageUrl: data['imageUrl'] ?? data['image_url'],
+              businessId: resolvedBusinessId,
+              available: data['available'] ?? true,
+              isPopular: data['isPopular'] ?? data['is_popular'] ?? false,
+              stock: _safeToInt(data['stock']),
+              firestoreBusinessId: data['businessFirestoreId']?.toString() ?? doc.id,
+            );
+
+            addProduct(_applyPromotionToProduct(product));
+          } catch (e) {
+            debugPrint('⚠️ Error parseando producto ${doc.id}: $e');
+          }
+        }
       }
     } catch (e) {
-      debugPrint('Error cargando productos: $e');
+      debugPrint('Error cargando productos desde Firestore: $e');
     }
+
+    _products = combinedProducts;
     
     _isLoading = false;
     notifyListeners();
@@ -171,6 +453,8 @@ class CommunityStoreProvider with ChangeNotifier {
   
   // Método addToCart corregido
   void addToCart(Product product, {int quantity = 1}) {
+    final promotion = getPromotionForProduct(product.id);
+    final priceToUse = promotion?.promotionalPrice ?? product.price;
     final existingIndex = _cartItems.indexWhere(
       (item) => item.productId == product.id,
     );
@@ -178,6 +462,7 @@ class CommunityStoreProvider with ChangeNotifier {
     if (existingIndex >= 0) {
       _cartItems[existingIndex] = _cartItems[existingIndex].copyWith(
         quantity: _cartItems[existingIndex].quantity + quantity,
+        price: priceToUse,
       );
     } else {
       _cartItems.add(
@@ -185,11 +470,12 @@ class CommunityStoreProvider with ChangeNotifier {
           id: DateTime.now().millisecondsSinceEpoch.toString(),
           productId: product.id,
           productName: product.name,
-          price: product.price,
+          price: priceToUse,
           quantity: quantity,
           imageUrl: product.imageUrl,
           businessId: product.businessId,
           businessName: getBusinessById(product.businessId)?.name ?? 'Negocio',
+            businessFirestoreId: product.firestoreBusinessId,
         ),
       );
     }
@@ -221,6 +507,19 @@ class CommunityStoreProvider with ChangeNotifier {
     _cartItems.clear();
     _saveCart(); // Guardar cambios
     notifyListeners();
+  }
+
+  double _safeToDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is num) return value.toDouble();
+    return double.tryParse(value.toString()) ?? 0.0;
+  }
+
+  int _safeToInt(dynamic value) {
+    if (value == null) return 0;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    return int.tryParse(value.toString()) ?? 0;
   }
   
   // Métodos de persistencia del carrito
@@ -258,26 +557,47 @@ class CommunityStoreProvider with ChangeNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
       final favoritesJson = prefs.getString(_favoritesKey);
+      final favoriteProductsJson = prefs.getString(_favoriteProductsKey);
       
       if (favoritesJson != null) {
         final List<dynamic> favoritesList = json.decode(favoritesJson);
-        _favorites.clear();
-        _favorites.addAll(favoritesList.cast<String>());
-        debugPrint('❤️ Favoritos cargados desde SharedPreferences: ${_favorites.length} items');
+        _favorites
+          ..clear()
+          ..addAll(favoritesList.cast<String>());
+        debugPrint('❤️ Favoritos cargados desde SharedPreferences: ${_favorites.length} negocios');
+      }
+
+      if (favoriteProductsJson != null) {
+        final List<dynamic> favoritesList = json.decode(favoriteProductsJson);
+        _favoriteProductIds
+          ..clear()
+          ..addAll(favoritesList.cast<String>());
+        debugPrint('🍽 Productos favoritos cargados: ${_favoriteProductIds.length}');
       }
     } catch (e) {
       debugPrint('❌ Error cargando favoritos: $e');
     }
   }
-
-  Future<void> _saveFavorites() async {
+  
+  Future<void> _saveBusinessFavorites() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final favoritesJson = json.encode(_favorites);
       await prefs.setString(_favoritesKey, favoritesJson);
-      debugPrint('💾 Favoritos guardados en SharedPreferences: ${_favorites.length} items');
+      debugPrint('💾 Favoritos guardados (negocios): ${_favorites.length}');
     } catch (e) {
-      debugPrint('❌ Error guardando favoritos: $e');
+      debugPrint('❌ Error guardando favoritos de negocios: $e');
+    }
+  }
+
+  Future<void> _saveProductFavorites() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final favoritesJson = json.encode(_favoriteProductIds);
+      await prefs.setString(_favoriteProductsKey, favoritesJson);
+      debugPrint('💾 Favoritos guardados (productos): ${_favoriteProductIds.length}');
+    } catch (e) {
+      debugPrint('❌ Error guardando favoritos de productos: $e');
     }
   }
   
@@ -288,12 +608,26 @@ class CommunityStoreProvider with ChangeNotifier {
     } else {
       _favorites.add(businessId);
     }
-    _saveFavorites(); // Guardar cambios automáticamente
+    _saveBusinessFavorites(); // Guardar cambios automáticamente
+    notifyListeners();
+  }
+  
+  bool isFavorite(String businessId) {
+    return _favorites.contains(businessId);
+  }
+
+  void toggleProductFavorite(String productId) {
+    if (_favoriteProductIds.contains(productId)) {
+      _favoriteProductIds.remove(productId);
+    } else {
+      _favoriteProductIds.add(productId);
+    }
+    _saveProductFavorites();
     notifyListeners();
   }
 
-  bool isFavorite(String businessId) {
-    return _favorites.contains(businessId);
+  bool isProductFavorite(String productId) {
+    return _favoriteProductIds.contains(productId);
   }
   
   // Métodos de filtrado
@@ -303,6 +637,7 @@ class CommunityStoreProvider with ChangeNotifier {
   }
   
   void setCategory(String category) {
+    if (_selectedCategory == category) return;
     _selectedCategory = category;
     notifyListeners();
   }
@@ -332,217 +667,111 @@ class CommunityStoreProvider with ChangeNotifier {
     _showOnlyPopular = false;
     notifyListeners();
   }
-  
-  // Implementación de métodos privados para cargar datos de ejemplo
-  void _loadMockBusinesses() {
-    _businesses = [
-      Business(
-        id: '1',
-        name: 'Restaurante Doña María',
-        description: 'Comida casera con el sabor de la abuela',
-        imageUrl: 'assets/images/businesses/business_restaurante_dona_maria.jpg',
-        category: 'food',
-        address: 'Calle 10 #45-67, Barrio Centro',
-        phone: '+57 300 123 4567',
-        rating: 4.8,
-        latitude: 14.0723,
-        longitude: -87.2068,
-        tags: ['Sancocho', 'Bandeja Paisa', 'Ajiaco'],
-      ),
-      Business(
-        id: '2',
-        name: 'Panadería El Amanecer',
-        description: 'Pan fresco todos los días desde las 5 AM',
-        imageUrl: 'assets/images/businesses/business_panaderia_el_amanecer.jpg',
-        category: 'bakery',
-        address: 'Carrera 15 #23-45, Barrio Norte',
-        phone: '+57 301 234 5678',
-        rating: 4.9,
-        latitude: 14.0823,
-        longitude: -87.1968,
-        tags: ['Pan Integral', 'Croissants', 'Tortas'],
-      ),
-      Business(
-        id: '3',
-        name: 'Frutería La Cosecha',
-        description: 'Frutas y verduras frescas directo del campo',
-        imageUrl: 'assets/images/businesses/business_fruteria_la_cosecha.jpg',
-        category: 'fruits',
-        address: 'Avenida 20 #12-34, Barrio Sur',
-        phone: '+57 302 345 6789',
-        rating: 4.7,
-        latitude: 14.0623,
-        longitude: -87.2168,
-        tags: ['Frutas Tropicales', 'Verduras Orgánicas', 'Jugos Naturales'],
-      ),
-      Business(
-        id: '4',
-        name: 'Boutique Alma',
-        description: 'Ropa femenina y accesorios',
-        imageUrl: 'assets/images/businesses/business_boutique_alma.jpg',
-        category: 'fashion',
-        address: 'C.C. Central, Local 12',
-        phone: '+57 303 111 2222',
-        rating: 4.6,
-        latitude: 14.0751,
-        longitude: -87.2051,
-        tags: ['Vestidos', 'Blusas', 'Accesorios'],
-      ),
-      Business(
-        id: '5',
-        name: 'Joyas Brillantes',
-        description: 'Joyería artesanal y plata',
-        imageUrl: 'assets/images/businesses/business_joyas_brillantes.jpg',
-        category: 'jewelry',
-        address: 'Av. Principal #45',
-        phone: '+57 304 222 3333',
-        rating: 4.7,
-        latitude: 14.0788,
-        longitude: -87.2090,
-        tags: ['Anillos', 'Collares', 'Pulseras'],
-      ),
-      Business(
-        id: '6',
-        name: 'TecnoMundo',
-        description: 'Electrónica y gadgets',
-        imageUrl: 'assets/images/businesses/business_tecnomundo.jpg',
-        category: 'electronics',
-        address: 'C.C. Tech Plaza, Local 5',
-        phone: '+57 305 333 4444',
-        rating: 4.5,
-        latitude: 14.0814,
-        longitude: -87.2034,
-        tags: ['Auriculares', 'Smartphones', 'Accesorios'],
-      ),
-      Business(
-        id: '7',
-        name: 'Hogar & Deco',
-        description: 'Decoración y artículos para el hogar',
-        imageUrl: 'assets/images/businesses/business_hogar_deco.jpg',
-        category: 'home',
-        address: 'Calle 8 #12-90',
-        phone: '+57 306 444 5555',
-        rating: 4.4,
-        latitude: 14.0799,
-        longitude: -87.2005,
-        tags: ['Decoración', 'Textiles', 'Organización'],
-      ),
-      Business(
-        id: '8',
-        name: 'Belleza Natural',
-        description: 'Cosmética y cuidado personal',
-        imageUrl: 'assets/images/businesses/business_belleza_natural.jpg',
-        category: 'beauty',
-        address: 'Pasaje Norte, Local 3',
-        phone: '+57 307 666 7777',
-        rating: 4.6,
-        latitude: 14.0777,
-        longitude: -87.2077,
-        tags: ['Skincare', 'Maquillaje', 'Belleza'],
-      ),
-    ];
+
+  double? _nullableDouble(dynamic value) {
+    if (value == null) return null;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) {
+      final normalized = value.replaceAll(',', '.');
+      return double.tryParse(normalized);
+    }
+    return null;
   }
 
-  void _loadProducts() {
-    _products = [
-      // Productos de Doña María
-      Product(
-        id: 'p1',
-        name: 'Bandeja Paisa Completa',
-        description: 'Frijoles, arroz, carne molida, chicharrón, chorizo, huevo, plátano y arepa',
-        price: 18000,
-        imageUrl: 'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400',
-        businessId: '1',
-        isPopular: true,
-      ),
-      Product(
-        id: 'p2',
-        name: 'Sancocho de Gallina',
-        description: 'Sancocho tradicional con gallina criolla y verduras frescas',
-        price: 15000,
-        imageUrl: 'https://images.unsplash.com/photo-1547592180-85f173990554?w=400',
-        businessId: '1',
-        isPopular: true,
-      ),
-      // Productos de Panadería El Amanecer
-      Product(
-        id: 'p3',
-        name: 'Pan Integral Artesanal',
-        description: 'Pan integral con semillas, horneado en horno de leña',
-        price: 4500,
-        imageUrl: 'https://images.unsplash.com/photo-1549931319-a545dcf3bc73?w=400',
-        businessId: '2',
-        isPopular: false,
-      ),
-      Product(
-        id: 'p4',
-        name: 'Croissants Franceses',
-        description: 'Croissants mantequillosos recién horneados',
-        price: 3500,
-        imageUrl: 'https://images.unsplash.com/photo-1555507036-ab794f4afe5e?w=400',
-        businessId: '2',
-        isPopular: true,
-      ),
-      // Productos de Frutería La Cosecha
-      Product(
-        id: 'p5',
-        name: 'Canasta de Frutas Tropicales',
-        description: 'Mango, piña, papaya, maracuyá y guayaba',
-        price: 12000,
-        imageUrl: 'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=400',
-        businessId: '3',
-        isPopular: true,
-      ),
-
-      // Nuevos productos: marketplace
-      Product(
-        id: 'p6',
-        name: 'Vestido Floral',
-        description: 'Vestido midi floral, tela ligera',
-        price: 85000,
-        imageUrl: 'https://images.unsplash.com/photo-1521335629791-ce4aec67dd53?w=400',
-        businessId: '4',
-        isPopular: true,
-      ),
-      Product(
-        id: 'p7',
-        name: 'Collar Plata 925',
-        description: 'Collar minimalista de plata 925',
-        price: 120000,
-        imageUrl: 'https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?w=400',
-        businessId: '5',
-        isPopular: true,
-      ),
-      Product(
-        id: 'p8',
-        name: 'Auriculares Bluetooth',
-        description: 'Auriculares inalámbricos con cancelación de ruido',
-        price: 150000,
-        imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400',
-        businessId: '6',
-        isPopular: true,
-      ),
-      Product(
-        id: 'p9',
-        name: 'Set de Cojines Decorativos',
-        description: 'Set de 2 cojines tejidos',
-        price: 45000,
-        imageUrl: 'https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=400',
-        businessId: '7',
-        isPopular: false,
-      ),
-      Product(
-        id: 'p10',
-        name: 'Serum Vitamina C',
-        description: 'Serum iluminador y antioxidante',
-        price: 60000,
-        imageUrl: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc0?w=400',
-        businessId: '8',
-        isPopular: true,
-      ),
+  double? _extractLatitude(Map<String, dynamic> data) {
+    final directCandidates = [
+      data['latitude'],
+      data['lat'],
+      data['Latitude'],
+      data['Lat'],
+      data['latitud'],
+      data['location_lat'],
+      data['locationLat'],
     ];
+
+    for (final candidate in directCandidates) {
+      final value = _nullableDouble(candidate);
+      if (value != null) return value;
+    }
+
+    final location = data['location'] ?? data['coords'] ?? data['coordinates'];
+    return _extractFromLocation(location, isLatitude: true);
   }
-//Slider de categorias
+
+  double? _extractLongitude(Map<String, dynamic> data) {
+    final directCandidates = [
+      data['longitude'],
+      data['lng'],
+      data['lon'],
+      data['long'],
+      data['Longitude'],
+      data['Lng'],
+      data['longitud'],
+      data['location_lng'],
+      data['locationLong'],
+    ];
+
+    for (final candidate in directCandidates) {
+      final value = _nullableDouble(candidate);
+      if (value != null) return value;
+    }
+
+    final location = data['location'] ?? data['coords'] ?? data['coordinates'];
+    return _extractFromLocation(location, isLatitude: false);
+  }
+
+  double? _extractFromLocation(dynamic location, {required bool isLatitude}) {
+    if (location == null) return null;
+
+    if (location is GeoPoint) {
+      return isLatitude ? location.latitude : location.longitude;
+    }
+
+    if (location is String) {
+      final parts = location.split(',');
+      if (parts.length >= 2) {
+        final first = _nullableDouble(parts[0]);
+        final second = _nullableDouble(parts[1]);
+        if (first != null && second != null) {
+          return isLatitude ? first : second;
+        }
+      } else {
+        final value = _nullableDouble(location);
+        if (value != null) {
+          return value;
+        }
+      }
+    }
+
+    if (location is List && location.length >= 2) {
+      final first = _nullableDouble(location[0]);
+      final second = _nullableDouble(location[1]);
+      if (first != null && second != null) {
+        return isLatitude ? first : second;
+      }
+    }
+
+    if (location is Map) {
+      final lowerCaseMap = location.map(
+        (key, value) => MapEntry(key.toString().toLowerCase(), value),
+      );
+
+      final candidates = isLatitude
+          ? ['latitude', 'lat', '_latitude', 'latitud']
+          : ['longitude', 'lng', 'lon', 'long', '_longitude', 'longitud'];
+
+      for (final key in candidates) {
+        if (lowerCaseMap.containsKey(key)) {
+          final value = _nullableDouble(lowerCaseMap[key]);
+          if (value != null) return value;
+        }
+      }
+    }
+
+    return null;
+  }
+  // Slider de categorias
   void _loadCategories() {
     _categories = [
       Category(
@@ -612,5 +841,38 @@ class CommunityStoreProvider with ChangeNotifier {
         icon: 'assets/images/icons/servicios.png',
       ),
     ];
+  }
+
+  Future<void> loadPromotions() async {
+    try {
+      final firestore = FirebaseFirestore.instance;
+      final snapshot = await firestore.collection('promotions').get();
+
+      _promotions
+        ..clear()
+        ..addAll(snapshot.docs.map((doc) {
+          final data = doc.data();
+          return Promotion.fromMap(data, doc.id);
+        }).where((promotion) => promotion.isCurrentlyActive));
+
+      final Map<String, Promotion> bestPromotionsByProduct = {};
+      for (final promotion in _promotions) {
+        final existing = bestPromotionsByProduct[promotion.productId];
+        if (existing == null || promotion.discountPercent > existing.discountPercent) {
+          bestPromotionsByProduct[promotion.productId] = promotion;
+        }
+      }
+
+      for (var i = 0; i < _products.length; i++) {
+        final product = _products[i];
+        final promotion = bestPromotionsByProduct[product.id];
+        _products[i] = _applyPromotionToProduct(product, promotion: promotion);
+      }
+
+      notifyListeners();
+      debugPrint('🎯 Promociones activas: ${_promotions.length}');
+    } catch (e) {
+      debugPrint('❌ Error cargando promociones: $e');
+    }
   }
 }

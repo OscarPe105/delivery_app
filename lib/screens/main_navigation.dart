@@ -11,7 +11,6 @@ import 'customer/customer_home_screen.dart';           // Pantalla de inicio pri
 import 'customer/customer_profile_screen.dart';       // Pantalla de perfil
 import 'community_store_screen.dart';        // Pantalla de tienda
 import 'orders_screen.dart';                 // Pantalla de pedidos
-import 'profile_screen.dart';                 // Pantalla de perfil mejorada
 import 'favorites_screen.dart';               // Pantalla de favoritos
 import 'notifications_screen.dart';           // Pantalla de notificaciones
 
@@ -69,7 +68,7 @@ class _MainNavigationState extends State<MainNavigation> {
                 Text(
                   'Delivery Comunitario',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white.withValues(alpha: 0.8),
                     fontSize: 14,
                   ),
                 ),
@@ -154,16 +153,16 @@ class _MainNavigationState extends State<MainNavigation> {
               );
             },
           ),
-          const Divider(),
-          //OPCIÓN REGISTRAR NEGOCIO
+          // OPCIÓN MENSAJES
           ListTile(
-            leading: const Icon(Icons.store_mall_directory, color: Colors.green),
-            title: const Text('Registrar mi Negocio'),
+            leading: const Icon(Icons.chat_bubble_outline, color: Colors.blue),
+            title: const Text('Mensajes'),
             onTap: () {
               Navigator.pop(context);
-              Navigator.pushNamed(context, '/business/onboarding');
+              Navigator.pushNamed(context, '/chat/list');
             },
           ),
+          const Divider(),
           // OPCIÓN CONFIGURACIÓN
           ListTile(
             leading: const Icon(Icons.settings),
@@ -201,13 +200,22 @@ class _MainNavigationState extends State<MainNavigation> {
         children: _screens,      // Lista de pantallas
       ),
       
+      // Botón flotante para mensajes
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, '/chat/list');
+        },
+        backgroundColor: ThemeProvider.primaryColor,
+        child: const Icon(Icons.chat_bubble, color: Colors.white),
+      ),
+      
       // BARRA DE NAVEGACIÓN INFERIOR
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: Colors.white,    //  Cambiado a blanco puro
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1), // Sombra ligera
+              color: Colors.black.withValues(alpha: 0.1), // Sombra ligera
               blurRadius: 20,
               offset: const Offset(0, -5),
             ),
@@ -273,21 +281,3 @@ class _MainNavigationState extends State<MainNavigation> {
     );
   }
 }
-  
-  List<BottomNavigationBarItem> _getNavigationItems(bool isBusinessUser) {
-    if (isBusinessUser) {
-      return [
-        BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Panel'),
-        BottomNavigationBarItem(icon: Icon(Icons.inventory), label: 'Productos'),
-        BottomNavigationBarItem(icon: Icon(Icons.receipt_long), label: 'Pedidos'),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
-      ];
-    } else {
-      return [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Inicio'),
-        BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'Explorar'),
-        BottomNavigationBarItem(icon: Icon(Icons.shopping_bag), label: 'Pedidos'),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
-      ];
-    }
-  }

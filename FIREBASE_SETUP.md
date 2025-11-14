@@ -37,7 +37,8 @@
 ### 5. Configurar Cloud Messaging
 
 1. Ve a "Cloud Messaging"
-2. No necesitas configuración adicional aquí
+2. Genera o registra la **clave pública VAPID** en la sección "Configuración de aplicaciones web"
+3. Descarga el archivo de configuración para web si aún no lo has hecho
 
 ### 6. Obtener Credenciales
 
@@ -54,14 +55,94 @@
 3. Descarga el archivo `GoogleService-Info.plist`
 4. Colócalo en `ios/Runner/GoogleService-Info.plist`
 
-### 7. Obtener Clave de Servicio (para Django)
+## 🌐 Configuración específica para Flutter Web
 
-1. Ve a "Configuración del proyecto"
-2. Ve a la pestaña "Cuentas de servicio"
-3. Haz clic en "Generar nueva clave privada"
-4. Descarga el archivo JSON
-5. Renómbralo a `firebase-service-account.json`
-6. Colócalo en `django_backend/firebase/`
+### 1. Service worker para Firebase Messaging
+
+1. Crea (o actualiza) `web/firebase-messaging-sw.js` con:
+   ```js
+   importScripts('https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js');
+   importScripts('https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging-compat.js');
+
+   firebase.initializeApp({
+     apiKey: 'AIzaSyB-dcsAHoET-rg21-C-T0qQIaoxLYqgFTA',
+     appId: '1:397640943349:web:46f26f58525316e2a5a7bc',
+     messagingSenderId: '397640943349',
+     projectId: 'delivery-app-15f53',
+     storageBucket: 'delivery-app-15f53.appspot.com',
+   });
+
+   const messaging = firebase.messaging();
+
+   messaging.onBackgroundMessage((payload) => {
+     const { title, body } = payload.notification ?? {};
+     self.registration.showNotification(title ?? 'Nuevo mensaje', {
+       body: body ?? 'Tienes una nueva notificación',
+       icon: '/icons/Icon-192.png',
+     });
+   });
+   ```
+2. Reinicia `flutter run -d chrome` después de modificar el service worker para que el navegador lo recargue.
+
+### 2. Inicialización en `firebase_service.dart`
+
+- `FirebaseService.initialize()` ya evita habilitar Analytics en web para prevenir el error 404 de configuración.
+- `FirebaseService._setupMessaging()` obtiene el token web con `FirebaseMessaging.instance.getToken(vapidKey: _webVapidKey)` y sólo se suscribe a tópicos en Android/iOS.
+- Revisa `lib/services/firebase_service.dart` si necesitas replicar esta lógica en otro proyecto.
+
+### 3. Clave VAPID
+
+1. Copia la clave pública VAPID desde **Firebase Console → Project settings → Cloud Messaging → Web push certificates**.
+2. Declárala en tu código:
+   ```dart
+   const String _webVapidKey =
+       'BEBmZEF5QDOX41JPuZBoovAlWqlYUwhvYehEycFPCcXG7-R6qcHYCLbmD28N9SQ0ZMW916IKKPotuWm6J-FLBC4';
+   ```
+3. Úsala al solicitar el token (sólo en web):
+   ```dart
+   final token = await FirebaseMessaging.instance.getToken(
+     vapidKey: kIsWeb ? _webVapidKey : null,
+   );
+   ```
+
+### 4. Configuración de CORS en Firebase Storage
+
+Para servir imágenes en Flutter web sin errores de CORS, habilita los encabezados correspondientes en el bucket `delivery-app-15f53.firebasestorage.app`.
+
+1. Instala Google Cloud CLI (elige una ruta con permisos de usuario, por ejemplo `C:\Users\arman\AppData\Local\Google\Cloud SDK`).
+2. Inicializa la CLI y selecciona el proyecto:
+   ```powershell
+   gcloud init
+   ```
+3. Crea `cors.json` en la raíz del repo con:
+   ```json
+   [
+     {
+       "origin": [
+         "http://localhost:5000",
+         "http://localhost:61303",
+         "http://localhost:61921",
+         "http://localhost:62657"
+       ],
+       "method": ["GET", "POST", "PUT", "HEAD"],
+       "responseHeader": ["Content-Type", "Authorization"],
+       "maxAgeSeconds": 3600
+     }
+   ]
+   ```
+4. Aplica la configuración (si la sesión no encuentra `gsutil`, añade temporalmente la ruta con ` $env:Path += ";$env:LOCALAPPDATA\Google\Cloud SDK\google-cloud-sdk\bin"`):
+   ```powershell
+   gsutil cors set cors.json gs://delivery-app-15f53.firebasestorage.app
+   ```
+5. Ejecuta Flutter web siempre con un puerto fijo (por ejemplo 5000) para que coincida con la configuración CORS:
+   ```bash
+   flutter run -d chrome --web-port 5000
+   ```
+6. Vuelve a subir las imágenes para obtener URLs `...firebasestorage.app...` y verifica que ya se cargan sin bloqueos.
+
+### 5. Metadata de imágenes
+
+`lib/services/firebase_storage_service.dart` establece `SettableMetadata(contentType: 'image/jpeg')` para todos los uploads (usuarios, negocios, productos), evitando problemas de MIME en web.
 
 ## 🔧 Configuración de Variables de Entorno
 
@@ -76,7 +157,7 @@ FIREBASE_CLIENT_EMAIL=firebase-adminsdk-xxxxx@tu-proyecto.iam.gserviceaccount.co
 FIREBASE_CLIENT_ID=tu-client-id
 FIREBASE_AUTH_URI=https://accounts.google.com/o/oauth2/auth
 FIREBASE_TOKEN_URI=https://oauth2.googleapis.com/token
-FIREBASE_STORAGE_BUCKET=tu-proyecto.appspot.com
+FIREBASE_STORAGE_BUCKET=tu-proyecto.firebasestorage.app
 FIREBASE_MESSAGING_SENDER_ID=tu-sender-id
 FIREBASE_APP_ID=tu-app-id
 ```
@@ -130,12 +211,21 @@ En `ios/Runner/Info.plist`, agrega:
 </array>
 ```
 
+### 4. Ajustar `firebase_options.dart`
+
+Si usaste FlutterFire CLI antes de noviembre de 2023 es probable que el archivo generado haya dejado `storageBucket: '...appspot.com'`. Actualízalo a:
+
+```dart
+storageBucket: 'delivery-app-15f53.firebasestorage.app'
+```
+
+Hazlo para todas las plataformas definidas (web, android, ios) para que el SDK apunte al bucket canonical y respete la política CORS aplicada.
+
 ## 🚀 Funcionalidades Implementadas
 
 ### ✅ Autenticación Firebase
 - Login/registro con email y contraseña
-- Integración con Django backend
-- Tokens JWT personalizados
+- Tokens seguros administrados por Firebase
 
 ### ✅ Firestore Database
 - Sincronización en tiempo real
@@ -250,11 +340,9 @@ service firebase.storage {
 ## 🔄 Flujo de Integración
 
 1. **Usuario se registra** → Firebase Auth
-2. **Token Firebase** → Enviado a Django
-3. **Django valida** → Crea/actualiza usuario local
-4. **Datos sincronizados** → Firestore + Django DB
-5. **Notificaciones** → Firebase Cloud Messaging
-6. **Archivos** → Firebase Storage
+2. **Datos sincronizados** → Firestore
+3. **Notificaciones** → Firebase Cloud Messaging
+4. **Archivos** → Firebase Storage
 
 ## 📈 Beneficios de Firebase
 
@@ -272,7 +360,6 @@ service firebase.storage {
 2. **Descarga los archivos de configuración**
 3. **Actualiza las dependencias** en Flutter
 4. **Configura las variables de entorno**
-5. **Ejecuta la instalación** del backend Django
-6. **Prueba la integración** con datos de ejemplo
+5. **Prueba la aplicación** en los entornos deseados
 
 ¡Firebase está listo para potenciar tu aplicación de delivery! 🚀

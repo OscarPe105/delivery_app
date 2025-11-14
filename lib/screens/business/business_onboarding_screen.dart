@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../providers/business_provider.dart';
-import '../../services/api_service.dart';
+import '../../providers/auth_provider.dart';
 import '../../config/category_config.dart';
 import '../../themes/app_colors.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import '../../widgets/address_autocomplete_field.dart';
+import '../../services/firebase_storage_service.dart';
+import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
+import 'package:image_picker/image_picker.dart';
 
 class BusinessOnboardingScreen extends StatefulWidget {
   const BusinessOnboardingScreen({super.key});
@@ -27,8 +31,15 @@ class _BusinessOnboardingScreenState extends State<BusinessOnboardingScreen> {
   bool _isLoading = false;
   bool _isOpen = true;
   
+  // Coordenadas de ubicación del negocio
+  double? _latitude;
+  double? _longitude;
+  
+  // Imagen del negocio
+  XFile? _selectedImage;
+  
   // Horarios de trabajo
-  Map<String, Map<String, String>> _schedule = {
+  final Map<String, Map<String, String>> _schedule = {
     'monday': {'open': '08:00', 'close': '18:00', 'isOpen': 'true'},
     'tuesday': {'open': '08:00', 'close': '18:00', 'isOpen': 'true'},
     'wednesday': {'open': '08:00', 'close': '18:00', 'isOpen': 'true'},
@@ -55,26 +66,29 @@ class _BusinessOnboardingScreenState extends State<BusinessOnboardingScreen> {
   }
 
   Future<void> _loadCategories() async {
-    try {
-      final response = await http.get(
-        Uri.parse('${ApiService.baseUrl}/businesses/categories/'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      );
+    setState(() {
+      _categories = CategoryConfig.getAllSubcategories();
+    });
+  }
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        setState(() {
-          _categories = data.map<String>((category) => category['name'] as String).toList();
-        });
-      }
-    } catch (e) {
-      debugPrint('Error al cargar categorías: $e');
-      // Fallback con categorías organizadas
+  void _onAddressSelected(Map<String, dynamic> placeData) {
+    setState(() {
+      _latitude = placeData['latitude'] as double?;
+      _longitude = placeData['longitude'] as double?;
+    });
+    
+    if (kDebugMode) {
+      debugPrint('📍 Dirección seleccionada: ${placeData['address']}');
+      debugPrint('📍 Coordenadas: $_latitude, $_longitude');
+    }
+  }
+
+  Future<void> _selectImage() async {
+    final storageService = FirebaseStorageService();
+    final image = await storageService.showImageSourceDialog(context);
+    if (image != null) {
       setState(() {
-        _categories = CategoryConfig.getAllSubcategories();
+        _selectedImage = image;
       });
     }
   }
@@ -94,6 +108,28 @@ class _BusinessOnboardingScreenState extends State<BusinessOnboardingScreen> {
     setState(() { _isLoading = true; });
 
     try {
+      // Primero subir la imagen si existe
+      String? imageUrl;
+      if (_selectedImage != null) {
+        try {
+          final storageService = FirebaseStorageService();
+          final currentUser = FirebaseAuth.instance.currentUser;
+          if (currentUser != null) {
+            imageUrl = await storageService.uploadBusinessImage(
+              currentUser.uid,
+              _selectedImage!,
+            );
+            if (kDebugMode) {
+              debugPrint('📸 Imagen subida: $imageUrl');
+            }
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            debugPrint('⚠️ Error subiendo imagen: $e');
+          }
+        }
+      }
+      
       final businessData = {
         'name': _businessNameController.text.trim(),
         'description': _descriptionController.text.trim(),
@@ -101,51 +137,66 @@ class _BusinessOnboardingScreenState extends State<BusinessOnboardingScreen> {
         'phone': _phoneController.text.trim(),
         'email': _emailController.text.trim(),
         'category': _selectedCategory,
+        'isOpen': _isOpen,
         'is_open': _isOpen,
         'schedule': _schedule,
+        if (_latitude != null) 'latitude': _latitude,
+        if (_longitude != null) 'longitude': _longitude,
+        if (imageUrl != null) 'imageUrl': imageUrl,
+        if (imageUrl != null) 'image_url': imageUrl,
       };
 
-      final response = await http.post(
-        Uri.parse('${ApiService.baseUrl}/businesses/'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': 'Bearer ${Provider.of<BusinessProvider>(context, listen: false).token}',
-        },
-        body: json.encode(businessData),
-      );
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) {
+        throw Exception('Debes iniciar sesión para registrar un negocio');
+      }
+
+      final firestore = FirebaseFirestore.instance;
+      final docRef = firestore.collection('businesses').doc();
+
+      await docRef.set({
+        ...businessData,
+        'ownerUid': currentUser.uid,
+        'ownerEmail': currentUser.email,
+        'ownerName': currentUser.displayName,
+        'isActive': true,
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      if (kDebugMode) {
+        debugPrint('✅ Negocio registrado en Firestore: ${docRef.id}');
+      }
 
       if (!mounted) return;
 
-      if (response.statusCode == 201) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('¡Negocio registrado exitosamente!'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 3),
-          ),
-        );
-        
-        // Navegar al dashboard principal
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          '/business/dashboard',
-          (route) => false,
-        );
-      } else {
-        final errorData = json.decode(response.body);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${errorData['error'] ?? 'Error desconocido'}'),
-            backgroundColor: Colors.red,
-          ),
-        );
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      authProvider.setUserType(UserType.business);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('¡Negocio registrado exitosamente!'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 3),
+        ),
+      );
+
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        '/business/dashboard',
+        (route) => false,
+      );
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        debugPrint('❌ Excepción en _registerBusiness: $e');
+        debugPrint('📍 Stack trace: $stackTrace');
       }
-    } catch (e) {
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text('Error: ${e.toString()}'),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
           ),
         );
       }
@@ -194,7 +245,7 @@ class _BusinessOnboardingScreenState extends State<BusinessOnboardingScreen> {
                       children: [
                         const Text('Apertura', style: TextStyle(fontSize: 12)),
                         DropdownButtonFormField<String>(
-                          value: daySchedule['open'],
+                          initialValue: daySchedule['open'],
                           decoration: const InputDecoration(
                             border: OutlineInputBorder(),
                             contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -221,7 +272,7 @@ class _BusinessOnboardingScreenState extends State<BusinessOnboardingScreen> {
                       children: [
                         const Text('Cierre', style: TextStyle(fontSize: 12)),
                         DropdownButtonFormField<String>(
-                          value: daySchedule['close'],
+                          initialValue: daySchedule['close'],
                           decoration: const InputDecoration(
                             border: OutlineInputBorder(),
                             contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -290,7 +341,7 @@ class _BusinessOnboardingScreenState extends State<BusinessOnboardingScreen> {
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(12),
-                                color: Colors.orange.withOpacity(0.1),
+                                color: Colors.orange.withValues(alpha: 0.1),
                               ),
                               child: const Icon(
                                 Icons.store,
@@ -317,6 +368,62 @@ class _BusinessOnboardingScreenState extends State<BusinessOnboardingScreen> {
                               textAlign: TextAlign.center,
                             ),
                           ],
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+
+                      // Imagen del negocio
+                      const Text(
+                        'Imagen del Negocio',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF2C3E50),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      GestureDetector(
+                        onTap: _selectImage,
+                        child: Container(
+                          height: 200,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey[300]!, width: 2),
+                            borderRadius: BorderRadius.circular(12),
+                            color: Colors.grey[50],
+                          ),
+                          child: _selectedImage != null
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: kIsWeb
+                                      ? FutureBuilder<List<int>>(
+                                          future: _selectedImage!.readAsBytes(),
+                                          builder: (context, snapshot) {
+                                            if (snapshot.hasData) {
+                                              return Image.memory(
+                                                Uint8List.fromList(snapshot.data!),
+                                                fit: BoxFit.cover,
+                                              );
+                                            }
+                                            return const Center(child: CircularProgressIndicator());
+                                          },
+                                        )
+                                      : Image.file(
+                                          File(_selectedImage!.path),
+                                          fit: BoxFit.cover,
+                                        ),
+                                )
+                              : Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.add_photo_alternate, size: 60, color: Colors.grey[400]),
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      'Toca para agregar imagen',
+                                      style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                                    ),
+                                  ],
+                                ),
                         ),
                       ),
                       const SizedBox(height: 32),
@@ -377,7 +484,7 @@ class _BusinessOnboardingScreenState extends State<BusinessOnboardingScreen> {
 
                       // Categoría
                       DropdownButtonFormField<String>(
-                        value: _selectedCategory.isEmpty ? null : _selectedCategory,
+                        initialValue: _selectedCategory.isEmpty ? null : _selectedCategory,
                         decoration: InputDecoration(
                           labelText: 'Categoría',
                           prefixIcon: const Icon(Icons.category),
@@ -387,10 +494,36 @@ class _BusinessOnboardingScreenState extends State<BusinessOnboardingScreen> {
                           filled: true,
                           fillColor: Colors.grey[50],
                         ),
+                        icon: const Icon(Icons.keyboard_arrow_down, color: Colors.orange),
+                        borderRadius: BorderRadius.circular(12),
+                        dropdownColor: Colors.white,
+                        menuMaxHeight: 360,
+                        isExpanded: true,
+                        style: const TextStyle(
+                          color: Color(0xFF2C3E50),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
                         items: _categories.map((category) {
+                          final icon = CategoryConfig.getIconForBusinessCategory(category);
                           return DropdownMenuItem(
                             value: category,
-                            child: Text(category),
+                            child: Row(
+                              children: [
+                                Icon(icon, color: Colors.orange.shade400),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    category,
+                                    style: const TextStyle(
+                                      color: Color(0xFF2C3E50),
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           );
                         }).toList(),
                         onChanged: (value) {
@@ -407,18 +540,13 @@ class _BusinessOnboardingScreenState extends State<BusinessOnboardingScreen> {
                       ),
                       const SizedBox(height: 16),
 
-                      // Dirección
-                      TextFormField(
+                      // Dirección con autocompletado
+                      AddressAutocompleteField(
                         controller: _addressController,
-                        decoration: InputDecoration(
-                          labelText: 'Dirección',
-                          prefixIcon: const Icon(Icons.location_on),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          filled: true,
-                          fillColor: Colors.grey[50],
-                        ),
+                        label: 'Dirección',
+                        hint: 'Escribe una dirección',
+                        onPlaceSelected: _onAddressSelected,
+                        prefixIcon: Icons.location_on,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Por favor ingresa la dirección';
@@ -426,7 +554,6 @@ class _BusinessOnboardingScreenState extends State<BusinessOnboardingScreen> {
                           return null;
                         },
                       ),
-                      const SizedBox(height: 16),
 
                       // Teléfono
                       TextFormField(

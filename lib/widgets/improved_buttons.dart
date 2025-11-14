@@ -1,19 +1,15 @@
-/**
- * 🎨 BOTONES MEJORADOS PARA LA APLICACIÓN
- * 
- * Sistema completo de botones con diferentes estilos y animaciones
- * para una experiencia visual superior
- * 
- * @author Sistema de Delivery Comunitario
- * @version 2.0.0
- */
+/// BOTONES MEJORADOS PARA LA APLICACIÓN
+/// 
+/// Sistema completo de botones con diferentes estilos y animaciones
+/// para una experiencia visual superior
+/// 
+/// @author Sistema de Delivery Comunitario
+/// @version 2.0.0
 
 import 'package:flutter/material.dart';
 
-/**
- * 🔥 BOTÓN PRINCIPAL CON GRADIENTE
- * Botón principal con efectos visuales avanzados
- */
+/// 🔥 BOTÓN PRINCIPAL CON GRADIENTE
+/// Botón principal con efectos visuales avanzados
 class PrimaryGradientButton extends StatefulWidget {
   final String text;
   final VoidCallback? onPressed;
@@ -84,9 +80,9 @@ class _PrimaryGradientButtonState extends State<PrimaryGradientButton>
   @override
   Widget build(BuildContext context) {
     final colors = widget.gradientColors ?? [
-      const Color(0xFF34656D),
-      const Color(0xFF334443),
-      const Color(0xFFFAEAB1),
+      const Color(0xFFE8B86D),
+      const Color(0xFFD4A574),
+      const Color(0xFFF2D4A3),
     ];
 
     return GestureDetector(
@@ -111,12 +107,12 @@ class _PrimaryGradientButtonState extends State<PrimaryGradientButton>
                 borderRadius: BorderRadius.circular(widget.borderRadius),
                 boxShadow: [
                   BoxShadow(
-                    color: colors.first.withOpacity(0.4),
+                    color: colors.first.withValues(alpha: 0.4),
                     blurRadius: _elevationAnimation.value * 2,
                     offset: Offset(0, _elevationAnimation.value),
                   ),
                   BoxShadow(
-                    color: colors.last.withOpacity(0.2),
+                    color: colors.last.withValues(alpha: 0.2),
                     blurRadius: _elevationAnimation.value * 4,
                     offset: Offset(0, _elevationAnimation.value * 2),
                   ),
@@ -150,13 +146,16 @@ class _PrimaryGradientButtonState extends State<PrimaryGradientButton>
                           ),
                           const SizedBox(width: 8),
                         ],
-                        Text(
-                          widget.text,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
+                        Flexible(
+                          child: Text(
+                            widget.text,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
@@ -172,10 +171,8 @@ class _PrimaryGradientButtonState extends State<PrimaryGradientButton>
   }
 }
 
-/**
- * 🌟 BOTÓN SECUNDARIO CON BORDE
- * Botón secundario con borde y efectos sutiles
- */
+/// 🌟 BOTÓN SECUNDARIO CON BORDE
+/// Botón secundario con borde y efectos sutiles
 class SecondaryButton extends StatefulWidget {
   final String text;
   final VoidCallback? onPressed;
@@ -225,8 +222,8 @@ class _SecondaryButtonState extends State<SecondaryButton>
 
   @override
   Widget build(BuildContext context) {
-    final borderColor = widget.borderColor ?? const Color(0xFF34656D);
-    final textColor = widget.textColor ?? const Color(0xFF34656D);
+    final borderColor = widget.borderColor ?? const Color(0xFFE8B86D);
+    final textColor = widget.textColor ?? const Color(0xFFE8B86D);
 
     return GestureDetector(
       onTapDown: (_) => _animationController.forward(),
@@ -247,7 +244,7 @@ class _SecondaryButtonState extends State<SecondaryButton>
                 border: Border.all(color: borderColor, width: 2),
                 boxShadow: [
                   BoxShadow(
-                    color: borderColor.withOpacity(0.1),
+                    color: borderColor.withValues(alpha: 0.1),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),
@@ -271,13 +268,16 @@ class _SecondaryButtonState extends State<SecondaryButton>
                           ),
                           const SizedBox(width: 8),
                         ],
-                        Text(
-                          widget.text,
-                          style: TextStyle(
-                            color: textColor,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 0.5,
+                        Flexible(
+                          child: Text(
+                            widget.text,
+                            style: TextStyle(
+                              color: textColor,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.5,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
@@ -293,10 +293,8 @@ class _SecondaryButtonState extends State<SecondaryButton>
   }
 }
 
-/**
- * 🎯 BOTÓN FLOTANTE CON EFECTOS
- * Botón flotante con animaciones avanzadas
- */
+/// 🎯 BOTÓN FLOTANTE CON EFECTOS
+/// Botón flotante con animaciones avanzadas
 class FloatingActionButton extends StatefulWidget {
   final VoidCallback? onPressed;
   final IconData icon;
@@ -346,7 +344,7 @@ class _FloatingActionButtonState extends State<FloatingActionButton>
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor = widget.backgroundColor ?? const Color(0xFF34656D);
+    final backgroundColor = widget.backgroundColor ?? const Color(0xFFE8B86D);
     final iconColor = widget.iconColor ?? Colors.white;
 
     return GestureDetector(
@@ -368,7 +366,7 @@ class _FloatingActionButtonState extends State<FloatingActionButton>
                   gradient: LinearGradient(
                     colors: [
                       backgroundColor,
-                      backgroundColor.withOpacity(0.8),
+                      backgroundColor.withValues(alpha: 0.8),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -376,12 +374,12 @@ class _FloatingActionButtonState extends State<FloatingActionButton>
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: backgroundColor.withOpacity(0.4),
+                      color: backgroundColor.withValues(alpha: 0.4),
                       blurRadius: 12,
                       offset: const Offset(0, 6),
                     ),
                     BoxShadow(
-                      color: backgroundColor.withOpacity(0.2),
+                      color: backgroundColor.withValues(alpha: 0.2),
                       blurRadius: 20,
                       offset: const Offset(0, 10),
                     ),
@@ -408,10 +406,8 @@ class _FloatingActionButtonState extends State<FloatingActionButton>
   }
 }
 
-/**
- * 📱 BOTÓN DE ICONO CON EFECTOS
- * Botón pequeño para iconos con animaciones
- */
+/// 📱 BOTÓN DE ICONO CON EFECTOS
+/// Botón pequeño para iconos con animaciones
 class CustomIconButton extends StatefulWidget {
   final VoidCallback? onPressed;
   final IconData icon;
@@ -460,7 +456,7 @@ class _CustomIconButtonState extends State<CustomIconButton>
   @override
   Widget build(BuildContext context) {
     final backgroundColor = widget.backgroundColor ?? Colors.white;
-    final iconColor = widget.iconColor ?? const Color(0xFF34656D);
+    final iconColor = widget.iconColor ?? const Color(0xFFE8B86D);
 
     return GestureDetector(
       onTapDown: (_) => _animationController.forward(),
@@ -480,7 +476,7 @@ class _CustomIconButtonState extends State<CustomIconButton>
                 borderRadius: BorderRadius.circular(widget.size / 2),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),

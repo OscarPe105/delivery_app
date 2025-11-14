@@ -1,7 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 
 class FirebaseMessagingService {
   static final FirebaseMessagingService _instance = FirebaseMessagingService._internal();
@@ -32,11 +31,11 @@ class FirebaseMessagingService {
       _setupMessageHandlers();
 
       if (kDebugMode) {
-        print('✅ Firebase Messaging inicializado correctamente');
+        debugPrint('✅ Firebase Messaging inicializado correctamente');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error inicializando Firebase Messaging: $e');
+        debugPrint('❌ Error inicializando Firebase Messaging: $e');
       }
     }
   }
@@ -79,15 +78,15 @@ class FirebaseMessagingService {
 
     if (settings.authorizationStatus == AuthorizationStatus.authorized) {
       if (kDebugMode) {
-        print('✅ Permisos de notificación autorizados');
+        debugPrint('✅ Permisos de notificación autorizados');
       }
     } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
       if (kDebugMode) {
-        print('✅ Permisos de notificación provisionales autorizados');
+        debugPrint('✅ Permisos de notificación provisionales autorizados');
       }
     } else {
       if (kDebugMode) {
-        print('❌ Permisos de notificación denegados');
+        debugPrint('❌ Permisos de notificación denegados');
       }
     }
   }
@@ -98,15 +97,15 @@ class FirebaseMessagingService {
       _fcmToken = await _messaging.getToken();
       if (_fcmToken != null) {
         if (kDebugMode) {
-          print('📱 Token FCM obtenido: $_fcmToken');
+          debugPrint('📱 Token FCM obtenido: $_fcmToken');
         }
         
-        // TODO: Enviar token al backend Django
+        // TODO: En el futuro podríamos enviar este token a un backend propio si se requiere
         await _sendTokenToBackend(_fcmToken!);
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error obteniendo token FCM: $e');
+        debugPrint('❌ Error obteniendo token FCM: $e');
       }
     }
   }
@@ -130,7 +129,7 @@ class FirebaseMessagingService {
     _messaging.onTokenRefresh.listen((newToken) {
       _fcmToken = newToken;
       if (kDebugMode) {
-        print('🔄 Token FCM actualizado: $newToken');
+        debugPrint('🔄 Token FCM actualizado: $newToken');
       }
       _sendTokenToBackend(newToken);
     });
@@ -139,7 +138,7 @@ class FirebaseMessagingService {
   /// Manejar mensaje en primer plano
   Future<void> _handleForegroundMessage(RemoteMessage message) async {
     if (kDebugMode) {
-      print('📨 Mensaje recibido en primer plano: ${message.messageId}');
+      debugPrint('📨 Mensaje recibido en primer plano: ${message.messageId}');
     }
 
     // Mostrar notificación local
@@ -149,7 +148,7 @@ class FirebaseMessagingService {
   /// Manejar mensaje cuando se abre la app desde notificación
   Future<void> _handleMessageOpenedApp(RemoteMessage message) async {
     if (kDebugMode) {
-      print('📨 App abierta desde notificación: ${message.messageId}');
+      debugPrint('📨 App abierta desde notificación: ${message.messageId}');
     }
 
     // Navegar a la pantalla correspondiente
@@ -159,7 +158,7 @@ class FirebaseMessagingService {
   /// Manejar mensaje inicial
   Future<void> _handleInitialMessage(RemoteMessage message) async {
     if (kDebugMode) {
-      print('📨 Mensaje inicial: ${message.messageId}');
+      debugPrint('📨 Mensaje inicial: ${message.messageId}');
     }
 
     // Navegar a la pantalla correspondiente
@@ -169,7 +168,7 @@ class FirebaseMessagingService {
   /// Manejar tap en notificación local
   void _onNotificationTapped(NotificationResponse response) {
     if (kDebugMode) {
-      print('📨 Notificación local tocada: ${response.payload}');
+      debugPrint('📨 Notificación local tocada: ${response.payload}');
     }
 
     // Procesar payload si existe
@@ -234,15 +233,15 @@ class FirebaseMessagingService {
   /// Enviar token al backend
   Future<void> _sendTokenToBackend(String token) async {
     try {
-      // TODO: Implementar envío del token al backend Django
+      // TODO: Implementar envío del token a un backend propio si se requiere
       // await ApiService().updateFCMToken(token);
       
       if (kDebugMode) {
-        print('📤 Token enviado al backend: $token');
+        debugPrint('📤 Token enviado al backend: $token');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error enviando token al backend: $e');
+        debugPrint('❌ Error enviando token al backend: $e');
       }
 
     }
@@ -254,11 +253,11 @@ class FirebaseMessagingService {
     try {
       await _messaging.subscribeToTopic(topic);
       if (kDebugMode) {
-        print('✅ Suscrito al tópico: $topic');
+        debugPrint('✅ Suscrito al tópico: $topic');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error suscribiéndose al tópico $topic: $e');
+        debugPrint('❌ Error suscribiéndose al tópico $topic: $e');
       }
     }
   }
@@ -268,11 +267,11 @@ class FirebaseMessagingService {
     try {
       await _messaging.unsubscribeFromTopic(topic);
       if (kDebugMode) {
-        print('✅ Desuscrito del tópico: $topic');
+        debugPrint('✅ Desuscrito del tópico: $topic');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error desuscribiéndose del tópico $topic: $e');
+        debugPrint('❌ Error desuscribiéndose del tópico $topic: $e');
       }
     }
 
@@ -288,6 +287,11 @@ class FirebaseMessagingService {
     await subscribeToTopic('business_$businessId');
   }
 
+  /// Suscribirse a notificaciones para repartidores
+  Future<void> subscribeToDriverNotifications(String driverId) async {
+    await subscribeToTopic('driver_$driverId');
+  }
+
   /// Desuscribirse de notificaciones de pedidos
   Future<void> unsubscribeFromOrderNotifications(String userId) async {
     await unsubscribeFromTopic('user_$userId');
@@ -296,5 +300,10 @@ class FirebaseMessagingService {
   /// Desuscribirse de notificaciones de negocio
   Future<void> unsubscribeFromBusinessNotifications(String businessId) async {
     await unsubscribeFromTopic('business_$businessId');
+  }
+
+  /// Desuscribirse de notificaciones de repartidor
+  Future<void> unsubscribeFromDriverNotifications(String driverId) async {
+    await unsubscribeFromTopic('driver_$driverId');
   }
 }

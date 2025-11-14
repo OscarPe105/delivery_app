@@ -7,6 +7,9 @@ import '../config/google_maps_config.dart';
 /// Servicio para manejar mapas y geolocalización
 class MapService {
 
+  static const String _defaultCountry = 'El Salvador';
+  static const String _defaultCity = 'San Salvador';
+
   /// Obtener la ubicación actual del usuario
   static Future<Position?> getCurrentLocation() async {
     try {
@@ -33,10 +36,29 @@ class MapService {
     }
   }
 
+  static String normalizeAddress(String address) {
+    String normalized = address.trim();
+    final lower = normalized.toLowerCase();
+
+    if (_defaultCity.isNotEmpty && !lower.contains(_defaultCity.toLowerCase())) {
+      normalized = '$normalized, $_defaultCity';
+    }
+
+    if (_defaultCountry.isNotEmpty && !normalized.toLowerCase().contains(_defaultCountry.toLowerCase())) {
+      normalized = '$normalized, $_defaultCountry';
+    }
+
+    return normalized;
+  }
+
   /// Convertir dirección a coordenadas
   static Future<LatLng?> getCoordinatesFromAddress(String address) async {
     try {
-      List<Location> locations = await locationFromAddress(address);
+      final normalizedAddress = normalizeAddress(address);
+      List<Location> locations = await locationFromAddress(
+        normalizedAddress,
+        localeIdentifier: 'es_SV',
+      );
       if (locations.isNotEmpty) {
         Location location = locations.first;
         return LatLng(location.latitude, location.longitude);
@@ -138,10 +160,15 @@ class MapService {
     double maxDiff = latDiff > lngDiff ? latDiff : lngDiff;
 
     double zoom = 10.0;
-    if (maxDiff > 0.1) zoom = 8.0;
-    else if (maxDiff > 0.05) zoom = 10.0;
-    else if (maxDiff > 0.01) zoom = 12.0;
-    else zoom = 14.0;
+    if (maxDiff > 0.1) {
+      zoom = 8.0;
+    } else if (maxDiff > 0.05) {
+      zoom = 10.0;
+    } else if (maxDiff > 0.01) {
+      zoom = 12.0;
+    } else {
+      zoom = 14.0;
+    }
 
     return CameraPosition(
       target: LatLng(centerLat, centerLng),

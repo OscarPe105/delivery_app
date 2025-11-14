@@ -1,19 +1,15 @@
-/**
- * ✨ EFECTOS VISUALES AVANZADOS
- * 
- * Colección de efectos visuales modernos para mejorar la experiencia del usuario
- * 
- * @author Sistema de Delivery Comunitario
- * @version 2.0.0
- */
+/// ✨ EFECTOS VISUALES AVANZADOS
+/// 
+/// Colección de efectos visuales modernos para mejorar la experiencia del usuario
+/// 
+/// @author Sistema de Delivery Comunitario
+/// @version 2.0.0
 
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
-/**
- * 🌟 EFECTO DE PARTÍCULAS FLOTANTES
- * Crea partículas animadas que flotan en el fondo
- */
+/// 🌟 EFECTO DE PARTÍCULAS FLOTANTES
+/// Crea partículas animadas que flotan en el fondo
 class FloatingParticles extends StatefulWidget {
   final int particleCount;
   final Color particleColor;
@@ -123,7 +119,7 @@ class ParticlePainter extends CustomPainter {
       final animatedY = (particle.y + animationValue * particle.speed) % 1.0;
       final animatedOpacity = particle.opacity * (1 - (animatedY * 0.5));
       
-      paint.color = color.withOpacity(animatedOpacity);
+      paint.color = color.withValues(alpha: animatedOpacity);
       
       canvas.drawCircle(
         Offset(
@@ -140,10 +136,8 @@ class ParticlePainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
 
-/**
- * 🌈 EFECTO DE GRADIENTE ANIMADO
- * Gradiente que cambia de colores de forma suave
- */
+/// 🌈 EFECTO DE GRADIENTE ANIMADO
+/// Gradiente que cambia de colores de forma suave
 class AnimatedGradient extends StatefulWidget {
   final List<Color> colors;
   final Duration duration;
@@ -207,10 +201,8 @@ class _AnimatedGradientState extends State<AnimatedGradient>
   }
 }
 
-/**
- * 💫 EFECTO DE SHIMMER
- * Efecto de brillo que se mueve a través del contenido
- */
+/// 💫 EFECTO DE SHIMMER
+/// Efecto de brillo que se mueve a través del contenido
 class ShimmerEffect extends StatefulWidget {
   final Widget child;
   final Color baseColor;
@@ -278,10 +270,8 @@ class _ShimmerEffectState extends State<ShimmerEffect>
   }
 }
 
-/**
- * 🌊 EFECTO DE ONDAS
- * Ondas que se expanden desde un punto central
- */
+/// 🌊 EFECTO DE ONDAS
+/// Ondas que se expanden desde un punto central
 class WaveEffect extends StatefulWidget {
   final Widget child;
   final Color waveColor;
@@ -355,7 +345,7 @@ class WavePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final paint = Paint()
-      ..color = waveColor.withOpacity(1 - animationValue)
+      ..color = waveColor.withValues(alpha: 1 - animationValue)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
 
@@ -367,10 +357,8 @@ class WavePainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
 
-/**
- * 🎆 EFECTO DE CONFETTI
- * Confetti que cae desde la parte superior
- */
+/// 🎆 EFECTO DE CONFETTI
+/// Confetti que cae desde la parte superior
 class ConfettiEffect extends StatefulWidget {
   final Widget child;
   final int confettiCount;
@@ -506,10 +494,8 @@ class ConfettiPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
 
-/**
- * 🔥 EFECTO DE FUEGO
- * Efecto de llamas animadas
- */
+/// 🔥 EFECTO DE FUEGO
+/// Efecto de llamas animadas
 class FireEffect extends StatefulWidget {
   final Widget child;
   final Color fireColor;
@@ -580,12 +566,12 @@ class FirePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = fireColor.withOpacity(0.3 * intensity)
+      ..color = fireColor.withValues(alpha: 0.3 * intensity)
       ..style = PaintingStyle.fill;
 
     final path = Path();
     final waveHeight = 20.0 * intensity;
-    final frequency = 0.02;
+    const frequency = 0.02;
 
     path.moveTo(0, size.height);
     for (double x = 0; x <= size.width; x += 1) {

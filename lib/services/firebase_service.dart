@@ -31,18 +31,20 @@ class FirebaseService {
       );
       FirebaseService()._isInitialized = true;
       
-      // Configurar Analytics
-      await analytics.setAnalyticsCollectionEnabled(true);
-      
+      // Configurar Analytics (evitar 404 en web cuando no hay config de Analytics)
+      if (!kIsWeb) {
+        await analytics.setAnalyticsCollectionEnabled(true);
+      }
+
       // Configurar Messaging
       await _setupMessaging();
       
       if (kDebugMode) {
-        print('Firebase inicializado correctamente');
+        debugPrint('Firebase inicializado correctamente');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('Error inicializando Firebase: $e');
+        debugPrint('Error inicializando Firebase: $e');
       }
       rethrow;
     }
@@ -51,51 +53,48 @@ class FirebaseService {
   /// Configurar Firebase Messaging
   static Future<void> _setupMessaging() async {
     try {
-      // En web, messaging requiere service worker que no está configurado
-      // Solo configurar en Android/iOS
-      if (kIsWeb) {
-        if (kDebugMode) {
-          print('Messaging no configurado en web');
-        }
-        return;
-      }
-      
       // Solicitar permisos para notificaciones
-      NotificationSettings settings = await messaging.requestPermission(
-        alert: true,
-        announcement: false,
-        badge: true,
-        carPlay: false,
-        criticalAlert: false,
-        provisional: false,
-        sound: true,
-      );
-
-      if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-        if (kDebugMode) {
-          print('Usuario autorizó las notificaciones');
-        }
-      } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
-        if (kDebugMode) {
-          print('Usuario autorizó las notificaciones provisionales');
-        }
+      NotificationSettings settings;
+      if (kIsWeb) {
+        settings = await messaging.requestPermission();
       } else {
-        if (kDebugMode) {
-          print('Usuario denegó las notificaciones');
+        settings = await messaging.requestPermission(
+          alert: true,
+          announcement: false,
+          badge: true,
+          carPlay: false,
+          criticalAlert: false,
+          provisional: false,
+          sound: true,
+        );
+      }
+
+      if (kDebugMode) {
+        switch (settings.authorizationStatus) {
+          case AuthorizationStatus.authorized:
+            debugPrint('Usuario autorizó las notificaciones');
+            break;
+          case AuthorizationStatus.provisional:
+            debugPrint('Usuario autorizó las notificaciones provisionales');
+            break;
+          default:
+            debugPrint('Usuario denegó las notificaciones');
         }
       }
 
-      // Obtener token FCM
-      String? token = await messaging.getToken();
+      // Obtener token FCM (usar VAPID en web)
+      String? token = await messaging.getToken(
+        vapidKey: kIsWeb ? _webVapidKey : null,
+      );
       if (token != null) {
         if (kDebugMode) {
-          print('📱 Token FCM: $token');
+          debugPrint('📱 Token FCM: $token');
         }
         // Guardar token en SharedPreferences o enviar al backend
       }
     } catch (e) {
       if (kDebugMode) {
-        print('Error configurando messaging: $e');
+        debugPrint('Error configurando messaging: $e');
       }
       // No relanzar el error, solo loguear
     }
@@ -107,7 +106,7 @@ class FirebaseService {
       return await messaging.getToken();
     } catch (e) {
       if (kDebugMode) {
-        print('Error obteniendo token FCM: $e');
+        debugPrint('Error obteniendo token FCM: $e');
       }
       return null;
     }
@@ -116,13 +115,19 @@ class FirebaseService {
   /// Suscribirse a un tópico
   static Future<void> subscribeToTopic(String topic) async {
     try {
+      if (kIsWeb) {
+        if (kDebugMode) {
+          debugPrint(' Suscripciones a tópicos no son compatibles en web');
+        }
+        return;
+      }
       await messaging.subscribeToTopic(topic);
       if (kDebugMode) {
-        print('Suscrito al tópico: $topic');
+        debugPrint('Suscrito al tópico: $topic');
       }
     } catch (e) {
       if (kDebugMode) {
-        print(' Error suscribiéndose al tópico $topic: $e');
+        debugPrint(' Error suscribiéndose al tópico $topic: $e');
       }
     }
   }
@@ -130,13 +135,19 @@ class FirebaseService {
   /// Desuscribirse de un tópico
   static Future<void> unsubscribeFromTopic(String topic) async {
     try {
+      if (kIsWeb) {
+        if (kDebugMode) {
+          debugPrint(' Desuscripciones a tópicos no son compatibles en web');
+        }
+        return;
+      }
       await messaging.unsubscribeFromTopic(topic);
       if (kDebugMode) {
-        print(' Desuscrito del tópico: $topic');
+        debugPrint(' Desuscrito del tópico: $topic');
       }
     } catch (e) {
       if (kDebugMode) {
-        print(' Error desuscribiéndose del tópico $topic: $e');
+        debugPrint(' Error desuscribiéndose del tópico $topic: $e');
       }
     }
   }
@@ -146,11 +157,11 @@ class FirebaseService {
     try {
       await analytics.logEvent(name: name, parameters: parameters);
       if (kDebugMode) {
-        print(' Evento Analytics: $name');
+        debugPrint(' Evento Analytics: $name');
       }
     } catch (e) {
       if (kDebugMode) {
-        print(' Error registrando evento Analytics: $e');
+        debugPrint(' Error registrando evento Analytics: $e');
       }
     }
   }
@@ -160,11 +171,11 @@ class FirebaseService {
     try {
       await analytics.setUserId(id: userId);
       if (kDebugMode) {
-        print(' Usuario configurado en Analytics: $userId');
+        debugPrint(' Usuario configurado en Analytics: $userId');
       }
     } catch (e) {
       if (kDebugMode) {
-        print(' Error configurando usuario en Analytics: $e');
+        debugPrint(' Error configurando usuario en Analytics: $e');
       }
     }
   }
@@ -181,12 +192,16 @@ class FirebaseService {
       
       // await analytics.setUserProperties(properties: properties);
       if (kDebugMode) {
-        print(' Propiedades de usuario configuradas: $properties');
+        debugPrint(' Propiedades de usuario configuradas: $properties');
       }
     } catch (e) {
       if (kDebugMode) {
-        print(' Error configurando propiedades de usuario: $e');
+        debugPrint(' Error configurando propiedades de usuario: $e');
       }
     }
   }
 }
+
+// VAPID key para notificaciones web (provista por el usuario)
+const String _webVapidKey =
+    'BEBmZEF5QDOX41JPuZBoovAlWqlYUwhvYehEycFPCcXG7-R6qcHYCLbmD28N9SQ0ZMW916IKKPotuWm6J-FLBC4';

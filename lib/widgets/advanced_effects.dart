@@ -1,21 +1,17 @@
-/**
- * ✨ EFECTOS VISUALES AVANZADOS
- * 
- * Widgets con efectos visuales sofisticados para mejorar la experiencia del usuario
- * 
- * @author Sistema de Delivery Comunitario
- * @version 1.0.0
- */
+/// ✨ EFECTOS VISUALES AVANZADOS
+/// 
+/// Widgets con efectos visuales sofisticados para mejorar la experiencia del usuario
+/// 
+/// @author Sistema de Delivery Comunitario
+/// @version 1.0.0
 
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'dart:ui';
 
-/**
- * 🌊 EFECTO DE ONDAS
- * 
- * Crea un efecto de ondas animadas
- */
+/// 🌊 EFECTO DE ONDAS
+/// 
+/// Crea un efecto de ondas animadas
 class WaveEffect extends StatefulWidget {
   final Widget child;
   final Color waveColor;
@@ -88,7 +84,7 @@ class WavePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = waveColor.withOpacity(0.3)
+      ..color = waveColor.withValues(alpha: 0.3)
       ..style = PaintingStyle.fill;
 
     final path = Path();
@@ -116,11 +112,9 @@ class WavePainter extends CustomPainter {
   }
 }
 
-/**
- * 💫 EFECTO DE BRILLO
- * 
- * Crea un efecto de brillo que se mueve por el widget
- */
+/// 💫 EFECTO DE BRILLO
+/// 
+/// Crea un efecto de brillo que se mueve por el widget
 class ShimmerEffect extends StatefulWidget {
   final Widget child;
   final Color baseColor;
@@ -192,11 +186,9 @@ class _ShimmerEffectState extends State<ShimmerEffect>
   }
 }
 
-/**
- * 🎆 EFECTO DE CONFETTI
- * 
- * Crea un efecto de confetti animado
- */
+/// 🎆 EFECTO DE CONFETTI
+/// 
+/// Crea un efecto de confetti animado
 class ConfettiEffect extends StatefulWidget {
   final Widget child;
   final int particleCount;
@@ -297,7 +289,7 @@ class _ConfettiEffectState extends State<ConfettiEffect>
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: color.withOpacity(0.5),
+                            color: color.withValues(alpha: 0.5),
                             blurRadius: 4,
                             offset: const Offset(0, 2),
                           ),
@@ -315,11 +307,9 @@ class _ConfettiEffectState extends State<ConfettiEffect>
   }
 }
 
-/**
- * 🌈 EFECTO DE ARCOÍRIS
- * 
- * Crea un efecto de arcoíris animado
- */
+/// 🌈 EFECTO DE ARCOÍRIS
+/// 
+/// Crea un efecto de arcoíris animado
 class RainbowEffect extends StatefulWidget {
   final Widget child;
   final Duration duration;
@@ -366,7 +356,7 @@ class _RainbowEffectState extends State<RainbowEffect>
             return LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [
+              colors: const [
                 Colors.red,
                 Colors.orange,
                 Colors.yellow,
@@ -395,11 +385,9 @@ class _RainbowEffectState extends State<RainbowEffect>
   }
 }
 
-/**
- * 💎 EFECTO DE CRISTAL
- * 
- * Crea un efecto de cristal con blur y transparencia
- */
+/// 💎 EFECTO DE CRISTAL
+/// 
+/// Crea un efecto de cristal con blur y transparencia
 class GlassEffect extends StatelessWidget {
   final Widget child;
   final double blur;
@@ -418,15 +406,15 @@ class GlassEffect extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: tintColor.withOpacity(opacity),
+        color: tintColor.withValues(alpha: opacity),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: tintColor.withOpacity(0.2),
+          color: tintColor.withValues(alpha: 0.2),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: blur,
             offset: const Offset(0, 8),
           ),
@@ -443,11 +431,9 @@ class GlassEffect extends StatelessWidget {
   }
 }
 
-/**
- * 🔥 EFECTO DE FUEGO
- * 
- * Crea un efecto de fuego animado
- */
+/// 🔥 EFECTO DE FUEGO
+/// 
+/// Crea un efecto de fuego animado
 class FireEffect extends StatefulWidget {
   final Widget child;
   final Duration duration;
@@ -495,9 +481,9 @@ class _FireEffectState extends State<FireEffect>
               center: Alignment.bottomCenter,
               colors: [
                 Colors.transparent,
-                Colors.orange.withOpacity(0.3),
-                Colors.red.withOpacity(0.5),
-                Colors.yellow.withOpacity(0.7),
+                Colors.orange.withValues(alpha: 0.3),
+                Colors.red.withValues(alpha: 0.5),
+                Colors.yellow.withValues(alpha: 0.7),
               ],
               stops: [
                 0.0,

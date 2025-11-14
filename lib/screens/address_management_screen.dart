@@ -31,7 +31,7 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
           latitude: 14.0723,
           longitude: -87.1921,
           isDefault: true,
-          createdAt: DateTime.now().subtract(Duration(days: 30)),
+          createdAt: DateTime.now().subtract(const Duration(days: 30)),
         ),
         Address(
           id: '2',
@@ -39,7 +39,7 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
           fullAddress: 'Centro Comercial Cascadas, Tegucigalpa, Honduras',
           latitude: 14.0850,
           longitude: -87.2063,
-          createdAt: DateTime.now().subtract(Duration(days: 15)),
+          createdAt: DateTime.now().subtract(const Duration(days: 15)),
         ),
       ];
     });
@@ -155,7 +155,7 @@ class _AddressManagementScreenState extends State<AddressManagementScreen> {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: ThemeProvider.primaryColor.withOpacity(0.1),
+                      color: ThemeProvider.primaryColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(

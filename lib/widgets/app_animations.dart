@@ -160,7 +160,7 @@ class AppAnimations {
     Color baseColor = Colors.grey,
     Color highlightColor = Colors.white,
   }) {
-    return TweenAnimationBuilder<Color>(
+    return TweenAnimationBuilder<Color?>(
       duration: duration,
       tween: ColorTween(begin: baseColor, end: highlightColor),
       builder: (context, value, child) {

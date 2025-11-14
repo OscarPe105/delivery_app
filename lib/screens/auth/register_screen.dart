@@ -61,13 +61,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
       if (!mounted) return;
 
       if (ok) {
+        final successMessage = _selectedUserType == UserType.business
+            ? '¡Cuenta creada! Te llevamos al dashboard de tu negocio'
+            : _selectedUserType == UserType.driver
+                ? '¡Bienvenido! Prepara tu perfil de repartidor'
+                : '¡Cuenta creada exitosamente!';
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              _selectedUserType == UserType.business 
-                ? '¡Cuenta creada! Te llevamos al dashboard de tu negocio'
-                : '¡Cuenta creada exitosamente!'
-            ),
+            content: Text(successMessage),
             backgroundColor: AppColors.primary,
             duration: const Duration(seconds: 3),
           ),
@@ -80,15 +82,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
             '/business/onboarding',
             (route) => false,
           );
+        } else if (_selectedUserType == UserType.driver) {
+          Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
         } else {
           // Navegar de vuelta al login para clientes
         Navigator.of(context).pop();
         }
       } else {
+        // Mostrar mensaje específico del error
+        final errorMessage = authProvider.lastError ?? 'Error al crear la cuenta';
+        
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Error al crear la cuenta'),
+          SnackBar(
+            content: Text(errorMessage),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
           ),
         );
       }
@@ -142,32 +150,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                         // Logo
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            color: Colors.white.withOpacity(0.1),
-                          ),
-                          child: const Icon(
-                            Icons.delivery_dining,
-                              size: 64,
-                            color: AppColors.primary,
-                          ),
-                            ),
-                            const SizedBox(height: 16),
+                        const SizedBox(height: 16),
                         const Text(
-                              'Crear Cuenta',
+                          'Ready2Go',
                           style: TextStyle(
-                            fontSize: 28,
+                            fontSize: 30,
                             fontWeight: FontWeight.bold,
                             color: Color(0xFF2C3E50),
                           ),
                         ),
                         const SizedBox(height: 8),
-                        const Text(
-                          'Completa los datos para registrarte',
+                        Text(
+                          'Todo lo que buscas, cerca y rápido',
                           style: TextStyle(
                             fontSize: 16,
+                            color: Colors.grey[700],
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Completa tus datos para crear tu cuenta',
+                          style: TextStyle(
+                            fontSize: 15,
                             color: Colors.grey,
                           ),
                         ),
@@ -216,7 +221,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
                                           decoration: BoxDecoration(
                                             color: _selectedUserType == UserType.customer 
-                                              ? AppColors.primary.withOpacity(0.1)
+                                              ? AppColors.primary.withValues(alpha: 0.1)
                                               : Colors.white,
                                             border: Border.all(
                                               color: _selectedUserType == UserType.customer 
@@ -252,7 +257,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                                 style: TextStyle(
                                                   fontSize: 12,
                                                   color: _selectedUserType == UserType.customer 
-                                                    ? AppColors.primary.withOpacity(0.8)
+                                                    ? AppColors.primary.withValues(alpha: 0.8)
                                                     : Colors.grey[500],
                                                 ),
                                                 textAlign: TextAlign.center,
@@ -277,7 +282,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
                                           decoration: BoxDecoration(
                                             color: _selectedUserType == UserType.business 
-                                              ? Colors.orange.withOpacity(0.1)
+                                              ? Colors.orange.withValues(alpha: 0.1)
                                               : Colors.white,
                                             border: Border.all(
                                               color: _selectedUserType == UserType.business 
@@ -313,7 +318,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                                 style: TextStyle(
                                                   fontSize: 12,
                                                   color: _selectedUserType == UserType.business 
-                                                    ? Colors.orange.withOpacity(0.8)
+                                                    ? Colors.orange.withValues(alpha: 0.8)
                                                     : Colors.grey[500],
                                                 ),
                                                 textAlign: TextAlign.center,
@@ -325,6 +330,80 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     ),
                                   ),
                                 ],
+                              ),
+                              const SizedBox(height: 12),
+                              AppAnimations.scaleIn(
+                                duration: const Duration(milliseconds: 650),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _selectedUserType = UserType.driver;
+                                    });
+                                  },
+                                  child: Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                                    decoration: BoxDecoration(
+                                      color: _selectedUserType == UserType.driver
+                                          ? const Color(0xFF10B981).withValues(alpha: 0.12)
+                                          : Colors.white,
+                                      border: Border.all(
+                                        color: _selectedUserType == UserType.driver
+                                            ? const Color(0xFF10B981)
+                                            : Colors.grey[300]!,
+                                        width: _selectedUserType == UserType.driver ? 2 : 1,
+                                      ),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            color: _selectedUserType == UserType.driver
+                                                ? const Color(0xFF10B981).withValues(alpha: 0.2)
+                                                : Colors.grey[100],
+                                            borderRadius: BorderRadius.circular(10),
+                                          ),
+                                          child: Icon(
+                                            Icons.delivery_dining,
+                                            color: _selectedUserType == UserType.driver
+                                                ? const Color(0xFF0B8F68)
+                                                : Colors.grey[600],
+                                          ),
+                                        ),
+                                        const SizedBox(width: 16),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Repartidor',
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: _selectedUserType == UserType.driver
+                                                      ? const Color(0xFF0B8F68)
+                                                      : Colors.grey[700],
+                                                ),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                'Entrega pedidos y gestiona tu disponibilidad',
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  color: _selectedUserType == UserType.driver
+                                                      ? const Color(0xFF0B8F68).withValues(alpha: 0.8)
+                                                      : Colors.grey[500],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
                               ),
                             ],
                               ),
@@ -536,7 +615,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 borderRadius: BorderRadius.circular(16),
                               ),
                               elevation: 2,
-                              shadowColor: AppColors.primary.withOpacity(0.3),
+                              shadowColor: AppColors.primary.withValues(alpha: 0.3),
                             ),
                                 child: _isLoading
                                     ? const SizedBox(
